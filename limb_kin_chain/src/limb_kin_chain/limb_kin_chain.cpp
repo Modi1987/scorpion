@@ -126,7 +126,7 @@ namespace penta_pod::kin::limb_kin_chain {
     /* following is for not to get errors */
     jpos[0] = x;
     jpos[1] = y;
-    jpos[3] = z;
+    jpos[2] = z;
     return jpos;
   }
 }  // penta_pod::kin::limb_kin_chain

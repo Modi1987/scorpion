@@ -6,15 +6,15 @@ import launch_ros.actions
 
 def generate_launch_description():
     config = os.path.join(
-        get_package_share_directory("differential_drive"),
+        get_package_share_directory("limb_kin_chain"),
         "config",
-        "topperware_bot.yaml",
+        "limb_0.yaml",
     )
     return LaunchDescription(
         [
             launch_ros.actions.Node(
-                package="differential_drive",
-                executable="differential_drive_node",
+                package="limb_kin_chain",
+                executable="limb_kin_chain_node",
                 output="screen",
                 parameters=[config],
             ),
