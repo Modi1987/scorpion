@@ -25,8 +25,12 @@ namespace penta_pod::kin::limb_kin_chain {
     std::vector<double> alfa;
     node_->get_parameter("modified_dh.alfa", alfa);
     limb_->init(dof, a, d, alfa);
-    /*
-    // jpos_publisher_ = node_->create_publisher<traction_driver_msgs::msg::WheelsRps>("cmd_rps_wheels", 10);
+     
+    for(int i = 0; i < dof; i++) {
+        joints_names.push_back("Joint_" + std::to_string(i));
+    }
+
+    joint_state_publisher_ = node_->create_publisher<sensor_msgs::msg::JointState>("joint_state", 10);
     
     xyz_subscriber_ = node_->create_subscription<limb_msgs::msg::Pxyz>(
       "xyz_msg", 1, 
@@ -35,9 +39,14 @@ namespace penta_pod::kin::limb_kin_chain {
           double y = xyz_msg.y;
           double z = xyz_msg.z;
           RCLCPP_INFO_STREAM(node_->get_logger(), "x, y, z received: " << x << y << z);
+          std::vector<double> q = limb_->get_ik(x, y, z);
+          sensor_msgs::msg::JointState msg;
+          msg.name = joints_names;
+          msg.position = q;
+          joint_state_publisher_->publish(msg);
       }
     );
-    */
+    
   }
 
   void LimbNode::declare_parameters(){

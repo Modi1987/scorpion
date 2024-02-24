@@ -118,4 +118,15 @@ namespace penta_pod::kin::limb_kin_chain {
   }
 
 
+  std::vector<double> Limb::get_ik(double x, double y, double z) {
+    std::vector<double> jpos;
+    for(int i = 0; i < dof; i++) {
+      jpos.push_back(q[i]);
+    }
+    /* following is for not to get errors */
+    jpos[0] = x;
+    jpos[1] = y;
+    jpos[3] = z;
+    return jpos;
+  }
 }  // penta_pod::kin::limb_kin_chain
