@@ -213,7 +213,7 @@ namespace penta_pod::kin::limb_kin_chain {
 
   std::vector<double> Limb::get_ik(const double& x, const double& y, const double& z) {
     /* following is for not to get errors */
-    const int max_iterations = 20;
+    const int max_iterations = 200;
     for(int iterations = 0; iterations < max_iterations; iterations++) {
       this->fk(); // calculates (T, tcp_xyz_base, J, JJT) @(q)
       double lambda = 0.1;
