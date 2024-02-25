@@ -56,50 +56,37 @@ namespace penta_pod::kin::limb_kin_chain {
 
 
   std::vector<std::vector<double>> Limb::JJT_dls_inverter(double lambda) {
-    std::vector<std::vector<double>> matrix(3, std::vector<double>(3, 0));
-    std::vector<std::vector<double>> result(3, std::vector<double>(3, 0));
+    std::vector<std::vector<double>> m(3, std::vector<double>(3, 0));
+    std::vector<std::vector<double>> minv(3, std::vector<double>(3, 0));
 
     // Add damping
     for(int i = 0; i < 3; i++) {
         for(int j = 0; j < 3; j++){
             if(i == j){
-                matrix[i][j] = JJT[i][j] + lambda;
+                m[i][j] = JJT[i][j] + lambda;
             } else {
-                matrix[i][j] = JJT[i][j];
+                m[i][j] = JJT[i][j];
             }
         }
     }
+    // computes the inverse of a matrix m
+    double det = m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2]) -
+                m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
+                m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
 
-    // Function to calculate the determinant of a 2x2 matrix
-    auto determinant2x2 = [] (double a, double b, double c, double d) -> double {
-      return a * d - b * c;
-    };
+    double invdet = 1 / det;
 
-    // Calculate the determinant
-    // Calculate the determinant of the 3x3 matrix
-    double det = matrix[0][0] * determinant2x2(matrix[1][1], matrix[1][2], matrix[2][1], matrix[2][2])
-               - matrix[0][1] * determinant2x2(matrix[1][0], matrix[1][2], matrix[2][0], matrix[2][2])
-               + matrix[0][2] * determinant2x2(matrix[1][0], matrix[1][1], matrix[2][0], matrix[2][1]);
-
-    // If determinant is zero, matrix is singular, cannot be inverted
-    if (det == 0) {
-        std::cerr << "Cannot invert matrix, determinant is zero." << std::endl;
-        return result;
-    }
-
-    result[0][0] = determinant2x2(matrix[1][1], matrix[1][2], matrix[2][1], matrix[2][2]);
-    result[0][1] = -determinant2x2(matrix[1][0], matrix[1][2], matrix[2][0], matrix[2][2]);
-    result[0][2] = determinant2x2(matrix[1][0], matrix[1][1], matrix[2][0], matrix[2][1]);
-
-    result[1][0] = -determinant2x2(matrix[0][1], matrix[0][2], matrix[2][1], matrix[2][2]);
-    result[1][1] = determinant2x2(matrix[0][0], matrix[0][2], matrix[2][0], matrix[2][2]);
-    result[1][2] = -determinant2x2(matrix[0][0], matrix[0][1], matrix[2][0], matrix[2][1]);
-
-    result[2][0] = determinant2x2(matrix[0][1], matrix[0][2], matrix[1][1], matrix[1][2]);
-    result[2][1] = -determinant2x2(matrix[0][0], matrix[0][2], matrix[1][0], matrix[1][2]);
-    result[2][2] = determinant2x2(matrix[0][0], matrix[0][1], matrix[1][0], matrix[1][1]);
-    return result;
-  }
+    minv[0][0] = (m[1][1] * m[2][2] - m[2][1] * m[1][2]) * invdet;
+    minv[0][1] = (m[0][2] * m[2][1] - m[0][1] * m[2][2]) * invdet;
+    minv[0][2] = (m[0][1] * m[1][2] - m[0][2] * m[1][1]) * invdet;
+    minv[1][0] = (m[1][2] * m[2][0] - m[1][0] * m[2][2]) * invdet;
+    minv[1][1] = (m[0][0] * m[2][2] - m[0][2] * m[2][0]) * invdet;
+    minv[1][2] = (m[1][0] * m[0][2] - m[0][0] * m[1][2]) * invdet;
+    minv[2][0] = (m[1][0] * m[2][1] - m[2][0] * m[1][1]) * invdet;
+    minv[2][1] = (m[2][0] * m[0][1] - m[0][0] * m[2][1]) * invdet;
+    minv[2][2] = (m[0][0] * m[1][1] - m[1][0] * m[0][1]) * invdet;
+    return minv;
+}
 
   std::vector<double> Limb::get_vector(const int n, const std::vector<double>& vec) {
       std::vector<double> x(n);
@@ -176,12 +163,13 @@ namespace penta_pod::kin::limb_kin_chain {
     }
     // calculate JJT
     for(int i=0; i<3; i++) {
-      for(int j=0; j<3; j++){
+      for(int j=0; j<2; j++){
         double accum = 0.;
         for(int k=0; k<this->dof; k++){
           accum = accum +  J[i][k] * J[j][k];
         }
         JJT[i][j] = accum;
+        JJT[j][i] = accum;
       }
     }
   }
@@ -228,7 +216,7 @@ namespace penta_pod::kin::limb_kin_chain {
     const int max_iterations = 20;
     for(int iterations = 0; iterations < max_iterations; iterations++) {
       this->fk(); // calculates (T, tcp_xyz_base, J, JJT) @(q)
-      double lambda = 0.01;
+      double lambda = 0.1;
       auto JJT_1 = JJT_dls_inverter(lambda);
       double c = 0.9; // (iterations+1)/max_iterations;
       double dx = c*(x - tcp_xyz_base[0]);
@@ -242,8 +230,8 @@ namespace penta_pod::kin::limb_kin_chain {
         disp1[i]=accum;
       }
       for(int j = 0; j < this->dof; j++) {
-        //this->q[j] = this->q[j] + J[0][j]*disp1[0] + J[1][j]*disp1[1] + J[2][j]*disp1[2];
-        this->q[j] = this->q[j] + J[0][j]*disp[0] + J[1][j]*disp[1] + J[2][j]*disp[2];
+        this->q[j] = this->q[j] + J[0][j]*disp1[0] + J[1][j]*disp1[1] + J[2][j]*disp1[2];
+        //this->q[j] = this->q[j] + J[0][j]*disp[0] + J[1][j]*disp[1] + J[2][j]*disp[2];
       }
     }
     std::vector<double> jpos;
