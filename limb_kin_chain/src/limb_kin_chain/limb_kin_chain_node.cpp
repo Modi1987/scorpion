@@ -25,10 +25,9 @@ namespace penta_pod::kin::limb_kin_chain {
     node_->get_parameter("modified_dh.d", d);
     std::vector<double> alfa;
     node_->get_parameter("modified_dh.alfa", alfa);
-    for(int i = 0; i < dof; i++) {
-      RCLCPP_INFO_STREAM(node_->get_logger(), "modified dh for link " << i << "a: " << a[i] << " | d:" << d[i] << " | alfa: " << alfa[i]);
-    }
-    limb_->init(dof, a, d, alfa);
+    std::vector<double> eef_trans;
+    node_->get_parameter("modified_dh.eef_trans", eef_trans);
+    limb_->init(dof, a, d, alfa, eef_trans);
      
     for(int i = 0; i < dof; i++) {
       std::string temp = "Joint_" + std::to_string(i);
@@ -59,6 +58,7 @@ namespace penta_pod::kin::limb_kin_chain {
     node_->declare_parameter<std::vector<double>>("modified_dh.a", std::vector<double>());
     node_->declare_parameter<std::vector<double>>("modified_dh.d", std::vector<double>());
     node_->declare_parameter<std::vector<double>>("modified_dh.alfa", std::vector<double>());
+    node_->declare_parameter<std::vector<double>>("modified_dh.eef_trans", std::vector<double>());
   }
 
 }  // penta_pod::kin::limb_kin_chain
