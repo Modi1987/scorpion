@@ -15,25 +15,24 @@ namespace penta_pod::kin::limb_kin_chain {
   class Limb {
     private:
       // kinematic variables
-      double *xyz;
-      int dof;
-      double *q;
-      double **J;
-      double ***T;
-      double **Ttemp;
+      std::vector<double> xyz;
+      std::vector<double> q;
+      std::vector<std::vector<double>> J; 
+      std::vector<std::vector<std::vector<double>>> T;
+      std::vector<std::vector<double>> Ttemp;
       // kinematic constants
-      double *a;
-      double *d;
-      double *alfa;
+      int dof;
+      std::vector<double> a;
+      std::vector<double> d;
+      std::vector<double> alfa;
 
     public:
       explicit Limb(){};
-      ~Limb();
-      void init(int n, std::vector<double> a, std::vector<double> d, std::vector<double> alfa);
+      void init(const int n, const std::vector<double>& a, const std::vector<double>& d, const std::vector<double>& alfa);
       void fk();
       void ik();
-      std::vector<double> get_ik(double x, double y, double z);
-      double* get_vector(int n, std::vector<double> vec);
+      std::vector<double> get_ik(const double& x, const double& y, const double& z);
+      std::vector<double> get_vector(const int n, const std::vector<double>& vec);
       void calculate_Ttemp_at_i(int i);
   }; 
   

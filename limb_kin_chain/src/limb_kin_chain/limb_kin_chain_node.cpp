@@ -8,6 +8,7 @@
 // include messages
 #include "limb_msgs/msg/pxyz.hpp"
 #include <vector>
+#include <string>
 #define pi 3.141592
 
 namespace penta_pod::kin::limb_kin_chain {
@@ -24,12 +25,16 @@ namespace penta_pod::kin::limb_kin_chain {
     node_->get_parameter("modified_dh.d", d);
     std::vector<double> alfa;
     node_->get_parameter("modified_dh.alfa", alfa);
+    for(int i = 0; i < dof; i++) {
+      RCLCPP_INFO_STREAM(node_->get_logger(), "modified dh for link " << i << "a: " << a[i] << " | d:" << d[i] << " | alfa: " << alfa[i]);
+    }
     limb_->init(dof, a, d, alfa);
      
     for(int i = 0; i < dof; i++) {
-        joints_names.push_back("Joint_" + std::to_string(i));
+      std::string temp = "Joint_" + std::to_string(i);
+      joints_names.push_back(temp);
     }
-
+    
     joint_state_publisher_ = node_->create_publisher<sensor_msgs::msg::JointState>("joint_state", 10);
     
     xyz_subscriber_ = node_->create_subscription<limb_msgs::msg::Pxyz>(
@@ -46,11 +51,11 @@ namespace penta_pod::kin::limb_kin_chain {
           joint_state_publisher_->publish(msg);
       }
     );
-    
   }
 
   void LimbNode::declare_parameters(){
     // robot geometry
+    node_->declare_parameter<int>("modified_dh.dof");
     node_->declare_parameter<std::vector<double>>("modified_dh.a", std::vector<double>());
     node_->declare_parameter<std::vector<double>>("modified_dh.d", std::vector<double>());
     node_->declare_parameter<std::vector<double>>("modified_dh.alfa", std::vector<double>());
