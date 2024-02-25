@@ -18,6 +18,7 @@ namespace penta_pod::kin::limb_kin_chain {
       rclcpp::Node::SharedPtr node_;
       std::shared_ptr<Limb> limb_;
       std::vector<std::string> joints_names;
+      std::vector<double> q_state;
       rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_publisher_;
       rclcpp::Subscription<limb_msgs::msg::Pxyz>::SharedPtr xyz_subscriber_;
       void declare_parameters(); // shall declarte modified dh paramters

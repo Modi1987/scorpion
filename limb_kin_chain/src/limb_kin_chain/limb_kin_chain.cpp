@@ -29,9 +29,6 @@ namespace penta_pod::kin::limb_kin_chain {
       std::cout<<"eef_trans[" <<i<<"]: "<<this->eef_trans[i]<<std::endl;
     }
     // kinematics variables
-    q = std::vector<double>(n);
-    // ToDo initialize q to be equal to q0
-    for(int i = 0; i < n; i++)q[i] = 0.; 
     J = std::vector<std::vector<double>>(3);
     for (int i = 0; i < 3; i++) {
       J[i] = std::vector<double>(n);
@@ -96,15 +93,15 @@ namespace penta_pod::kin::limb_kin_chain {
     return x;
   }
 
-  void Limb::fk() {
-    calculate_Ttemp_at_i(0);
+  void Limb::fk(const std::vector<double>& q) {
+    calculate_Ttemp_at_i(0, q);
     for(int i = 0; i < 4; i++) {
         for(int j = 0; j < 4; j++) {
           T[i][j][0] = Ttemp[i][j];
       }
     }
     for(int m=1; m<this->dof; m++){ // loop over all T matrices
-      calculate_Ttemp_at_i(m);
+      calculate_Ttemp_at_i(m, q);
       for(int i = 0; i<4; i++){ // loop over rows of matrix T[m]
         for(int j = 0; j<4; j++){ // loop over columns of matrix T[m]
           double accum = 0.;
@@ -174,11 +171,11 @@ namespace penta_pod::kin::limb_kin_chain {
     }
   }
 
-  void Limb::calculate_Ttemp_at_i(int i) {
+  void Limb::calculate_Ttemp_at_i(int i, const std::vector<double>& q) {
     double c_alfa = cos(this->alfa[i]);
     double s_alfa = sin(this->alfa[i]);
-    double c_theta = cos(this->q[i]);
-    double s_theta = sin(this->q[i]);
+    double c_theta = cos(q[i]);
+    double s_theta = sin(q[i]);
     // first column
     this->Ttemp[0][0] = c_theta;
     this->Ttemp[1][0] = s_theta*c_alfa;
@@ -211,12 +208,15 @@ namespace penta_pod::kin::limb_kin_chain {
   }
 
 
-  std::vector<double> Limb::get_ik(const double& x, const double& y, const double& z) {
+  std::vector<double> Limb::get_ik(const double& x, const double& y, const double& z,
+                        const std::vector<double>& q0) {
     /* following is for not to get errors */
     const int max_iterations = 200;
     const double epsilon = 0.0001; // positioning accuracy of 0.1 mm
+    std::vector<double> q(this->dof);
+    for(int i=0; i<this->dof; i++)q[i]=q0[i];
     for(int iterations = 0; iterations < max_iterations; iterations++) {
-      this->fk(); // calculates (T, tcp_xyz_base, J, JJT) @(q)
+      this->fk(q); // calculates (T, tcp_xyz_base, J, JJT) @(q)
       double lambda = 0.1;
       auto JJT_1 = JJT_dls_inverter(lambda);
       double c = 0.9; // (iterations+1)/max_iterations;
@@ -233,14 +233,9 @@ namespace penta_pod::kin::limb_kin_chain {
         disp1[i]=accum;
       }
       for(int j = 0; j < this->dof; j++) {
-        this->q[j] = this->q[j] + J[0][j]*disp1[0] + J[1][j]*disp1[1] + J[2][j]*disp1[2];
-        //this->q[j] = this->q[j] + J[0][j]*disp[0] + J[1][j]*disp[1] + J[2][j]*disp[2];
+        q[j] = q[j] + J[0][j]*disp1[0] + J[1][j]*disp1[1] + J[2][j]*disp1[2];
       }
     }
-    std::vector<double> jpos;
-    for(int i = 0; i < this->dof; i++) {
-      jpos.push_back(q[i]);
-    }
-    return jpos;
+    return q;
   }
 }  // penta_pod::kin::limb_kin_chain

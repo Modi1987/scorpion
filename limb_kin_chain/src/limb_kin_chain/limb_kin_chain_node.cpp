@@ -27,6 +27,8 @@ namespace penta_pod::kin::limb_kin_chain {
     node_->get_parameter("modified_dh.alfa", alfa);
     std::vector<double> eef_trans;
     node_->get_parameter("modified_dh.eef_trans", eef_trans);
+    // get initial q0
+    node_->get_parameter("modified_dh.q0", q_state);
     limb_->init(dof, a, d, alfa, eef_trans);
      
     for(int i = 0; i < dof; i++) {
@@ -43,7 +45,11 @@ namespace penta_pod::kin::limb_kin_chain {
           double y = xyz_msg.y;
           double z = xyz_msg.z;
           RCLCPP_INFO_STREAM(node_->get_logger(), "x, y, z received: " << x << y << z);
-          std::vector<double> q = limb_->get_ik(x, y, z);
+          // get inverse kinematics
+          std::vector<double> q = limb_->get_ik(x, y, z, q_state);
+          // update internal state
+          for(size_t i=0; i<q.size(); i++)q_state[i]=q[i];
+          // create and publish the message
           sensor_msgs::msg::JointState msg;
           msg.name = joints_names;
           msg.position = q;
@@ -59,6 +65,7 @@ namespace penta_pod::kin::limb_kin_chain {
     node_->declare_parameter<std::vector<double>>("modified_dh.d", std::vector<double>());
     node_->declare_parameter<std::vector<double>>("modified_dh.alfa", std::vector<double>());
     node_->declare_parameter<std::vector<double>>("modified_dh.eef_trans", std::vector<double>());
+    node_->declare_parameter<std::vector<double>>("modified_dh.q0", std::vector<double>());
   }
 
 }  // penta_pod::kin::limb_kin_chain
