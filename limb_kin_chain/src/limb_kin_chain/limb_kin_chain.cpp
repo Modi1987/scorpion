@@ -214,15 +214,18 @@ namespace penta_pod::kin::limb_kin_chain {
   std::vector<double> Limb::get_ik(const double& x, const double& y, const double& z) {
     /* following is for not to get errors */
     const int max_iterations = 200;
+    const double epsilon = 0.0001; // positioning accuracy of 0.1 mm
     for(int iterations = 0; iterations < max_iterations; iterations++) {
       this->fk(); // calculates (T, tcp_xyz_base, J, JJT) @(q)
       double lambda = 0.1;
       auto JJT_1 = JJT_dls_inverter(lambda);
       double c = 0.9; // (iterations+1)/max_iterations;
-      double dx = c*(x - tcp_xyz_base[0]);
-      double dy = c*(y - tcp_xyz_base[1]);
-      double dz = c*(z - tcp_xyz_base[2]);
-      std::vector<double> disp = {dx, dy, dz};
+      double dx = (x - tcp_xyz_base[0]);
+      double dy = (y - tcp_xyz_base[1]);
+      double dz = (z - tcp_xyz_base[2]);
+      double norm_seq = dx*dx+dy*dy+dz*dz;
+      if(norm_seq<epsilon*epsilon)break;
+      std::vector<double> disp = {c*dx, c*dy, c*dz};
       std::vector<double> disp1 = std::vector<double>(3);
       for(int i = 0; i < 3; i++){
         double accum = 0.;
