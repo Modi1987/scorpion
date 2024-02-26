@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+
+<robot name="penta_bot">
+
+  <link name="base_footprint"/>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.10" length="0.025"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+    </visual>
+  </link>
+
+  <link name="shoulder_motor">
+    <visual>
+      <geometry>
+        <cylinder radius="0.0350" length="0.035"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+    </visual>
+  </link>
+
+  <link name="shoulder_link">
+    <visual>
+      <geometry>
+        <box size="0.1 0.02 0.02"/>
+      </geometry>
+      <origin xyz="0.05 0.0 0.0" rpy="0 0 0"/>
+    </visual>
+  </link>
+
+  <link name="upper_arm_link">
+    <visual>
+      <geometry>
+        <box size="0.1 0.02 0.02"/>
+      </geometry>
+      <origin xyz="0.05 0.0 0.0" rpy="0 0 0"/>
+    </visual>
+  </link>
+
+  <link name="lower_arm_link">
+    <visual>
+      <geometry>
+        <box size="0.1 0.02 0.02"/>
+      </geometry>
+      <origin xyz="0.05 0.0 0.0" rpy="0 0 0"/>
+    </visual>
+  </link>
+
+
+  <joint name="joint_robot_body_center" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0.0 0.0 0.05" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="joint_shoulder_motor" type="fixed">
+    <parent link="base_link"/>
+    <child link="shoulder_motor"/>
+    <origin xyz="0.1 0.0 0.0" rpy="0 0 0"/>
+  </joint>
+
+
+  <joint name="limb0_joint0" type="continuous">
+    <parent link="shoulder_motor"/>
+    <child link="shoulder_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+    <axis xyz="0 0 1" />
+  </joint>
+
+  <joint name="limb0_joint1" type="continuous">
+    <parent link="shoulder_link"/>
+    <child link="upper_arm_link"/>
+    <origin xyz="0.1 0.0 0.0" rpy="-1.57 0 0"/>
+    <axis xyz="0 0 1" />
+  </joint>
+
+
+  <joint name="limb0_joint2" type="continuous">
+    <parent link="upper_arm_link"/>
+    <child link="lower_arm_link"/>
+    <origin xyz="0.1 0.0 0.0" rpy="0 0 0"/>
+    <axis xyz="0 0 1" />
+  </joint>
+
+
+
+
+</robot>
