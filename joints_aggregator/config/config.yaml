@@ -1,0 +1,4 @@
+/**:
+  ros__parameters:
+    limbs_num: 4
+    joints_per_limb: 3
