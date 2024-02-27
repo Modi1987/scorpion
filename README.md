@@ -26,3 +26,9 @@ ros2 launch joints_aggregator joints_aggregator.launch.py
 ```
 ros2 launch penta_pod penta_rviz.launch.py
 ```
+
+- fourth, invoke the ik solver by publishing a target foot position
+
+```
+ros2 topic pub /limb0/xyz_msg limb_msgs/msg/Pxyz "{"x": 0.1, "z": -0.1}"
+```
