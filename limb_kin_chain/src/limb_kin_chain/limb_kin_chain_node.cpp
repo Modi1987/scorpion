@@ -18,17 +18,42 @@ namespace penta_pod::kin::limb_kin_chain {
     this->declare_parameters();
     
     int dof;
-    node_->get_parameter("modified_dh.dof", dof);
+    if(node_->get_parameter("modified_dh.dof", dof)) {
+      RCLCPP_INFO(node_->get_logger(), "limb dof loaded successfully");  
+    } else {
+      RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    }
     std::vector<double> a;
-    node_->get_parameter("modified_dh.a", a);
+    if(node_->get_parameter("modified_dh.a", a)) {
+      RCLCPP_INFO(node_->get_logger(), "limb DH paramter (a) loaded successfully");
+    } else {
+      RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    }
     std::vector<double> d;
-    node_->get_parameter("modified_dh.d", d);
+    if(node_->get_parameter("modified_dh.d", d)) {
+      RCLCPP_INFO(node_->get_logger(), "limb DH paramter (d) loaded successfully");
+    } else {
+      RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    }
     std::vector<double> alfa;
-    node_->get_parameter("modified_dh.alfa", alfa);
+    if(node_->get_parameter("modified_dh.alfa", alfa)) {
+      RCLCPP_INFO(node_->get_logger(), "limb DH parameter (alfa) loaded successfully");
+    } else {
+      RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    }
     std::vector<double> eef_trans;
-    node_->get_parameter("modified_dh.eef_trans", eef_trans);
+    if(node_->get_parameter("modified_dh.eef_trans", eef_trans)) {
+      RCLCPP_INFO(node_->get_logger(), "limb eef_trans loaded successfully");
+    } else {
+      RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    }
     // get initial q0
-    node_->get_parameter("modified_dh.q0", q_state);
+    if(node_->get_parameter("modified_dh.q0", q_state)) {
+
+    } else {
+      RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    }
+
     limb_->init(dof, a, d, alfa, eef_trans);
      
     for(int i = 0; i < dof; i++) {
