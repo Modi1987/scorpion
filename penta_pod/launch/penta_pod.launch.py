@@ -14,10 +14,8 @@ def generate_launch_description():
         "limb_0.yaml",
     )
     ld = LaunchDescription()
-    limbs_joint_states_topics_list = []
     for i in range(4):
         limb_prefix = "limb"+str(i)
-        individual_joint_state_topic = "/" + limb_prefix + "/joint_state"
         temp_node = Node(
             package="limb_kin_chain",
             executable="limb_kin_chain_node",
@@ -28,15 +26,4 @@ def generate_launch_description():
             # remappings=[(individual_joint_state_topic, '/joint_states')]
         )
         ld.add_action(temp_node)  # Added the Node to LaunchDescription
-        
-        limbs_joint_states_topics_list.append(individual_joint_state_topic)
-    # mapp_to = "/joint_states"
-    # limbs_joint_states_topics_list.append(mapp_to)
-    # joint_state_relay_node = Node(
-    #     package='topic_tools',
-    #     executable='relay',
-    #     arguments=limbs_joint_states_topics_list,
-    #     output='screen',
-    # )
-    # ld.add_action(joint_state_relay_node)
     return ld
