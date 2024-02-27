@@ -126,6 +126,7 @@ namespace penta_pod::kin::joints_aggregator {
 
   void JointsAggregator::on_joint_state_callback_limb0(const sensor_msgs::msg::JointState& joint_state) {
     sensor_msgs::msg::JointState msg;
+    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     const int limb_index = 0;
     int index_start = limb_index*3;
     this->q[index_start+0] = joint_state.position[0];
@@ -138,6 +139,7 @@ namespace penta_pod::kin::joints_aggregator {
 
   void JointsAggregator::on_joint_state_callback_limb1(const sensor_msgs::msg::JointState& joint_state) {
     sensor_msgs::msg::JointState msg;
+    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     const int limb_index = 1;
     int index_start = limb_index*3;
     this->q[index_start+0] = joint_state.position[0];
@@ -151,6 +153,7 @@ namespace penta_pod::kin::joints_aggregator {
 
   void JointsAggregator::on_joint_state_callback_limb2(const sensor_msgs::msg::JointState& joint_state) {
     sensor_msgs::msg::JointState msg;
+    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     const int limb_index = 2;
     int index_start = limb_index*3;
     this->q[index_start+0] = joint_state.position[0];
@@ -163,6 +166,7 @@ namespace penta_pod::kin::joints_aggregator {
 
   void JointsAggregator::on_joint_state_callback_limb3(const sensor_msgs::msg::JointState& joint_state) {
     sensor_msgs::msg::JointState msg;
+    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     const int limb_index = 3;
     int index_start = limb_index*3;
     this->q[index_start+0] = joint_state.position[0];
@@ -175,6 +179,7 @@ namespace penta_pod::kin::joints_aggregator {
 
   void JointsAggregator::on_joint_state_callback_limb4(const sensor_msgs::msg::JointState& joint_state) {
     sensor_msgs::msg::JointState msg;
+    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     const int limb_index = 4;
     int index_start = limb_index*3;
     this->q[index_start+0] = joint_state.position[0];
@@ -187,6 +192,7 @@ namespace penta_pod::kin::joints_aggregator {
 
   void JointsAggregator::on_joint_state_callback_limb5(const sensor_msgs::msg::JointState& joint_state) {
     sensor_msgs::msg::JointState msg;
+    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     const int limb_index = 5;
     int index_start = limb_index*3;
     this->q[index_start+0] = joint_state.position[0];
@@ -199,6 +205,7 @@ namespace penta_pod::kin::joints_aggregator {
 
   void JointsAggregator::on_joint_state_callback_limb6(const sensor_msgs::msg::JointState& joint_state) {
     sensor_msgs::msg::JointState msg;
+    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     const int limb_index = 6;
     int index_start = limb_index*3;
     this->q[index_start+0] = joint_state.position[0];
@@ -211,6 +218,7 @@ namespace penta_pod::kin::joints_aggregator {
 
   void JointsAggregator::on_joint_state_callback_limb7(const sensor_msgs::msg::JointState& joint_state) {
     sensor_msgs::msg::JointState msg;
+    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     const int limb_index = 7;
     int index_start = limb_index*3;
     this->q[index_start+0] = joint_state.position[0];
