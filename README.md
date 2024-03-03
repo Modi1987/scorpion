@@ -31,3 +31,9 @@ ros2 launch penta_pod penta_pod.launch.py
 ```
 ros2 topic pub /limb0/xyz_msg limb_msgs/msg/Pxyz "{"x": 0.1, "z": -0.1}"
 ```
+
+- fifth, to animate the simulation you can stream feet positions
+
+```
+ros2 launch test_foot_pos test_foot_pos.launch.py
+```
