@@ -9,7 +9,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     config = os.path.join(
-        get_package_share_directory("limb_kin_chain"),
+        get_package_share_directory("penta_pod"),
         "config",
         "limb_0.yaml",
     )

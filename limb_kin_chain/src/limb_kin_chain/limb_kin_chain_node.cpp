@@ -62,7 +62,12 @@ namespace penta_pod::kin::limb_kin_chain {
     }
     
     joint_state_publisher_ = node_->create_publisher<sensor_msgs::msg::JointState>("joint_state", 10);
-    
+    // you can publish initial joints states once
+    sensor_msgs::msg::JointState msg;
+    msg.name = joints_names;
+    msg.position = q_state;
+    joint_state_publisher_->publish(msg);
+    // following is the tcp position subscriber
     xyz_subscriber_ = node_->create_subscription<limb_msgs::msg::Pxyz>(
       "xyz_msg", 1, 
       [this](const limb_msgs::msg::Pxyz& xyz_msg) -> void {
