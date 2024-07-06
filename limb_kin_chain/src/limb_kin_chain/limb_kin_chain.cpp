@@ -8,7 +8,7 @@
 #include <iostream>
 #include <cmath>
 
-#define DEBUG_PRINGS true
+#define DEBUG_PRINTS false
 namespace penta_pod::kin::limb_kin_chain {
 
   void Limb::init(const int n, const std::vector<double>& a, 
@@ -112,7 +112,7 @@ namespace penta_pod::kin::limb_kin_chain {
         }
       }		
     }
-    if(DEBUG_PRINGS) {
+    if(DEBUG_PRINTS) {
       for(int m = 0; m<this->dof; m++) {
         std::cout<<"T_"<<m<<"_-1"<<std::endl;
         for(int k=0; k<4; k++){
@@ -123,7 +123,7 @@ namespace penta_pod::kin::limb_kin_chain {
         }
       }
     }
-    if(DEBUG_PRINGS){
+    if(DEBUG_PRINTS){
       for(int i=0; i<3; i++)std::cout<<"flange_pos["<<i<<"]: "<<this->T[i][3][this->dof-1]<<" ";
       std::cout<<std::endl;
     }
@@ -134,7 +134,7 @@ namespace penta_pod::kin::limb_kin_chain {
       }
       this->tcp_xyz_base[i] = accum + this->T[i][3][this->dof-1];
     } 
-    if(DEBUG_PRINGS){
+    if(DEBUG_PRINTS){
       for(int i=0; i<3; i++)std::cout<<"pos["<<i<<"]: "<<this->tcp_xyz_base[i]<< " ";
       std::cout<<std::endl;
     }
@@ -151,7 +151,7 @@ namespace penta_pod::kin::limb_kin_chain {
       this->J[2][j] = -lx*ky + ly*kx;
     }
 
-    if(DEBUG_PRINGS){
+    if(DEBUG_PRINTS){
       std::cout<<"J :"<<std::endl;
       for(int i=0; i<3; i++) {
         for(int j=0; j<this->dof; j++)std::cout<<J[i][j]<< " ";
@@ -196,7 +196,7 @@ namespace penta_pod::kin::limb_kin_chain {
     this->Ttemp[1][3] = -s_alfa*d[i];
     this->Ttemp[2][3] = c_alfa*d[i];
 	  this->Ttemp[3][3] = 1.;
-    if(DEBUG_PRINGS) {
+    if(DEBUG_PRINTS) {
       std::cout<<"T_"<<i<<"_"<<i-1<<std::endl;
       for(int k=0; k<4; k++){
         for(int l =0; l<4; l++){
