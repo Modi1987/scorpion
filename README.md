@@ -37,3 +37,17 @@ ros2 topic pub /limb0/xyz_msg limb_msgs/msg/Pxyz "{"x": 0.1, "z": -0.1}"
 ```
 ros2 launch test_foot_pos test_foot_pos.launch.py
 ```
+
+# Other ways to move the simulation around
+
+Move feet up and down
+
+```
+ros2 run test_foot_pos test_gait_node
+```
+
+Move the robot according to twist command
+
+```
+ros2 launch gait_generator gait_generator.launch.py
+```
