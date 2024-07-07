@@ -20,7 +20,7 @@ namespace penta_pod::kin::test_gait {
     const double delta_t_milli = 50.;
     t_ = 0.;
     sign_ = 1.0;
-    dof_ = 4;
+    dof_ = 5;
     foot_count_ = 0;
     for(int i = 0; i < dof_; i++) {
         auto topic_name = "limb" + std::to_string(i) + "/xyz_msg";

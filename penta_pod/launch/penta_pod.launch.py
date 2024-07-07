@@ -14,7 +14,7 @@ def generate_launch_description():
         "limb_0.yaml",
     )
     ld = LaunchDescription()
-    for i in range(4):
+    for i in range(5):
         limb_prefix = "limb"+str(i)
         temp_node = Node(
             package="limb_kin_chain",

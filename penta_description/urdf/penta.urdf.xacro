@@ -87,9 +87,10 @@
 
   </xacro:macro>
 
-  <xacro:leg prefix="limb0" shoulderxyz="0.1 0. 0." shoulderrpy="0. 0. 0."/>
-  <xacro:leg prefix="limb1" shoulderxyz="0. 0.1 0." shoulderrpy="0. 0. 1.570796"/>
-  <xacro:leg prefix="limb2" shoulderxyz="-0.1 0. 0." shoulderrpy="0. 0. 3.141592"/>
-  <xacro:leg prefix="limb3" shoulderxyz="0. -0.1 0." shoulderrpy="0. 0. 4.71"/>
+<xacro:leg prefix="limb0" shoulderxyz="${0.1*cos(0.*3.141592/2.5)} ${0.1*sin(0.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(0.*3.141592/2.5)}"/>
+<xacro:leg prefix="limb1" shoulderxyz="${0.1*cos(1.*3.141592/2.5)} ${0.1*sin(1.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(1.*3.141592/2.5)}"/>
+<xacro:leg prefix="limb2" shoulderxyz="${0.1*cos(2.*3.141592/2.5)} ${0.1*sin(2.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(2.*3.141592/2.5)}"/>
+<xacro:leg prefix="limb3" shoulderxyz="${0.1*cos(3.*3.141592/2.5)} ${0.1*sin(3.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(3.*3.141592/2.5)}"/>
+<xacro:leg prefix="limb4" shoulderxyz="${0.1*cos(4.*3.141592/2.5)} ${0.1*sin(4.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(4.*3.141592/2.5)}"/>
 
 </robot>
