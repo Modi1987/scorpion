@@ -20,6 +20,7 @@ find_package(geometry_msgs REQUIRED)
 # # Declare library
 add_library(${PROJECT_NAME}
         src/${PROJECT_NAME}/${PROJECT_NAME}.cpp
+        src/${PROJECT_NAME}/test_gait.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
@@ -42,6 +43,11 @@ target_link_libraries(${PROJECT_NAME}_node
         )
 
 
+add_executable(test_gait_node src/test_gait_node.cpp)
+target_link_libraries(test_gait_node
+        ${PROJECT_NAME}
+        )
+
 #############
 ## Install ##
 #############
@@ -53,6 +59,7 @@ install(
 
 install(TARGETS 
         ${PROJECT_NAME}_node
+        test_gait_node
         DESTINATION lib/${PROJECT_NAME}
         )
 
