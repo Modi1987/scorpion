@@ -6,9 +6,9 @@ import launch_ros.actions
 
 def generate_launch_description():
     config = os.path.join(
-        get_package_share_directory("joints_aggregator"),
+        get_package_share_directory("penta_description"),
         "config",
-        "config.yaml",
+        "general_config.yaml",
     )
     return LaunchDescription(
         [

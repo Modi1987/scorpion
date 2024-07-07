@@ -6,9 +6,9 @@ import launch_ros.actions
 
 def generate_launch_description():
     config = os.path.join(
-        get_package_share_directory("limb_kin_chain"),
+        get_package_share_directory("penta_description"),
         "config",
-        "limb_0.yaml",
+        "limb_0_mdh.yaml",
     )
     return LaunchDescription(
         [
