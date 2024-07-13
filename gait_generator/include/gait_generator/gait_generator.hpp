@@ -8,6 +8,7 @@
 #include "limb_msgs/msg/pxyz.hpp"
 #include "geometry_msgs/msg/transform.hpp"
 #include "geometry_msgs/msg/twist.hpp"
+#include "geometry_msgs/msg/point.hpp"
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
@@ -27,8 +28,9 @@ namespace penta_pod::kin::gait_generator {
       std::vector<geometry_msgs::msg::Transform> legs_body_transforms_;
       geometry_msgs::msg::Transform body_base_;      
 
-      std::vector<geometry_msgs::msg::Point> feet_pos_in_footprint_;
-      std::vector<geometry_msgs::msg::Point> init_feet_pos_in_footprint_;
+      std::vector<geometry_msgs::msg::Point> feet_pos_in_footprint_; // current feet pos
+      std::vector<geometry_msgs::msg::Point> init_feet_pos_in_footprint_; // feet pos at equilibrium
+      std::vector<geometry_msgs::msg::Point> final_displacement_; // feet pos displacement from equilbrium
       std::vector<double> phase_shift_vec_;
 
       std::vector<rclcpp::Publisher<limb_msgs::msg::Pxyz>::SharedPtr> xyz_publishers_;
@@ -41,6 +43,7 @@ namespace penta_pod::kin::gait_generator {
       void timer_callback(double delta_t_milli);
       void cmd_vel_sub_callback(const geometry_msgs::msg::Twist::SharedPtr msg);
 
+      // move feet up (z up) calculation
       double stepFunOneLegOff_2(double b, double q, double phase_shift, int n) {
         q = q + phase_shift; // add the phase
         q = q - std::floor(q / (2 * M_PI)) * 2 * M_PI; // remove multiples of 2*pi (resulting q is always less than 2*pi)
@@ -54,6 +57,23 @@ namespace penta_pod::kin::gait_generator {
         } else {
             return 0.0;
         }
+      }
+
+      // moving foot back to equilbrium
+      double stepFunOneLegOff_3(double q, double phase_shift, double delta_xFinal, int legsNum) {
+          q = q + phase_shift;
+          q = q - std::floor(q / (2 * M_PI)) * 2 * M_PI;
+          double epsilon = M_PI / legsNum;
+
+          if (q < 2 * (M_PI - epsilon)) {
+              return delta_xFinal;
+          } else if (q < 2 * M_PI) {
+              double u = q - 2 * epsilon * (legsNum - 1);
+              double alfa = delta_xFinal / (2 * epsilon);
+              return delta_xFinal - alfa * u;
+          } else {
+              return 0.0;
+          }
       }
 
       auto init_phase_shift(int feet_num) -> std::vector<double>  {

@@ -32,6 +32,7 @@ namespace penta_pod::kin::gait_generator {
     for(int i = 0; i < feet_num_; i++) {
         auto topic_name = "limb" + std::to_string(i) + "/xyz_msg";
         xyz_publishers_.push_back(node_->create_publisher<limb_msgs::msg::Pxyz>(topic_name, 10));
+        final_displacement_.push_back(geometry_msgs::msg::Point());
     }
     phase_shift_vec_ = init_phase_shift(feet_num_);
 
@@ -55,22 +56,26 @@ namespace penta_pod::kin::gait_generator {
       double dx = cmd_vel_.linear.x*delta_t_sec;
       double dy = cmd_vel_.linear.y*delta_t_sec;
       double d_theta = cmd_vel_.angular.z*delta_t_sec;
-      double w = 1.2;
+      double w = 2.0;
       double b = 0.05;
       current_phase_=current_phase_+w*delta_t_sec;
 
       for(int i = 0; i < feet_num_; i++) {
           auto temp = stepFunOneLegOff_2(b,current_phase_,phase_shift_vec_[i],feet_num_);
-          if(temp!=0.) {
-              feet_pos_in_footprint_[i].x = init_feet_pos_in_footprint_[i].x;
-              feet_pos_in_footprint_[i].y = init_feet_pos_in_footprint_[i].y;
-              feet_pos_in_footprint_[i].z = temp;
-          } else {
+          if(temp==0.) {
               double x = feet_pos_in_footprint_[i].x;
               double y = feet_pos_in_footprint_[i].y;
               feet_pos_in_footprint_[i].x = x + dx - d_theta*y;
               feet_pos_in_footprint_[i].y = y + dy + d_theta*x;
               feet_pos_in_footprint_[i].z = feet_pos_in_footprint_[i].z;
+              final_displacement_[i].x = feet_pos_in_footprint_[i].x - init_feet_pos_in_footprint_[i].x;
+              final_displacement_[i].y = feet_pos_in_footprint_[i].y - init_feet_pos_in_footprint_[i].y;
+          } else {
+              feet_pos_in_footprint_[i].x = init_feet_pos_in_footprint_[i].x + 
+                                              stepFunOneLegOff_3(current_phase_, phase_shift_vec_[i], final_displacement_[i].x, feet_num_);
+              feet_pos_in_footprint_[i].y = init_feet_pos_in_footprint_[i].y + 
+                                              stepFunOneLegOff_3(current_phase_, phase_shift_vec_[i], final_displacement_[i].y, feet_num_);
+              feet_pos_in_footprint_[i].z = temp;
           }
 
           if (i < static_cast<int>(legs_body_transforms_.size())) {
