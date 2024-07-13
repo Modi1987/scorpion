@@ -16,9 +16,26 @@
   <joint name="joint_robot_body_center" type="fixed">
     <parent link="base_footprint"/>
     <child link="base_link"/>
-    <origin xyz="0.0 0.0 0.05" rpy="0 0 0"/>
+    <origin xyz="0.0 0.0 0.075" rpy="0 0 0"/>
   </joint>
 
+  <link name="head_link">
+    <visual>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <material name="green">
+        <color rgba="0 1 0 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="head_base" type="fixed">
+    <parent link="base_link"/>
+    <child link="head_link"/>
+    <origin xyz="-0.1 0.0 0.025" rpy="0 0 0"/>
+  </joint>
+    
   <xacro:macro name="leg" params="prefix shoulderxyz shoulderrpy">
     <link name="${prefix}_shoulder_motor">
       <visual>
