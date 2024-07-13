@@ -45,9 +45,21 @@ namespace penta_pod::kin::gait_generator {
   }
 
   void GaitGenerator::cmd_vel_sub_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
+    constexpr double MAX_VEL_M_PER_SEC = 0.025;
+    constexpr double MAX_W_RAD_PER_SEC = 0.025;
+
+    auto mag = std::sqrt(msg->linear.x * msg->linear.x + msg->linear.y * msg->linear.y);
+    if (mag > MAX_VEL_M_PER_SEC) {
+        msg->linear.x = msg->linear.x * MAX_VEL_M_PER_SEC / mag;
+        msg->linear.y = msg->linear.y * MAX_VEL_M_PER_SEC / mag;
+    }
+    mag = std::abs(msg->angular.z);
+    if (mag > MAX_W_RAD_PER_SEC) {
+        msg->angular.z = msg->angular.z * MAX_W_RAD_PER_SEC / mag;
+    }
     cmd_vel_ = *msg;
     RCLCPP_INFO(node_->get_logger(), "Received cmd_vel: linear=%.2f, angular=%.2f",
-                    cmd_vel_.linear.x, cmd_vel_.angular.z);
+                cmd_vel_.linear.x, cmd_vel_.angular.z);
   }
 
   void GaitGenerator::timer_callback(double delta_t_milli){
