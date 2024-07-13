@@ -2,3 +2,5 @@
   ros__parameters:
     limbs_num: 5
     joints_per_limb: 3
+    max_v: 0.005 # meter per sec
+    max_w: 0.05 # rad per sec
