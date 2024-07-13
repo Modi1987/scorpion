@@ -49,7 +49,11 @@ namespace penta_pod::kin::gait_generator {
   }
 
   void GaitGenerator::timer_callback(double delta_t_milli){
-      t_ = t_ + delta_t_milli/1000.;
+      auto delta_t_sec = delta_t_milli/1000.;
+      t_ = t_ + delta_t_sec;
+      double dx = cmd_vel_.linear.x*delta_t_sec;
+      double dy = cmd_vel_.linear.y*delta_t_sec;
+      double d_theta = cmd_vel_.angular.z*delta_t_sec;
       double w = 1.2;
       double r = 0.05;
       auto temp = sign_*r*sin(w*t_);
@@ -63,13 +67,20 @@ namespace penta_pod::kin::gait_generator {
       }
 
       for(int i = 0; i < dof_; i++) {
-          auto foot_pos_in_footprint = feet_pos_in_footprint_[i];
           if(i == foot_count_) {
-              foot_pos_in_footprint.z += temp;
+              feet_pos_in_footprint_[i].x = init_feet_pos_in_footprint_[i].x;
+              feet_pos_in_footprint_[i].y = init_feet_pos_in_footprint_[i].y;
+              feet_pos_in_footprint_[i].z = temp;
+          } else {
+              double x = feet_pos_in_footprint_[i].x;
+              double y = feet_pos_in_footprint_[i].y;
+              feet_pos_in_footprint_[i].x = x + dx - d_theta*y;
+              feet_pos_in_footprint_[i].y = y + dy + d_theta*x;
+              feet_pos_in_footprint_[i].z = feet_pos_in_footprint_[i].z;
           }
 
           if (i < static_cast<int>(legs_body_transforms_.size())) {
-            auto  point = applyInverseTransform(foot_pos_in_footprint, legs_body_transforms_[i]);
+            auto  point = applyInverseTransform(feet_pos_in_footprint_[i], legs_body_transforms_[i]);
             limb_msgs::msg::Pxyz xyz_msg;
             xyz_msg.x = point.x;
             xyz_msg.y = point.y;
@@ -135,6 +146,7 @@ namespace penta_pod::kin::gait_generator {
           xyz.y = init_feet_pos_params[1 + count * 3];
           xyz.z = init_feet_pos_params[2 + count * 3];
           feet_pos_in_footprint_.emplace_back(xyz);
+          init_feet_pos_in_footprint_.emplace_back(xyz);
       }
   }
 

@@ -28,11 +28,12 @@ namespace penta_pod::kin::gait_generator {
       geometry_msgs::msg::Transform body_base_;      
 
       std::vector<geometry_msgs::msg::Point> feet_pos_in_footprint_;
+      std::vector<geometry_msgs::msg::Point> init_feet_pos_in_footprint_;
 
       std::vector<rclcpp::Publisher<limb_msgs::msg::Pxyz>::SharedPtr> xyz_publishers_;
       rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscription_;
       rclcpp::TimerBase::SharedPtr timer_;
-      geometry_msgs::msg::Twist cmd_vel_;
+      geometry_msgs::msg::Twist cmd_vel_{};
 
       void declare_parameters();
       void load_parameters();
