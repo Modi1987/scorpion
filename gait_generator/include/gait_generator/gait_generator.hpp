@@ -12,23 +12,24 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-
+#include <cmath>
 
 namespace penta_pod::kin::gait_generator {
-  
+
   class GaitGenerator {
     private:
       rclcpp::Node::SharedPtr node_;
       std::vector<double> q_state;
 
-      double t_, sign_;
-      int dof_, foot_count_;
+      double t_, sign_, current_phase_;
+      int feet_num_;
 
       std::vector<geometry_msgs::msg::Transform> legs_body_transforms_;
       geometry_msgs::msg::Transform body_base_;      
 
       std::vector<geometry_msgs::msg::Point> feet_pos_in_footprint_;
       std::vector<geometry_msgs::msg::Point> init_feet_pos_in_footprint_;
+      std::vector<double> phase_shift_vec_;
 
       std::vector<rclcpp::Publisher<limb_msgs::msg::Pxyz>::SharedPtr> xyz_publishers_;
       rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscription_;
@@ -39,6 +40,29 @@ namespace penta_pod::kin::gait_generator {
       void load_parameters();
       void timer_callback(double delta_t_milli);
       void cmd_vel_sub_callback(const geometry_msgs::msg::Twist::SharedPtr msg);
+
+      double stepFunOneLegOff_2(double b, double q, double phase_shift, int n) {
+        q = q + phase_shift; // add the phase
+        q = q - std::floor(q / (2 * M_PI)) * 2 * M_PI; // remove multiples of 2*pi (resulting q is always less than 2*pi)
+        double epsilon = M_PI / n;
+
+        if (q < ((n - 1) * 2 * epsilon)) { // interval where feet is on ground
+            return 0.0;
+        } else if (q < 2 * M_PI) { // when feet is off the ground
+            double u = M_PI * (q - (n - 1) * 2 * epsilon) / (2 * epsilon);
+            return b * std::sin(u);
+        } else {
+            return 0.0;
+        }
+      }
+
+      auto init_phase_shift(int feet_num) -> std::vector<double>  {
+        std::vector<double> phase_shift_vec(feet_num);
+        for (int i = 0; i < feet_num; ++i) {
+            phase_shift_vec[i] = i * (2 * M_PI / feet_num);
+        }
+        return phase_shift_vec;
+      }
 
       geometry_msgs::msg::Quaternion invertQuaternion(const geometry_msgs::msg::Quaternion &q)
       {

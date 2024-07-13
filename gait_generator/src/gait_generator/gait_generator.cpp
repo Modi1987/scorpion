@@ -27,12 +27,13 @@ namespace penta_pod::kin::gait_generator {
     const double delta_t_milli = 50.;
     t_ = 0.;
     sign_ = 1.0;
-    dof_ = 5;
-    foot_count_ = 0;
-    for(int i = 0; i < dof_; i++) {
+    feet_num_ = 5;
+    current_phase_ = 0.;
+    for(int i = 0; i < feet_num_; i++) {
         auto topic_name = "limb" + std::to_string(i) + "/xyz_msg";
         xyz_publishers_.push_back(node_->create_publisher<limb_msgs::msg::Pxyz>(topic_name, 10));
     }
+    phase_shift_vec_ = init_phase_shift(feet_num_);
 
     cmd_vel_subscription_ = node_->create_subscription<geometry_msgs::msg::Twist>(
         "cmd_vel", 10, [this](const geometry_msgs::msg::Twist::SharedPtr msg){ cmd_vel_sub_callback(msg); });
@@ -55,19 +56,12 @@ namespace penta_pod::kin::gait_generator {
       double dy = cmd_vel_.linear.y*delta_t_sec;
       double d_theta = cmd_vel_.angular.z*delta_t_sec;
       double w = 1.2;
-      double r = 0.05;
-      auto temp = sign_*r*sin(w*t_);
-      if(temp<0.){
-        foot_count_++;
-        if(foot_count_ == dof_) {
-          foot_count_=0;
-        }
-        sign_ = -sign_;
-        temp = -temp;
-      }
+      double b = 0.05;
+      current_phase_=current_phase_+w*delta_t_sec;
 
-      for(int i = 0; i < dof_; i++) {
-          if(i == foot_count_) {
+      for(int i = 0; i < feet_num_; i++) {
+          auto temp = stepFunOneLegOff_2(b,current_phase_,phase_shift_vec_[i],feet_num_);
+          if(temp!=0.) {
               feet_pos_in_footprint_[i].x = init_feet_pos_in_footprint_[i].x;
               feet_pos_in_footprint_[i].y = init_feet_pos_in_footprint_[i].y;
               feet_pos_in_footprint_[i].z = temp;
