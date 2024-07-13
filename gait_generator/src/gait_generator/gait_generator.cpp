@@ -34,9 +34,18 @@ namespace penta_pod::kin::gait_generator {
         xyz_publishers_.push_back(node_->create_publisher<limb_msgs::msg::Pxyz>(topic_name, 10));
     }
 
+    cmd_vel_subscription_ = node_->create_subscription<geometry_msgs::msg::Twist>(
+        "cmd_vel", 10, [this](const geometry_msgs::msg::Twist::SharedPtr msg){ cmd_vel_sub_callback(msg); });
+
     timer_ = node_->create_wall_timer(
         std::chrono::milliseconds(static_cast<int>(delta_t_milli)),
         [this, delta_t_milli]() { timer_callback(delta_t_milli); });
+  }
+
+  void GaitGenerator::cmd_vel_sub_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
+    cmd_vel_ = *msg;
+    RCLCPP_INFO(node_->get_logger(), "Received cmd_vel: linear=%.2f, angular=%.2f",
+                    cmd_vel_.linear.x, cmd_vel_.angular.z);
   }
 
   void GaitGenerator::timer_callback(double delta_t_milli){

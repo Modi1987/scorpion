@@ -7,6 +7,7 @@
 // include messages
 #include "limb_msgs/msg/pxyz.hpp"
 #include "geometry_msgs/msg/transform.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
@@ -29,11 +30,14 @@ namespace penta_pod::kin::gait_generator {
       std::vector<geometry_msgs::msg::Point> feet_pos_in_footprint_;
 
       std::vector<rclcpp::Publisher<limb_msgs::msg::Pxyz>::SharedPtr> xyz_publishers_;
+      rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscription_;
       rclcpp::TimerBase::SharedPtr timer_;
+      geometry_msgs::msg::Twist cmd_vel_;
 
       void declare_parameters();
       void load_parameters();
       void timer_callback(double delta_t_milli);
+      void cmd_vel_sub_callback(const geometry_msgs::msg::Twist::SharedPtr msg);
 
       geometry_msgs::msg::Quaternion invertQuaternion(const geometry_msgs::msg::Quaternion &q)
       {
