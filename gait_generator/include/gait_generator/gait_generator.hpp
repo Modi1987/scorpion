@@ -33,6 +33,7 @@ namespace penta_pod::kin::gait_generator {
 
       void declare_parameters();
       void load_parameters();
+      void timer_callback(double delta_t_milli);
 
       geometry_msgs::msg::Quaternion invertQuaternion(const geometry_msgs::msg::Quaternion &q)
       {
