@@ -68,7 +68,7 @@ namespace penta_pod::kin::gait_generator {
       double dx = cmd_vel_.linear.x*delta_t_sec;
       double dy = cmd_vel_.linear.y*delta_t_sec;
       double d_theta = cmd_vel_.angular.z*delta_t_sec;
-      double w = 2.0;
+      double w = 2.5;
       double b = 0.05;
       current_phase_=current_phase_+w*delta_t_sec;
 
