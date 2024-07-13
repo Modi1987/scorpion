@@ -33,45 +33,45 @@ namespace penta_pod::kin::gait_generator {
         auto topic_name = "limb" + std::to_string(i) + "/xyz_msg";
         xyz_publishers_.push_back(node_->create_publisher<limb_msgs::msg::Pxyz>(topic_name, 10));
     }
+
     timer_ = node_->create_wall_timer(
-      std::chrono::milliseconds(static_cast<int>(delta_t_milli)),
-      [this, delta_t_milli](){
-        t_ = t_ + delta_t_milli/1000.;
-        double w = 1.2;
-        double r = 0.05;
-        auto temp = sign_*r*sin(w*t_);
-        if(temp<0.){
-          foot_count_++;
-          if(foot_count_ == dof_) {
-            foot_count_=0;
-          }
-          sign_ = -sign_;
-          temp = -temp;
-        }
-
-        for(int i = 0; i < dof_; i++) {
-            auto foot_pos_in_footprint = feet_pos_in_footprint_[i];
-            if(i == foot_count_) {
-                foot_pos_in_footprint.z += temp;
-            }
-
-            if (i < static_cast<int>(legs_body_transforms_.size())) {
-              auto  point = applyInverseTransform(foot_pos_in_footprint, legs_body_transforms_[i]);
-              limb_msgs::msg::Pxyz xyz_msg;
-              xyz_msg.x = point.x;
-              xyz_msg.y = point.y;
-              xyz_msg.z = point.z;
-
-              xyz_publishers_[i]->publish(xyz_msg);
-            } else {
-                RCLCPP_ERROR_STREAM(node_->get_logger(), "No transform available for limb " << i);
-            }
-        }
-
-      }
-    );
+        std::chrono::milliseconds(static_cast<int>(delta_t_milli)),
+        [this, delta_t_milli]() { timer_callback(delta_t_milli); });
   }
 
+  void GaitGenerator::timer_callback(double delta_t_milli){
+      t_ = t_ + delta_t_milli/1000.;
+      double w = 1.2;
+      double r = 0.05;
+      auto temp = sign_*r*sin(w*t_);
+      if(temp<0.){
+        foot_count_++;
+        if(foot_count_ == dof_) {
+          foot_count_=0;
+        }
+        sign_ = -sign_;
+        temp = -temp;
+      }
+
+      for(int i = 0; i < dof_; i++) {
+          auto foot_pos_in_footprint = feet_pos_in_footprint_[i];
+          if(i == foot_count_) {
+              foot_pos_in_footprint.z += temp;
+          }
+
+          if (i < static_cast<int>(legs_body_transforms_.size())) {
+            auto  point = applyInverseTransform(foot_pos_in_footprint, legs_body_transforms_[i]);
+            limb_msgs::msg::Pxyz xyz_msg;
+            xyz_msg.x = point.x;
+            xyz_msg.y = point.y;
+            xyz_msg.z = point.z;
+
+            xyz_publishers_[i]->publish(xyz_msg);
+          } else {
+              RCLCPP_ERROR_STREAM(node_->get_logger(), "No transform available for limb " << i);
+          }
+      }    
+  }
   
   void GaitGenerator::declare_parameters(){
     node_->declare_parameter<std::vector<double>>("legs_body_transforms", std::vector<double>{});
