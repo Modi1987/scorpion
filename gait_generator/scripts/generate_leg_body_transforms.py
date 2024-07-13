@@ -1,9 +1,10 @@
 import math
 from math import cos, sin, pi
 
+# generate leg_root transform with respect to body frame
 r = 0.1
 for i in range(5):
-     theta = i*pi/5.
+     theta = 2*i*pi/5.
      x = r*cos(theta)
      y = r*sin(theta)
      z = 0.05
@@ -16,9 +17,10 @@ for i in range(5):
 
 print('***************')
 
+# generate initial feet position in body frame
 r = 0.25
 for i in range(5):
-     theta = i*pi/5.
+     theta = 2*i*pi/5.
      x = r*cos(theta)
      y = r*sin(theta)
      z = -0.05
