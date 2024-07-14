@@ -25,8 +25,6 @@ namespace penta_pod::kin::gait_generator {
     this->declare_parameters();
     this->load_parameters();
     const double delta_t_milli = 50.;
-    t_ = 0.;
-    sign_ = 1.0;
     feet_num_ = 5;
     current_phase_ = 0.;
     for(int i = 0; i < feet_num_; i++) {
@@ -64,7 +62,6 @@ namespace penta_pod::kin::gait_generator {
 
   void GaitGenerator::timer_callback(double delta_t_milli){
       auto delta_t_sec = delta_t_milli/1000.;
-      t_ = t_ + delta_t_sec;
       double dx = cmd_vel_.linear.x*delta_t_sec;
       double dy = cmd_vel_.linear.y*delta_t_sec;
       double d_theta = cmd_vel_.angular.z*delta_t_sec;
