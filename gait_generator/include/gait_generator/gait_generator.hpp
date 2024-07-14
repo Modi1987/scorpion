@@ -26,7 +26,7 @@ namespace penta_pod::kin::gait_generator {
       int feet_num_;
 
       std::vector<geometry_msgs::msg::Transform> legs_body_transforms_;
-      geometry_msgs::msg::Transform body_base_;      
+      geometry_msgs::msg::Transform body_basefootprint_;      
 
       std::vector<geometry_msgs::msg::Point> feet_pos_in_footprint_; // current feet pos
       std::vector<geometry_msgs::msg::Point> init_feet_pos_in_footprint_; // feet pos at equilibrium

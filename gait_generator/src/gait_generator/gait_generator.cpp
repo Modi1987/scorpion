@@ -107,6 +107,7 @@ namespace penta_pod::kin::gait_generator {
   void GaitGenerator::declare_parameters(){
     node_->declare_parameter<std::vector<double>>("legs_body_transforms", std::vector<double>{});
     node_->declare_parameter<std::vector<double>>("init_feet_pos_in_basefootprint", std::vector<double>{});
+    node_->declare_parameter<std::vector<double>>("init_body_basefootprint_transform", std::vector<double>{});
   }
 
   
@@ -158,6 +159,20 @@ namespace penta_pod::kin::gait_generator {
           xyz.z = init_feet_pos_params[2 + count * 3];
           feet_pos_in_footprint_.emplace_back(xyz);
           init_feet_pos_in_footprint_.emplace_back(xyz);
+      }
+
+      std::vector<double> body_basefootprint_params;
+      if (!node_->get_parameter("init_body_basefootprint_transform", body_basefootprint_params)) 
+      {
+          geometry_msgs::msg::Transform transform;
+          transform.translation.x = body_basefootprint_params[0];
+          transform.translation.y = body_basefootprint_params[1];
+          transform.translation.z = body_basefootprint_params[2];
+          transform.rotation.x = body_basefootprint_params[3];
+          transform.rotation.y = body_basefootprint_params[4];
+          transform.rotation.z = body_basefootprint_params[5];
+          transform.rotation.w = body_basefootprint_params[6];
+          body_basefootprint_ = transform;
       }
   }
 
