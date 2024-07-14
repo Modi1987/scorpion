@@ -91,7 +91,8 @@ namespace penta_pod::kin::gait_generator {
           }
 
           if (i < static_cast<int>(legs_body_transforms_.size())) {
-            auto  point = applyInverseTransform(feet_pos_in_footprint_[i], legs_body_transforms_[i]);
+            auto  point = applyInverseTransform(feet_pos_in_footprint_[i], body_basefootprint_);
+            point = applyInverseTransform(point, legs_body_transforms_[i]);
             limb_msgs::msg::Pxyz xyz_msg;
             xyz_msg.x = point.x;
             xyz_msg.y = point.y;
@@ -164,6 +165,16 @@ namespace penta_pod::kin::gait_generator {
       std::vector<double> body_basefootprint_params;
       if (!node_->get_parameter("init_body_basefootprint_transform", body_basefootprint_params)) 
       {
+          const char* message = "No init transform body to basefootprint found.";
+          RCLCPP_ERROR(node_->get_logger(), message);
+          throw std::runtime_error(message);
+      }
+      if (body_basefootprint_params.size()!=7)
+      {
+          const char* message = "Size of init_body_basefootprint_transform must be 7 (3 for position followed by 4 quaternion).";
+          RCLCPP_ERROR(node_->get_logger(), message);
+          throw std::runtime_error(message);
+      } else {
           geometry_msgs::msg::Transform transform;
           transform.translation.x = body_basefootprint_params[0];
           transform.translation.y = body_basefootprint_params[1];
