@@ -106,7 +106,7 @@ namespace penta_pod::kin::gait_generator {
   
   void GaitGenerator::declare_parameters(){
     node_->declare_parameter<std::vector<double>>("legs_body_transforms", std::vector<double>{});
-    node_->declare_parameter<std::vector<double>>("init_feet_pos_in_base", std::vector<double>{});
+    node_->declare_parameter<std::vector<double>>("init_feet_pos_in_basefootprint", std::vector<double>{});
   }
 
   
@@ -138,7 +138,7 @@ namespace penta_pod::kin::gait_generator {
       }
 
       std::vector<double> init_feet_pos_params;
-      if (!node_->get_parameter("init_feet_pos_in_base", init_feet_pos_params))
+      if (!node_->get_parameter("init_feet_pos_in_basefootprint", init_feet_pos_params))
       {
           const char* message = "No feet position parameters found.";
           RCLCPP_ERROR(node_->get_logger(), message);
