@@ -26,6 +26,8 @@ namespace penta_pod::kin::limb_kin_chain {
       std::vector<double> d;
       std::vector<double> alfa;
       std::vector<double> eef_trans;
+      std::vector<double> q_max;
+      std::vector<double> q_min;
       
       // private functions
       std::vector<std::vector<double>> JJT_dls_inverter(double lambda);
@@ -37,7 +39,8 @@ namespace penta_pod::kin::limb_kin_chain {
     public:
       explicit Limb(){};
       void init(const int n, const std::vector<double>& a, const std::vector<double>& d, 
-                const std::vector<double>& alfa, const std::vector<double>& eef_trans);
+                const std::vector<double>& alfa, const std::vector<double>& eef_trans, 
+                const std::vector<double>& q_max, const std::vector<double>& q_min);
       std::vector<double> get_ik(const double& x, const double& y, const double& z,
                const std::vector<double>& q0);
   }; 

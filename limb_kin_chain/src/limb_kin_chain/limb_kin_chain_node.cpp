@@ -53,8 +53,34 @@ namespace penta_pod::kin::limb_kin_chain {
     } else {
       RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
     }
+    std::vector<double> q_max;
+    if (node_->get_parameter("modified_dh.q_max", q_max)) {
+        RCLCPP_INFO(node_->get_logger(), "max joints angles loaded successfully");
+        RCLCPP_INFO(node_->get_logger(), "q_max size: %zu", q_max.size());
+        std::stringstream ss;
+        for (size_t i = 0; i < q_max.size(); i++) {
+            ss << q_max[i] << " ";
+        }
+        ss << "\n";
+        RCLCPP_INFO(node_->get_logger(), ss.str().c_str());
+    } else {
+        RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load maximum joint limits q_max");
+    }
+    std::vector<double> q_min;
+    if(node_->get_parameter("modified_dh.q_min", q_min)) {
+      RCLCPP_INFO(node_->get_logger(), "minimum joints angles loaded successfully");
+      RCLCPP_INFO(node_->get_logger(), "q_min size: %zu", q_max.size());
+      std::stringstream ss;
+      for (size_t i = 0; i < q_min.size(); i++) {
+          ss << q_min[i] << " ";
+      }
+      ss << "\n";
+      RCLCPP_INFO(node_->get_logger(), ss.str().c_str());
+    } else {
+      RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load minimum joint limits q_min");
+    }
 
-    limb_->init(dof, a, d, alfa, eef_trans);
+    limb_->init(dof, a, d, alfa, eef_trans, q_max, q_min);
      
     for(int i = 0; i < dof; i++) {
       std::string temp = "Joint_" + std::to_string(i);
@@ -96,6 +122,8 @@ namespace penta_pod::kin::limb_kin_chain {
     node_->declare_parameter<std::vector<double>>("modified_dh.alfa", std::vector<double>());
     node_->declare_parameter<std::vector<double>>("modified_dh.eef_trans", std::vector<double>());
     node_->declare_parameter<std::vector<double>>("modified_dh.q0", std::vector<double>());
+    node_->declare_parameter<std::vector<double>>("modified_dh.q_min", std::vector<double>());
+    node_->declare_parameter<std::vector<double>>("modified_dh.q_max", std::vector<double>());
   }
 
 }  // penta_pod::kin::limb_kin_chain

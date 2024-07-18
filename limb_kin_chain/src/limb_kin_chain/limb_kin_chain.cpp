@@ -13,13 +13,22 @@ namespace penta_pod::kin::limb_kin_chain {
 
   void Limb::init(const int n, const std::vector<double>& a, 
             const std::vector<double>& d, const std::vector<double>& alfa,
-            const std::vector<double>& eef_trans) {
+            const std::vector<double>& eef_trans, 
+            const std::vector<double>& q_max,
+            const std::vector<double>& q_min) {
+    size_t n_size = static_cast<size_t>(n);
+    if (a.size() < n_size || d.size() < n_size || alfa.size() < n_size || eef_trans.size() < 3 ||
+        q_max.size() < n_size, q_min.size() < n_size) {
+        throw std::invalid_argument("Input vector size is incorrect");
+    }
     // store kinenatic constatnts
     this->dof = n;
     this->a = get_vector(n, a);
     this->d = get_vector(n, d);
     this->alfa = get_vector(n, alfa);
     this->eef_trans = get_vector(3, eef_trans);
+    this->q_max = get_vector(n, q_max);
+    this->q_min = get_vector(n, q_min);
     // print some useful info
     std::cout<<"Limb initialized with parameters"<<std::endl;
     for(int i = 0; i < this->dof; i++) {
@@ -234,6 +243,8 @@ namespace penta_pod::kin::limb_kin_chain {
       }
       for(int j = 0; j < this->dof; j++) {
         q[j] = q[j] + J[0][j]*disp1[0] + J[1][j]*disp1[1] + J[2][j]*disp1[2];
+        if(q[j]>q_max[j])q[j]=q_max[j];
+        if(q[j]<q_min[j])q[j]=q_min[j];
       }
     }
     return q;
