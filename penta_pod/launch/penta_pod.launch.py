@@ -9,9 +9,9 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     config = os.path.join(
-        get_package_share_directory("penta_pod"),
+        get_package_share_directory("penta_description"),
         "config",
-        "limb_0.yaml",
+        "limb_0_mdh.yaml",
     )
     ld = LaunchDescription()
     for i in range(5):
