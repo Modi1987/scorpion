@@ -26,6 +26,7 @@ namespace penta_pod::kin::gait_generator {
       int feet_num_;
 
       std::vector<geometry_msgs::msg::Transform> legs_body_transforms_;
+      geometry_msgs::msg::Transform init_body_basefootprint_; // initial (default) transform
       geometry_msgs::msg::Transform body_basefootprint_;      
 
       std::vector<geometry_msgs::msg::Point> feet_pos_in_footprint_; // current feet pos
@@ -35,6 +36,7 @@ namespace penta_pod::kin::gait_generator {
 
       std::vector<rclcpp::Publisher<limb_msgs::msg::Pxyz>::SharedPtr> xyz_publishers_;
       rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscription_;
+      rclcpp::Subscription<geometry_msgs::msg::Transform>::SharedPtr cmd_null_pos_subscription_; // null space motion transform (body to basefootprint)
       rclcpp::TimerBase::SharedPtr timer_;
       geometry_msgs::msg::Twist cmd_vel_{};
 
@@ -42,6 +44,7 @@ namespace penta_pod::kin::gait_generator {
       void load_parameters();
       void timer_callback(double delta_t_milli);
       void cmd_vel_sub_callback(const geometry_msgs::msg::Twist::SharedPtr msg);
+      void cmd_null_pos_sub_callback(const geometry_msgs::msg::Transform::SharedPtr msg);
 
       // move feet up (z up) calculation
       double stepFunOneLegOff_2(double b, double q, double phase_shift, int n) {

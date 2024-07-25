@@ -37,6 +37,9 @@ namespace penta_pod::kin::gait_generator {
     cmd_vel_subscription_ = node_->create_subscription<geometry_msgs::msg::Twist>(
         "cmd_vel", 10, [this](const geometry_msgs::msg::Twist::SharedPtr msg){ cmd_vel_sub_callback(msg); });
 
+    cmd_null_pos_subscription_ = node_->create_subscription<geometry_msgs::msg::Transform>(
+        "cmd_null_position", 10, [this](const geometry_msgs::msg::Transform::SharedPtr msg){ cmd_null_pos_sub_callback(msg); });
+
     timer_ = node_->create_wall_timer(
         std::chrono::milliseconds(static_cast<int>(delta_t_milli)),
         [this, delta_t_milli]() { timer_callback(delta_t_milli); });
@@ -56,8 +59,17 @@ namespace penta_pod::kin::gait_generator {
         msg->angular.z = msg->angular.z * MAX_W_RAD_PER_SEC / mag;
     }
     cmd_vel_ = *msg;
-    RCLCPP_INFO(node_->get_logger(), "Received cmd_vel: linear=%.2f, angular=%.2f",
+    RCLCPP_INFO(node_->get_logger(), "Received cmd_vel: linear.x=%.2f, angular=%.2f",
                 cmd_vel_.linear.x, cmd_vel_.angular.z);
+  }
+
+  void GaitGenerator::cmd_null_pos_sub_callback(const geometry_msgs::msg::Transform::SharedPtr msg) {
+    // add to the initial displacement
+    body_basefootprint_.translation.x = init_body_basefootprint_.translation.x + msg->translation.x;
+    body_basefootprint_.translation.y = init_body_basefootprint_.translation.y + msg->translation.y;
+    body_basefootprint_.translation.z = init_body_basefootprint_.translation.z + msg->translation.z;
+    // consider the rotation absolute (initial rotation must be the identity)
+    body_basefootprint_.rotation = msg->rotation;
   }
 
   void GaitGenerator::timer_callback(double delta_t_milli){
@@ -180,6 +192,7 @@ namespace penta_pod::kin::gait_generator {
           transform.rotation.y = body_basefootprint_params[4];
           transform.rotation.z = body_basefootprint_params[5];
           transform.rotation.w = body_basefootprint_params[6];
+          init_body_basefootprint_ = transform;
           body_basefootprint_ = transform;
       }
   }
