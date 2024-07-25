@@ -59,8 +59,8 @@ namespace penta_pod::kin::gait_generator {
         msg->angular.z = msg->angular.z * MAX_W_RAD_PER_SEC / mag;
     }
     cmd_vel_ = *msg;
-    RCLCPP_INFO(node_->get_logger(), "Received cmd_vel: linear.x=%.2f, angular=%.2f",
-                cmd_vel_.linear.x, cmd_vel_.angular.z);
+    RCLCPP_INFO(node_->get_logger(), "Received cmd_vel: linear.x=%.2f, linear.y=%.2f, angular=%.2f",
+                cmd_vel_.linear.x, cmd_vel_.linear.y, cmd_vel_.angular.z);
   }
 
   void GaitGenerator::cmd_null_pos_sub_callback(const geometry_msgs::msg::Transform::SharedPtr msg) {
@@ -70,6 +70,8 @@ namespace penta_pod::kin::gait_generator {
     body_basefootprint_.translation.z = init_body_basefootprint_.translation.z + msg->translation.z;
     // consider the rotation absolute (initial rotation must be the identity)
     body_basefootprint_.rotation = msg->rotation;
+    RCLCPP_INFO(node_->get_logger(), "Received nullspace translation from equilibrium (default): displacement.x=%.2f, displacement.y=%.2f, displacement.z=%.2f",
+                msg->translation.x, msg->translation.y, msg->translation.z);
   }
 
   void GaitGenerator::timer_callback(double delta_t_milli){
