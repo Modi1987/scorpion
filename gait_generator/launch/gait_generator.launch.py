@@ -7,7 +7,7 @@ def generate_launch_description():
     config = os.path.join(
         get_package_share_directory("penta_description"),
         "config",
-        "legs_body_transforms.yaml",
+        "general_config.yaml",
     )
     ld = LaunchDescription()
     ld.add_action(Node(
