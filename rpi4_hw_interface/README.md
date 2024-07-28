@@ -33,6 +33,22 @@ I2C will be used to comunicate between the Raspberry Pi4 and PCA9685
 
 Python3 gui prigram inside the folder [scripts](./rpi4_hw_interface/scripts) will be used to test the motors
 
+### Setting up GPIO on 
+
+```
+# Update package list
+sudo apt update
+
+# Install pip if not already installed
+sudo apt install python3-pip
+
+# Install RPi.GPIO
+sudo pip install RPi.GPIO
+
+# Install adafruit-blinka
+sudo pip install adafruit-blinka
+```
+
 ### Setting up I2C on Raspberry Pi4
 
 Required packages to use I2C on your raspberry-pi, run the following inside your terminal from raspberry-pi4 running Ubuntu 22.04
