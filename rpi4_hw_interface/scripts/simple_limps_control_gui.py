@@ -11,7 +11,7 @@ class PentapodControlApp:
         self.sliders = []
         self.slider_values = [135] * 15  # Initialize with 135 degrees
 
-        self.kit = ServoKit(channels=15) # 15 servos
+        self.kit = ServoKit(channels=16) # 16 channel board is used
         # From data-sheets:
         # The pulse width for DSS-M15S is:
         # - Pulse range: 500-2500 us
