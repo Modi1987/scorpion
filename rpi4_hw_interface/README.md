@@ -16,7 +16,7 @@ Connect Raspberry Pi4 to PCA9685 as in the following
 
 | PCA9685 Pin | Raspberry Pi4 Pin |
 |-------------|-------------------|
-| GND         | Pin 4 (GND)       |
+| GND         | Pin 6 (GND)       |
 | SCL         | Pin 5 (SCL)       |
 | SDA         | Pin 3 (SDA)       |
 | VCC         | Pin 2 (5V)        |
@@ -57,7 +57,7 @@ sudo pip install adafruit-blinka
 Required packages to use I2C on your raspberry-pi, run the following inside your terminal from raspberry-pi4 running Ubuntu 22.04
 
 ```
-sudo apt-get install python-smbus
+sudo apt-get install python3-smbus
 sudo apt-get install i2c-tools
 ```
 
