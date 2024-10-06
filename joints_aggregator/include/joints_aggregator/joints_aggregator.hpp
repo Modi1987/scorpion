@@ -22,14 +22,7 @@ namespace penta_pod::kin::joints_aggregator {
       rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_publisher_;
       std::vector<rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr> limb_joints_subscriber_;
       void declare_parameters();
-      void on_joint_state_callback_limb0(const sensor_msgs::msg::JointState& joint_state);
-      void on_joint_state_callback_limb1(const sensor_msgs::msg::JointState& joint_state);
-      void on_joint_state_callback_limb2(const sensor_msgs::msg::JointState& joint_state);
-      void on_joint_state_callback_limb3(const sensor_msgs::msg::JointState& joint_state);
-      void on_joint_state_callback_limb4(const sensor_msgs::msg::JointState& joint_state);
-      void on_joint_state_callback_limb5(const sensor_msgs::msg::JointState& joint_state);
-      void on_joint_state_callback_limb6(const sensor_msgs::msg::JointState& joint_state);
-      void on_joint_state_callback_limb7(const sensor_msgs::msg::JointState& joint_state);
+      void on_joint_state_callback_limb(int limb_index, const sensor_msgs::msg::JointState& joint_state);
 
     public:
       explicit JointsAggregator();

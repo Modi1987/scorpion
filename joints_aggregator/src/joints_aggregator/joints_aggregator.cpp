@@ -42,77 +42,12 @@ namespace penta_pod::kin::joints_aggregator {
     
     joint_state_publisher_ = node_->create_publisher<sensor_msgs::msg::JointState>("/joint_states", 10);
 
-    // add callbacks according to limbs_num (hard-coded)
-    // ToDo, try to use templates or something to create the subscribers
-    // in runtime while still have access to (q) from the class
-    if(limbs_num>0){
+    for(int i=0; i < limbs_num; i++) {
+        std::string topic_string = "/limb" + std::to_string(i) + "/joint_state";
           limb_joints_subscriber_.push_back(node_->create_subscription<sensor_msgs::msg::JointState>(
-        "/limb0/joint_state", 1, 
-        [this](const sensor_msgs::msg::JointState& msg) -> void {
-            this->on_joint_state_callback_limb0(msg);
-        }
-      )); 
-    }
-
-    if(limbs_num>1){
-      limb_joints_subscriber_.push_back(node_->create_subscription<sensor_msgs::msg::JointState>(
-        "/limb1/joint_state", 1, 
-        [this](const sensor_msgs::msg::JointState& msg) -> void {
-            this->on_joint_state_callback_limb1(msg);
-        }
-      )); 
-    }
-
-    if(limbs_num>2){  
-      limb_joints_subscriber_.push_back(node_->create_subscription<sensor_msgs::msg::JointState>(
-        "/limb2/joint_state", 1, 
-        [this](const sensor_msgs::msg::JointState& msg) -> void {
-            this->on_joint_state_callback_limb2(msg);
-        }
-      )); 
-    }
-
-    if(limbs_num>3){
-      limb_joints_subscriber_.push_back(node_->create_subscription<sensor_msgs::msg::JointState>(
-        "/limb3/joint_state", 1, 
-        [this](const sensor_msgs::msg::JointState& msg) -> void {
-            this->on_joint_state_callback_limb3(msg);
-        }
-      ));
-    }
-
-    if(limbs_num>4){
-      limb_joints_subscriber_.push_back(node_->create_subscription<sensor_msgs::msg::JointState>(
-        "/limb4/joint_state", 1, 
-        [this](const sensor_msgs::msg::JointState& msg) -> void {
-            this->on_joint_state_callback_limb4(msg);
-        }
-      ));
-    }
-
-    if(limbs_num>5){
-      limb_joints_subscriber_.push_back(node_->create_subscription<sensor_msgs::msg::JointState>(
-        "/limb5/joint_state", 1, 
-        [this](const sensor_msgs::msg::JointState& msg) -> void {
-            this->on_joint_state_callback_limb5(msg);
-        }
-      ));
-    }
-
-    if(limbs_num>6){
-      limb_joints_subscriber_.push_back(node_->create_subscription<sensor_msgs::msg::JointState>(
-        "/limb6/joint_state", 1, 
-        [this](const sensor_msgs::msg::JointState& msg) -> void {
-            this->on_joint_state_callback_limb6(msg);
-        }
-      ));
-    }
-
-    if(limbs_num>7){
-      limb_joints_subscriber_.push_back(node_->create_subscription<sensor_msgs::msg::JointState>(
-        "/limb7/joint_state", 1, 
-        [this](const sensor_msgs::msg::JointState& msg) -> void {
-            this->on_joint_state_callback_limb7(msg);
+        topic_string, 1,
+        [i, this](const sensor_msgs::msg::JointState& msg) -> void {
+            this->on_joint_state_callback_limb(i, msg);
         }
       ));
     }
@@ -124,10 +59,9 @@ namespace penta_pod::kin::joints_aggregator {
     node_->declare_parameter<int>("joints_per_limb");
   }
 
-  void JointsAggregator::on_joint_state_callback_limb0(const sensor_msgs::msg::JointState& joint_state) {
+  void JointsAggregator::on_joint_state_callback_limb(int limb_index, const sensor_msgs::msg::JointState& joint_state) {
     sensor_msgs::msg::JointState msg;
     msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
-    const int limb_index = 0;
     int index_start = limb_index*3;
     this->q[index_start+0] = joint_state.position[0];
     this->q[index_start+1] = joint_state.position[1];
@@ -136,98 +70,5 @@ namespace penta_pod::kin::joints_aggregator {
     msg.position = q;
     joint_state_publisher_->publish(msg);
   }
-
-  void JointsAggregator::on_joint_state_callback_limb1(const sensor_msgs::msg::JointState& joint_state) {
-    sensor_msgs::msg::JointState msg;
-    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
-    const int limb_index = 1;
-    int index_start = limb_index*3;
-    this->q[index_start+0] = joint_state.position[0];
-    this->q[index_start+1] = joint_state.position[1];
-    this->q[index_start+2] = joint_state.position[2];
-    msg.name = joints_states_names;
-    msg.position = q;
-    joint_state_publisher_->publish(msg);
-  }
-
-
-  void JointsAggregator::on_joint_state_callback_limb2(const sensor_msgs::msg::JointState& joint_state) {
-    sensor_msgs::msg::JointState msg;
-    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
-    const int limb_index = 2;
-    int index_start = limb_index*3;
-    this->q[index_start+0] = joint_state.position[0];
-    this->q[index_start+1] = joint_state.position[1];
-    this->q[index_start+2] = joint_state.position[2];
-    msg.name = joints_states_names;
-    msg.position = q;
-    joint_state_publisher_->publish(msg);
-  }
-
-  void JointsAggregator::on_joint_state_callback_limb3(const sensor_msgs::msg::JointState& joint_state) {
-    sensor_msgs::msg::JointState msg;
-    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
-    const int limb_index = 3;
-    int index_start = limb_index*3;
-    this->q[index_start+0] = joint_state.position[0];
-    this->q[index_start+1] = joint_state.position[1];
-    this->q[index_start+2] = joint_state.position[2];
-    msg.name = joints_states_names;
-    msg.position = q;
-    joint_state_publisher_->publish(msg);
-  }
-
-  void JointsAggregator::on_joint_state_callback_limb4(const sensor_msgs::msg::JointState& joint_state) {
-    sensor_msgs::msg::JointState msg;
-    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
-    const int limb_index = 4;
-    int index_start = limb_index*3;
-    this->q[index_start+0] = joint_state.position[0];
-    this->q[index_start+1] = joint_state.position[1];
-    this->q[index_start+2] = joint_state.position[2];
-    msg.name = joints_states_names;
-    msg.position = q;
-    joint_state_publisher_->publish(msg);
-  }
-
-  void JointsAggregator::on_joint_state_callback_limb5(const sensor_msgs::msg::JointState& joint_state) {
-    sensor_msgs::msg::JointState msg;
-    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
-    const int limb_index = 5;
-    int index_start = limb_index*3;
-    this->q[index_start+0] = joint_state.position[0];
-    this->q[index_start+1] = joint_state.position[1];
-    this->q[index_start+2] = joint_state.position[2];
-    msg.name = joints_states_names;
-    msg.position = q;
-    joint_state_publisher_->publish(msg);
-  }
-
-  void JointsAggregator::on_joint_state_callback_limb6(const sensor_msgs::msg::JointState& joint_state) {
-    sensor_msgs::msg::JointState msg;
-    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
-    const int limb_index = 6;
-    int index_start = limb_index*3;
-    this->q[index_start+0] = joint_state.position[0];
-    this->q[index_start+1] = joint_state.position[1];
-    this->q[index_start+2] = joint_state.position[2];
-    msg.name = joints_states_names;
-    msg.position = q;
-    joint_state_publisher_->publish(msg);
-  }
-
-  void JointsAggregator::on_joint_state_callback_limb7(const sensor_msgs::msg::JointState& joint_state) {
-    sensor_msgs::msg::JointState msg;
-    msg.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
-    const int limb_index = 7;
-    int index_start = limb_index*3;
-    this->q[index_start+0] = joint_state.position[0];
-    this->q[index_start+1] = joint_state.position[1];
-    this->q[index_start+2] = joint_state.position[2];
-    msg.name = joints_states_names;
-    msg.position = q;
-    joint_state_publisher_->publish(msg);
-  }
-
 
 };  // penta_pod::kin::joints_aggregator
