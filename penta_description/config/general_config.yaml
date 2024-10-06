@@ -21,3 +21,19 @@
     init_body_basefootprint_transform: [
       0.0, 0.0, 0.075, 0.0, 0.0, 0.0, 1.0
     ]
+    i2c_actuators_params:
+      update_interval_millis: 20
+      actuator_angle_bias_at_joint_zero_degree: [
+        0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0,
+      ]
+      dir: [
+        1.0, 1.0, 1.0,
+        1.0, 1.0, 1.0,
+        1.0, 1.0, 1.0,
+        1.0, 1.0, 1.0,
+        1.0, 1.0, 1.0,
+      ]
