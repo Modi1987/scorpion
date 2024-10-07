@@ -23,7 +23,7 @@
     ]
     i2c_actuators_params:
       update_interval_millis: 20
-      actuator_angle_bias_at_joint_zero_degree: [
+      actuator_angle_bias_at_joint_zero_degree: [ # considering the motors are at their midrange at 135 degrees when robot joint is at zero"
         135.0, 135.0, 135.0,
         135.0, 135.0, 135.0,
         135.0, 135.0, 135.0,
