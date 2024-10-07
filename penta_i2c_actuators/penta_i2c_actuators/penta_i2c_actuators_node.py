@@ -45,8 +45,12 @@ class PentaI2CActuators(Node):
         # Timer to call the publishing function at fixed intervals
         timer_interval_sec = self.update_interval_millis / 1000.0  # Convert millis to seconds
         self.timer = self.create_timer(timer_interval_sec, self.timer_callback)
+        self.joints_pos_received = False
 
     def timer_callback(self):
+        if not self.joints_pos_received:
+            self.get_logger().warn("joints angles not received yet, will not send commands on the i2c bus")
+            return
         # Publish aggregated joint states
         msg = JointState()
         msg.header.stamp = self.get_clock().now().to_msg()
@@ -66,25 +70,25 @@ class PentaI2CActuators(Node):
     
     def declare_params(self):
         # Declare robot geometry parameters
-        self.declare_parameter('i2c_actuators_params.limbs_num', 5)  # Default value 5
-        self.declare_parameter('i2c_actuators_params.joints_per_limb', 3)  # Default value 3
+        self.declare_parameter('limbs_num', 200)  # Default value 5
+        self.declare_parameter('joints_per_limb', 3)  # Default value 3
         self.declare_parameter('i2c_actuators_params.update_interval_millis', 100)  # Default 100 ms
         self.declare_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree', [0.0] * 15)  # Default bias
         self.declare_parameter('i2c_actuators_params.dir', [1.0] * 15)  # Default direction (1.0 for no inversion)
 
     def load_params(self):
         # Load parameters and handle errors
-        self.update_interval_millis = self.get_parameter('i2c_actuators_params.update_interval_millis').get_parameter_value().integer_value
-        self.limbs_num = self.get_parameter('i2c_actuators_params.limbs_num').get_parameter_value().integer_value
-        self.joints_per_limb = self.get_parameter('i2c_actuators_params.joints_per_limb').get_parameter_value().integer_value
+        self.limbs_num = self.get_parameter('limbs_num').get_parameter_value().integer_value
+        self.joints_per_limb = self.get_parameter('joints_per_limb').get_parameter_value().integer_value
         self.joints_count = self.limbs_num * self.joints_per_limb
+        self.update_interval_millis = self.get_parameter('i2c_actuators_params.update_interval_millis').get_parameter_value().integer_value
         self.initial_joints_bias_degree = self.get_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree').get_parameter_value().double_array_value
         self.dir = self.get_parameter('i2c_actuators_params.dir').get_parameter_value().double_array_value
 
         if len(self.initial_joints_bias_degree) != self.joints_count:
             self.get_logger().error('ERROR, actuator_angle_bias_at_joint_zero_degree parameter size mismatch!')
         if len(self.dir) != self.joints_count:
-            self.get_logger().error('ERROR, dir parameter size mismatch!')
+            self.get_logger().error('ERROR, size mismatch in the array parameter describing the actuators rotation direction with respect to joints direction')
 
         if self.limbs_num is not None:
             self.get_logger().info(f'(limbs_num) parameter loaded and equal to: {self.limbs_num}')
@@ -96,11 +100,22 @@ class PentaI2CActuators(Node):
         else:
             self.get_logger().error('ERROR, cannot load (joints_per_limb) parameter')
 
+        if self.update_interval_millis is not None:
+            self.get_logger().info(f'(update_interval_millis) parameter loaded and equal to: {self.update_interval_millis}')
+        else:
+            self.get_logger().error('ERROR, cannot load (update_interval_millis) parameter')
+
+        if self.update_interval_millis is not None:
+            self.get_logger().info(f'(update_interval_millis) parameter loaded and equal to: {self.update_interval_millis}')
+        else:
+            self.get_logger().error('ERROR, cannot load (update_interval_millis) parameter')
+
     def on_joint_state_callback_limb(self, limb_index, joint_state):
         # Update the q vector with the received joint state positions for this limb
         index_start = limb_index * self.joints_per_limb
         self.q[index_start:index_start+self.joints_per_limb] = joint_state.position[:self.joints_per_limb]  # Assuming joint state size matches joints_per_limb
-
+        if not self.joints_pos_received:
+            self.joints_pos_received = True
 
 def main(args=None):
     rclpy.init(args=args)
