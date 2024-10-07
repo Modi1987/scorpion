@@ -28,6 +28,22 @@ colcon build
 ```
 
 
+## How to run on real robot
+
+Launch the following file:
+
+```
+ros2 launch penta_pod realhardware_bringup.launch.py
+```
+
+To teleoperate the robot from your PC, use the teleop_twist_keyboard:
+
+```
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```
+
+Enjoy move the robot around
+
 ## How to run and visualize in rviz:
 
 To run the package in rviz (and visualize the robot moving):
