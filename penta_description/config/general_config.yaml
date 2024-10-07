@@ -37,3 +37,25 @@
         1.0, 1.0, 1.0,
         1.0, 1.0, 1.0,
       ]
+    servo_parameters:
+      servo_actuation_range_degree: [ # servo angle range
+        270.0, 270.0, 270.0,
+        270.0, 270.0, 270.0,
+        270.0, 270.0, 270.0,
+        270.0, 270.0, 270.0,
+        270.0, 270.0, 270.0,
+      ]
+      servo_min_pulse_width_microsec: [ # microsecond, servo min pulse width
+        500.0, 500.0, 500.0,
+        500.0, 500.0, 500.0,
+        500.0, 500.0, 500.0,
+        500.0, 500.0, 500.0,
+        500.0, 500.0, 500.0,
+      ]
+      servo_max_pulse_width_microsec: [ # microsecond, servo max pulse width
+        2500.0, 2500.0, 2500.0,
+        2500.0, 2500.0, 2500.0,
+        2500.0, 2500.0, 2500.0,
+        2500.0, 2500.0, 2500.0,
+        2500.0, 2500.0, 2500.0,
+      ]
