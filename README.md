@@ -20,81 +20,47 @@ Clone the repo
 git clone git@github.com:Modi1987/scorpion.git
 ```
 
-Compile the workspace
+There are bash scripts that will allow you to build your workspace you can do this on your PC if you want to run RVIZ simulations, or on Raspberry-pi4 if you want to run on real-robot
 
 ```
-cd ~/my_ws/src
-colcon build
+cd ~/my_ws/src/scorpion/scripts
+./setup_scorpion_workspace.sh
 ```
 
+## Setting up on real robot Raspberry-4
 
-## How to run on real robot
-
-Launch the following file:
-
-```
-ros2 launch penta_pod realhardware_bringup.launch.py
-```
-
-To teleoperate the robot from your PC, use the teleop_twist_keyboard:
+besides to the previous steps to setup your workspace, to control the real-robot you will need to configure the i2c bus on Raspberry-pi 4, to do so on the Raspberry-pi 4:
 
 ```
-ros2 run teleop_twist_keyboard teleop_twist_keyboard
+cd ~/my_ws/src/scorpion/scripts
+./setup_i2c_on_raspberry_pi4.sh
 ```
 
-Enjoy move the robot around
-
-## How to run and visualize in rviz:
-
-To run the package in rviz (and visualize the robot moving):
-
-- first, run the joints_aggregator, which will aggregate the joitns angles published individually by each limb into one /joint_states message
+To bring-up the robot automatically each time you boot the robot, run the following script on the Raspberry-pi
 
 ```
-ros2 launch joints_aggregator joints_aggregator.launch.py 
+cd ~/my_ws/src/scorpion/scripts
+./setup_i2c_on_raspberry_pi4.sh
 ```
 
-- second, run the rviz simuation
+Then reboot the Raspberry-pi
 
-```
-ros2 launch penta_pod penta_rviz.launch.py
-```
-
-- third, run the penta_pod core package, this subscripes on feet positions and publishes joints angles for each limb
-
-```
-ros2 launch penta_pod penta_pod.launch.py
-```
-
-- fourth, run the gait generator, which move the robot feet according to twist command
-
-```
-ros2 launch gait_generator gait_generator.launch.py
-```
-
-- fifth, you can stream the twist command /cmd_vel using teleop_twist_keyboard
+Finally, you can move the robot around from external PC using keyboard
 
 ```
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
 
+## Run in simulation
 
-# Other ways to move the simulation around
-
-Invoke the ik solver by publishing a target foot position
-
-```
-ros2 topic pub /limb0/xyz_msg limb_msgs/msg/Pxyz "{"x": 0.1, "z": -0.1}"
-```
-
-Move feet up and down
+You can run the simulation using the command
 
 ```
-ros2 run test_foot_pos test_gait_node
+ros2 launch penta_pod scorpion_simn_rviz.launch.py
 ```
 
-To animate the simulation you can stream feet positions
+You can move the robot around using
 
 ```
-ros2 launch test_foot_pos test_foot_pos.launch.py
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
