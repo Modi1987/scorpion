@@ -18,6 +18,8 @@ Clone the repo
 
 ```
 git clone git@github.com:Modi1987/scorpion.git
+
+git checkout i2c_actuators
 ```
 
 There are bash scripts that will allow you to build your workspace you can do this on your PC if you want to run RVIZ simulations, or on Raspberry-pi4 if you want to run on real-robot
