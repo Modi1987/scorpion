@@ -40,11 +40,19 @@ cd ~/my_ws/src/scorpion/scripts
 ./setup_i2c_on_raspberry_pi4.sh
 ```
 
+```
+cd ~/my_ws
+
+source install/setup.bash
+
+ros2 launch penta_pod realhardware_bringup.launch.py
+```
+
 To bring-up the robot automatically each time you boot the robot, run the following script on the Raspberry Pi
 
 ```
 cd ~/my_ws/src/scorpion/scripts
-./setup_penta_bringup_on_boot.sh
+./setup_service_penta_bringup_on_boot.sh
 ```
 
 Then reboot the Raspberry Pi
