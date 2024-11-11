@@ -48,12 +48,7 @@ source install/setup.bash
 ros2 launch penta_pod realhardware_bringup.launch.py
 ```
 
-To bring-up the robot automatically each time you boot the robot, run the following script on the Raspberry Pi
-
-```
-cd ~/my_ws/src/scorpion/scripts
-./setup_service_penta_bringup_on_boot.sh
-```
+The robot shall move legs when the previous launch file is called
 
 Then reboot the Raspberry Pi
 
@@ -61,6 +56,15 @@ Finally, you can move the robot around from external PC using keyboard
 
 ```
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```
+
+## Setup as a service (automatic on boot)
+
+To bring-up the robot automatically each time you boot the robot, run the following script on the Raspberry Pi
+
+```
+cd ~/my_ws/src/scorpion/scripts
+./setup_service_penta_bringup_on_boot.sh
 ```
 
 ## Run in simulation
