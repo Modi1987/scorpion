@@ -31,8 +31,8 @@ class PentaI2CActuators(Node):
         self.servo_max_pulse_width_microsec = [0.0] * self.joints_count
         
         # Set mode (real or virtual)
-        self.real_mode_flag = True if mode == 'real' else False
-        if True:
+        self.real_mode_flag = True
+        if self.real_mode_flag:
             from adafruit_servokit import ServoKit
             self.kit = ServoKit(channels=16)  # Use 16-channel board
             for i in range(self.joints_count):

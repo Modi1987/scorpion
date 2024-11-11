@@ -45,7 +45,7 @@ cd ~/my_ws
 
 source install/setup.bash
 
-ros2 launch penta_pod realhardware_bringup.launch.py
+sudo ./use_with_sudo.sh
 ```
 
 The robot shall move legs when the previous launch file is called
