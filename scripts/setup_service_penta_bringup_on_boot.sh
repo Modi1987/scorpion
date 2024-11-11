@@ -4,11 +4,11 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Infer the workspace directory from the script's location
-WORKSPACE_SOURCE_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+WORKSPACE_DIR="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 
 # Add source to .bashrc if not already there
-if ! grep -Fxq "source ${WORKSPACE_SOURCE_DIR}/install/setup.bash" ~/.bashrc; then
-    echo "source ${WORKSPACE_SOURCE_DIR}/install/setup.bash" >> ~/.bashrc
+if ! grep -Fxq "source ${WORKSPACE_DIR}/install/setup.bash" ~/.bashrc; then
+    echo "source ${WORKSPACE_DIR}/install/setup.bash" >> ~/.bashrc
     echo "Added ROS 2 workspace sourcing to .bashrc"
 else
     echo "ROS 2 workspace already sourced in .bashrc"
@@ -25,8 +25,8 @@ Description=ROS 2 Launch Service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/bash -c 'source ${WORKSPACE_SOURCE_DIR}/install/setup.bash && ros2 launch penta_pod realhardware_bringup.launch.py'
-WorkingDirectory=${WORKSPACE_SOURCE_DIR}
+ExecStart=/usr/bin/bash -c 'source ${WORKSPACE_DIR}/install/setup.bash && ros2 launch penta_pod realhardware_bringup.launch.py'
+WorkingDirectory=${WORKSPACE_DIR}
 
 Restart=on-failure
 User=$(whoami)
