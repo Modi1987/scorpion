@@ -19,6 +19,8 @@ Clone the repo
 ```
 git clone git@github.com:Modi1987/scorpion.git
 
+cd scorpion
+
 git checkout i2c_actuators
 ```
 
