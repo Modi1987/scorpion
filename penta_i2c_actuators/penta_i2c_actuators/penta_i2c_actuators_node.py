@@ -9,6 +9,13 @@ class PentaI2CActuators(Node):
         super().__init__('penta_i2c_actuators')
         self.get_logger().info(f'Starting I2C actuators control in {mode} mode')
 
+        # Initialize the joint states position vector
+        self.q = [0.0] * self.joints_count
+        self.actuator_setpoint_degree = [0.0] * self.joints_count
+        self.servo_actuation_range_degree = [0.0] * self.joints_count
+        self.servo_min_pulse_width_microsec = [0.0] * self.joints_count
+        self.servo_max_pulse_width_microsec = [0.0] * self.joints_count
+
         # Declare and load parameters
         self.declare_params()
         self.load_params()
@@ -22,14 +29,7 @@ class PentaI2CActuators(Node):
             for j in range(self.joints_per_limb):
                 joint_name = f'limb{i}/joint{j}'
                 self.joints_states_names.append(joint_name)
-
-        # Initialize the joint states position vector
-        self.q = [0.0] * self.joints_count
-        self.actuator_setpoint_degree = [0.0] * self.joints_count
-        self.servo_actuation_range_degree = [0.0] * self.joints_count
-        self.servo_min_pulse_width_microsec = [0.0] * self.joints_count
-        self.servo_max_pulse_width_microsec = [0.0] * self.joints_count
-        
+                
         # Set mode (real or virtual)
         self.real_mode_flag = True
         if self.real_mode_flag:
@@ -37,7 +37,7 @@ class PentaI2CActuators(Node):
             self.kit = ServoKit(channels=16)  # Use 16-channel board
             for i in range(self.joints_count):
                 self.kit.servo[i].set_pulse_width_range(self.servo_min_pulse_width_microsec[i], self.servo_max_pulse_width_microsec[i]) 
-                self.kit.servo[i].actuation_range = self.servo_angle_range_degree[i]
+                self.kit.servo[i].actuation_range = self.servo_actuation_range_degree[i]
 
         # Publisher to publish aggregated joint states
         self.joint_state_publisher_ = self.create_publisher(JointState, '/joint_states', 10)
@@ -93,7 +93,7 @@ class PentaI2CActuators(Node):
         self.declare_parameter('i2c_actuators_params.update_interval_millis', 100)  # Default 100 ms
         self.declare_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree', [0.0] * 15)  # Default bias
         self.declare_parameter('i2c_actuators_params.dir', [1.0] * 15)  # Default direction (1.0 for no inversion)
-        self.declare_parameter('servo_parameters.servo_angle_range_degree', [180.0] * 15) # angular range degree
+        self.declare_parameter('servo_parameters.servo_actuation_range_degree', [180.0] * 15) # angular range degree
         self.declare_parameter('servo_parameters.servo_min_pulse_width_microsec', [500.0] * 15) # microseconds
         self.declare_parameter('servo_parameters.servo_max_pulse_width_microsec', [2500.0] * 15) # microseconds
 
@@ -107,7 +107,7 @@ class PentaI2CActuators(Node):
         self.get_logger().info(f'Loaded update_interval_millis for I2C bus: {self.update_interval_millis} ms')
         self.initial_joints_bias_degree = self.get_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree').get_parameter_value().double_array_value
         self.dir = self.get_parameter('i2c_actuators_params.dir').get_parameter_value().double_array_value
-        self.servo_angle_range_degree = self.get_parameter('servo_parameters.servo_angle_range_degree').get_parameter_value().double_array_value
+        self.servo_actuation_range_degree = self.get_parameter('servo_parameters.servo_actuation_range_degree').get_parameter_value().double_array_value
         self.servo_min_pulse_width_microsec = self.get_parameter('servo_parameters.servo_min_pulse_width_microsec').get_parameter_value().double_array_value
         self.servo_max_pulse_width_microsec = self.get_parameter('servo_parameters.servo_max_pulse_width_microsec').get_parameter_value().double_array_value
 
@@ -125,10 +125,10 @@ class PentaI2CActuators(Node):
         else:
             self.get_logger().info(f'Direction array is loaded: {format_array_to_string(self.dir)}')
 
-        if len(self.servo_angle_range_degree) != self.joints_count:
+        if len(self.servo_actuation_range_degree) != self.joints_count:
             self.get_logger().error('ERROR: Servo angle range array size mismatch with joints count!')
         else: 
-            self.get_logger().info(f'Servo joints angle range is loaded: {format_array_to_string(self.servo_angle_range_degree)}')
+            self.get_logger().info(f'Servo joints angle range is loaded: {format_array_to_string(self.servo_actuation_range_degree)}')
 
         if len(self.servo_min_pulse_width_microsec) != self.joints_count:
             self.get_logger().error('ERROR: Servo minimum pulse width array size mismatch!')

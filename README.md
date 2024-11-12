@@ -11,6 +11,7 @@ Create your workspace folder
 
 ```
 mkdir -p ~/my_ws/src
+
 cd ~/my_ws/src
 ```
 
@@ -37,20 +38,21 @@ besides to the previous steps to setup your workspace, to control the real-robot
 
 ```
 cd ~/my_ws/src/scorpion/scripts
+
 ./setup_i2c_on_raspberry_pi4.sh
 ```
+
+## Main launch file to control the real-robot
 
 ```
 cd ~/my_ws
 
 source install/setup.bash
 
-sudo ./use_with_sudo.sh
+ros2 launch penta_pod realhardware_bringup.launch.py
 ```
 
 The robot shall move legs when the previous launch file is called
-
-Then reboot the Raspberry Pi
 
 Finally, you can move the robot around from external PC using keyboard
 
@@ -60,10 +62,11 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 
 ## Setup as a service (automatic on boot)
 
-To bring-up the robot automatically each time you boot the robot, run the following script on the Raspberry Pi
+To bring-up the robot automatically each time you boot the robot (without having to launch the brinup manually), run the following script on the Raspberry Pi
 
 ```
 cd ~/my_ws/src/scorpion/scripts
+
 ./setup_service_penta_bringup_on_boot.sh
 ```
 
