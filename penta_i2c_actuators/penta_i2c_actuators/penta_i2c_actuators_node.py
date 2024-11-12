@@ -9,21 +9,14 @@ class PentaI2CActuators(Node):
         super().__init__('penta_i2c_actuators')
         self.get_logger().info(f'Starting I2C actuators control in {mode} mode')
 
-        # Initialize the joint states position vector
-        self.q = [0.0] * self.joints_count
-        self.actuator_setpoint_degree = [0.0] * self.joints_count
-        self.servo_actuation_range_degree = [0.0] * self.joints_count
-        self.servo_min_pulse_width_microsec = [0.0] * self.joints_count
-        self.servo_max_pulse_width_microsec = [0.0] * self.joints_count
-
         # Declare and load parameters
         self.declare_params()
         self.load_params()
 
         # Initialize joint states names and position vector
         self.joints_states_names = []
-        self.q = []
-        self.actuator_setpoint_degree = []
+        self.q = [0.0] * self.joints_count
+        self.actuator_setpoint_degree = [0.0] * self.joints_count
 
         for i in range(self.limbs_num):
             for j in range(self.joints_per_limb):
