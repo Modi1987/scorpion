@@ -67,12 +67,13 @@ class PentaI2CActuators(Node):
         # Publish actuator setpoints in degrees
         for i in range(self.joints_count):
             servo_setpoint = self.dir[i] * (self.q[i] * 180.0 / math.pi + self.initial_joints_bias_degree[i])
-            if servo_setpoint < 0.:
-                self.get_logger().error(f'ERROR: Servo motor [{i}] angle is [{servo_setpoint}] degrees, however minimum servo angle is zero, clamping value to zero!')
+            margin = 1.0
+            if servo_setpoint < (0. + margin):
+                self.get_logger().error(f'ERROR: Servo motor [{i}] angle is [{servo_setpoint}] degrees, however minimum servo angle is zero, clamping value to zero plus margin!')
                 servo_setpoint = 0.
             max_servo_angular_value = self.servo_actuation_range_degree[i]
-            if servo_setpoint > max_servo_angular_value:
-                self.get_logger().error(f'ERROR: Servo motor [{i}] angle is [{servo_setpoint}] degrees, however maximum servo angle is {max_servo_angular_value}, clamping value to maximum value!')
+            if servo_setpoint > (max_servo_angular_value - margin):
+                self.get_logger().error(f'ERROR: Servo motor [{i}] angle is [{servo_setpoint}] degrees, however maximum servo angle is {self.servo_actuation_range_degree[i]}, clamping value to maximum value minus margin {max_servo_angular_value}!')
                 servo_setpoint = max_servo_angular_value
             self.actuator_setpoint_degree[i] = servo_setpoint
 
