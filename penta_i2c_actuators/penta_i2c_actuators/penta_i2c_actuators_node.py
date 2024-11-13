@@ -66,7 +66,7 @@ class PentaI2CActuators(Node):
 
         # Publish actuator setpoints in degrees
         for i in range(self.joints_count):
-            servo_setpoint = self.dir[i] * (self.q[i] * 180.0 / math.pi + self.initial_joints_bias_degree[i])
+            servo_setpoint = self.dir[i] * (self.q[i] * 180.0 / math.pi) + self.initial_joints_bias_degree[i]
             margin = 1.0
             limit = (0. + margin)
             if servo_setpoint < limit:
