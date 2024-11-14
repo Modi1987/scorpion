@@ -1,0 +1,20 @@
+# Ignore .vscode settings
+.vscode/
+
+# Ignore Python bytecode and cache directories
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environment directories
+venv/
+env/
+.venv/
+.env/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore logs and other common Python
+
