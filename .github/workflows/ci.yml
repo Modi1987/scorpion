@@ -12,6 +12,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Check Docker and Docker Compose versions
+        run: |
+          docker --version
+          docker-compose --version || echo "Docker Compose not installed"
+
+      - name: Install Docker Compose (if needed)
+        run: |
+          DOCKER_COMPOSE_VERSION=2.10.2  # Or the latest version
+          if ! command -v docker-compose &> /dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/download/v$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
