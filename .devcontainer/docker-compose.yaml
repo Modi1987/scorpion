@@ -12,3 +12,15 @@ services:
     network_mode: "host"
     command: ["/bin/bash", "-c", "/root/ros_ws/src/.devcontainer/entrypoint.sh"]
 
+  scorpion-ros2-test:
+    build:
+      context: ../
+      dockerfile: ./.devcontainer/Dockerfile
+      args:
+        COLCON_WORKSPACE: /root/ros_ws
+    volumes:
+      - ../:/root/ros_ws/src
+    environment:
+      - ROS_DOMAIN_ID=91
+    network_mode: "host"
+    command: ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && colcon test"]
