@@ -29,6 +29,7 @@ There are bash scripts that will allow you to build your workspace you can do th
 
 ```
 cd ~/my_ws/src/scorpion/scripts
+
 ./setup_penta_workspace.sh
 ```
 
@@ -82,4 +83,49 @@ You can move the robot around using
 
 ```
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```
+
+
+## Using devcontainers
+
+You can use devconainers, in VS code using Remote Development plug in, do `Reopen in Container`, then from terminal
+
+```
+cd ..
+
+source install/setup.bash
+
+ros2 launch penta_pod penta_sim_rviz.launch.py
+```
+
+
+If rviz crashes, make sure to run in your terminal:
+
+```
+xhost +local:docker
+```
+
+
+## Using Docker Compose
+
+You can build the docker image (on ur machine) using the Dockerfile inside Docker folder as the following
+
+```
+cd .devcontainer
+
+docker compose up
+```
+
+attache the docker container
+
+```
+docker ps -a
+
+docker exec -it devcontainer-scorpion-ros2-1 /bin/bash
+
+cd ..
+
+source install/setup.bash
+
+ros2 launch penta_pod penta_pod.launch.py
 ```
