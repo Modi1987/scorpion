@@ -27,17 +27,16 @@ def generate_launch_description():
         )
     )
 
-    # Include the penta_i2c_actuators launch file with the mode:=real argument
-    penta_i2c_actuators_launch = IncludeLaunchDescription(
+    # Include the joints_aggregator launch file
+    joints_aggregator_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('penta_i2c_actuators').find('penta_i2c_actuators'), 'launch', 'penta_i2c_actuators.launch.py')
-        ),
-        launch_arguments={'mode': 'virtual'}.items()
+            os.path.join(FindPackageShare('joints_aggregator').find('joints_aggregator'), 'launch', 'joints_aggregator.launch.py')
+        )
     )
 
     return LaunchDescription([
         rviz_penta_pod_launch,
         penta_pod_launch,
         gait_generator_launch,
-        penta_i2c_actuators_launch,
+        joints_aggregator_launch,
     ])
