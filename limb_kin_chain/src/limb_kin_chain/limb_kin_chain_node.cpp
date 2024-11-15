@@ -100,7 +100,7 @@ namespace penta_pod::kin::limb_kin_chain {
           double x = xyz_msg.x;
           double y = xyz_msg.y;
           double z = xyz_msg.z;
-          RCLCPP_INFO_STREAM(node_->get_logger(), "x, y, z received: " << x << y << z);
+          // RCLCPP_INFO_STREAM(node_->get_logger(), "x, y, z received: " << x << y << z);
           // get inverse kinematics
           std::vector<double> q = limb_->get_ik(x, y, z, q_state);
           // update internal state

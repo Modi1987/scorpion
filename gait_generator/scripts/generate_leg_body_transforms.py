@@ -2,7 +2,7 @@ import math
 from math import cos, sin, pi
 
 # generate leg_root transform with respect to body frame
-r = 0.1
+r = 0.085
 for i in range(5):
      theta = 2*i*pi/5.
      x = r*cos(theta)

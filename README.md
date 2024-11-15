@@ -1,16 +1,17 @@
-# SCORPION
+# Scorpion
 
 This is a ROS2 software for the following older project [youtube video available here.](https://youtu.be/kcvJR5mcb1o?si=lxt_06UO4189CPcX)
 
 
 ## How to Build the Package
 
-The package is based on ROS2 Humble and can be compiled on a laptop or a Raspberry Pi. To compile:
+The package is based on ROS2 Humble (on Ubuntu 22.04) and can be compiled on a laptop or a Raspberry Pi. To compile:
 
 Create your workspace folder
 
 ```
 mkdir -p ~/my_ws/src
+
 cd ~/my_ws/src
 ```
 
@@ -18,67 +19,113 @@ Clone the repo
 
 ```
 git clone git@github.com:Modi1987/scorpion.git
+
+cd scorpion
+
+git checkout i2c_actuators
 ```
 
-Compile the workspace
+There are bash scripts that will allow you to build your workspace you can do this on your PC if you want to run RVIZ simulations, or on Raspberry-pi4 if you want to run on real-robot
 
 ```
-cd ~/my_ws/src
-colcon build
+cd ~/my_ws/src/scorpion/scripts
+
+./setup_penta_workspace.sh
 ```
 
+## Setting up on real robot Raspberry pi4
 
-## How to run and visualize in rviz:
-
-To run the package in rviz (and visualize the robot moving):
-
-- first, run the joints_aggregator, which will aggregate the joitns angles published individually by each limb into one /joint_states message
+besides to the previous steps to setup your workspace, to control the real-robot you will need to configure the i2c bus on Raspberry-pi 4, to do so on the Raspberry-pi 4:
 
 ```
-ros2 launch joints_aggregator joints_aggregator.launch.py 
+cd ~/my_ws/src/scorpion/scripts
+
+./setup_i2c_on_raspberry_pi4.sh
 ```
 
-- second, run the rviz simuation
+## Main launch file to control the real-robot
 
 ```
-ros2 launch penta_pod penta_rviz.launch.py
+cd ~/my_ws
+
+source install/setup.bash
+
+ros2 launch penta_pod realhardware_bringup.launch.py
 ```
 
-- third, run the penta_pod core package, this subscripes on feet positions and publishes joints angles for each limb
+The robot shall move legs when the previous launch file is called
+
+Finally, you can move the robot around from external PC using keyboard
 
 ```
-ros2 launch penta_pod penta_pod.launch.py
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
 
-- fourth, run the gait generator, which move the robot feet according to twist command
+## Setup as a service (automatic on boot)
+
+To bring-up the robot automatically each time you boot the robot (without having to launch the brinup manually), run the following script on the Raspberry Pi
 
 ```
-ros2 launch gait_generator gait_generator.launch.py
+cd ~/my_ws/src/scorpion/scripts
+
+./setup_service_penta_bringup_on_boot.sh
 ```
 
-- fifth, you can stream the twist command /cmd_vel using teleop_twist_keyboard
+## Run in simulation
+
+You can run the simulation using the command
+
+```
+ros2 launch penta_pod penta_simn_rviz.launch.py
+```
+
+You can move the robot around using
 
 ```
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
 
 
-# Other ways to move the simulation around
+## Using devcontainers
 
-Invoke the ik solver by publishing a target foot position
-
-```
-ros2 topic pub /limb0/xyz_msg limb_msgs/msg/Pxyz "{"x": 0.1, "z": -0.1}"
-```
-
-Move feet up and down
+You can use devconainers, in VS code using Remote Development plug in, do `Reopen in Container`, then from terminal
 
 ```
-ros2 run test_foot_pos test_gait_node
+cd ..
+
+source install/setup.bash
+
+ros2 launch penta_pod penta_sim_rviz.launch.py
 ```
 
-To animate the simulation you can stream feet positions
+
+If rviz crashes, make sure to run in your terminal:
 
 ```
-ros2 launch test_foot_pos test_foot_pos.launch.py
+xhost +local:docker
+```
+
+
+## Using Docker Compose
+
+You can build the docker image (on ur machine) using the Dockerfile inside Docker folder as the following
+
+```
+cd .devcontainer
+
+docker compose up
+```
+
+attache the docker container
+
+```
+docker ps -a
+
+docker exec -it devcontainer-scorpion-ros2-1 /bin/bash
+
+cd ..
+
+source install/setup.bash
+
+ros2 launch penta_pod penta_pod.launch.py
 ```
