@@ -18,11 +18,21 @@ namespace penta_pod::kin::joints_aggregator {
     private:
       rclcpp::Node::SharedPtr node_;
       std::vector<std::string> joints_states_names;
-      std::vector<double> q;
       rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_publisher_;
       std::vector<rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr> limb_joints_subscriber_;
       void declare_parameters();
       void on_joint_state_callback_limb(int limb_index, const sensor_msgs::msg::JointState& joint_state);
+
+      rclcpp::TimerBase::SharedPtr timer_;
+
+      std::mutex q_mutex_;
+      std::vector<double> q_;
+      int limbs_num_;
+      int joints_per_limb_;
+      int update_interval_millis_;
+      
+      auto get_parameters() -> bool;
+
 
     public:
       explicit JointsAggregator();
