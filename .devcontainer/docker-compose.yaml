@@ -23,4 +23,4 @@ services:
     environment:
       - ROS_DOMAIN_ID=91
     network_mode: "host"
-    command: ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && colcon test"]
+    command: ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && cd /root/ros_ws && colcon test"]
