@@ -12,19 +12,10 @@ class PentaI2CActuators(Node):
         # Declare and load parameters
         self.declare_params()
         self.load_params()
-
-        # Initialize joint states names and position vector
-        self.joints_states_names = []
-        self.q = [0.0] * self.joints_count
-        self.actuator_setpoint_degree = [0.0] * self.joints_count
-
-        for i in range(self.limbs_num):
-            for j in range(self.joints_per_limb):
-                joint_name = f'limb{i}/joint{j}'
-                self.joints_states_names.append(joint_name)
+        self.initialize_properties()
                 
         # Set mode (real or virtual)
-        self.real_mode_flag = True
+        self.real_mode_flag = False
         if self.real_mode_flag:
             from adafruit_servokit import ServoKit
             self.kit = ServoKit(channels=16)  # Use 16-channel board
@@ -32,53 +23,62 @@ class PentaI2CActuators(Node):
                 self.kit.servo[i].set_pulse_width_range(self.servo_min_pulse_width_microsec[i], self.servo_max_pulse_width_microsec[i]) 
                 self.kit.servo[i].actuation_range = self.servo_actuation_range_degree[i]
 
-        # Publisher to publish aggregated joint states
-        self.joint_state_publisher_ = self.create_publisher(JointState, '/joint_states', 10)
+        # Publisher actuators setpoint from joint states
         self.setpoint_publisher_ = self.create_publisher(JointState, '/actuator_setpoint_degree', 10)
-
-        # Subscribers for each limb's joint state topic
-        self.limb_joints_subscriber_ = []
-        for i in range(self.limbs_num):
-            topic_string = f'/limb{i}/joint_state'
-            subscriber = self.create_subscription(
+        self.joint_states_subscriber = self.create_subscription(
                 JointState,
-                topic_string,
-                lambda msg, limb_index=i: self.on_joint_state_callback_limb(limb_index, msg),
+                "/joint_states",
+                lambda msg : self.on_joint_states_callback(msg),
                 10  # Set QoS to 10
             )
-            self.limb_joints_subscriber_.append(subscriber)
-        
-        # Timer to call the publishing function at fixed intervals
-        timer_interval_sec = self.update_interval_millis / 1000.0  # Convert millis to seconds
-        self.timer = self.create_timer(timer_interval_sec, self.timer_callback)
-        self.joints_pos_received = False
+    
+    def initialize_properties(self):
+        # Initialize i2c related joint states names and servo position vector (degrees)
+        self.joints_states_names = []
+        self.q = [0.0] * self.joints_count # geometrical joint angle rads
+        self.actuator_setpoint_degree = [0.0] * self.joints_count # servo motor angle degree
+        for i in range(self.limbs_num):
+            for j in range(self.joints_per_limb):
+                joint_name = f'limb{i}/joint{j}'
+                self.joints_states_names.append(joint_name)
 
-    def timer_callback(self):
-        if not self.joints_pos_received:
-            self.get_logger().warn("Joints angles not received yet, will not send commands on the I2C bus.")
-            return
-        # Publish aggregated joint states
-        msg = JointState()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.name = self.joints_states_names
-        msg.position = self.q
-        self.joint_state_publisher_.publish(msg)
-
-        # Publish actuator setpoints in degrees
+    def on_joint_states_callback(self, msg):
+        # Create dictionary of joints stats from received /joint_states message
+        joint_states_dict = {name: {'position': pos, 'velocity': vel, 'effort': eff}
+                        for name, pos, vel, eff in zip(
+                            msg.name,
+                            msg.position if msg.position else [None] * len(msg.name),
+                            msg.velocity if msg.velocity else [None] * len(msg.name),
+                            msg.effort if msg.effort else [None] * len(msg.name)
+                        )}
+        # Update received joints states and log errors
+        for i, name in enumerate(self.joints_states_names):
+            if name in joint_states_dict:
+                joint_state = joint_states_dict[name]
+                self.q[i] = joint_state['position']
+            else:
+                self.get_logger().error(f"Joint {name} not found in the current message.")
+        # Calculate actuator setpoints in degrees
         for i in range(self.joints_count):
             servo_setpoint = self.dir[i] * (self.q[i] * 180.0 / math.pi) + self.initial_joints_bias_degree[i]
-            margin = 1.0
-            limit = (0. + margin)
-            if servo_setpoint < limit:
-                self.get_logger().error(f'ERROR: Servo motor [{i}] angle is [{servo_setpoint}] degrees, however minimum servo angle is zero, clamping value to zero plus margin!')
-                servo_setpoint = limit
-            max_servo_angular_value = self.servo_actuation_range_degree[i]
-            limit = (max_servo_angular_value - margin)
-            if servo_setpoint > limit:
-                self.get_logger().error(f'ERROR: Servo motor [{i}] angle is [{servo_setpoint}] degrees, however maximum servo angle is {max_servo_angular_value}, clamping value to maximum value minus margin {limit}!')
-                servo_setpoint = limit
-            self.actuator_setpoint_degree[i] = servo_setpoint
+            max_val = self.servo_actuation_range_degree[i]
+            self.actuator_setpoint_degree[i] = self.clamp(servo_setpoint, i, 0.0, max_val)
+        # Publish actuators setpoint
+        self.publish_actuators_setpoint()
+    
+    def clamp(self, value, index, min_val, max_val, margin=1.0):
+        min_safe_limit = min_val + margin
+        if value < (min_safe_limit):
+            self.get_logger().error(f'ERROR: Servo[{index}] calculated setpoint is {value} degrees, however its minimum permissible angle is {min_safe_limit}, clamping value to {min_safe_limit}!')
+            return min_safe_limit
+        max_safe_limit = max_val - margin
+        if value > (max_val - margin):
+            self.get_logger().error(f'ERROR: Servo[{index}] calculated setpoint is {value} degrees, however maximum servo angle is {max_safe_limit}, clamping value to {max_safe_limit}!')            
+            return max_safe_limit
+        return value
 
+
+    def publish_actuators_setpoint(self):
         msg_setpoint = JointState()
         msg_setpoint.header.stamp = self.get_clock().now().to_msg()
         msg_setpoint.name = self.joints_states_names
@@ -144,12 +144,6 @@ class PentaI2CActuators(Node):
         else:
             self.get_logger().info(f'Servos maximum pulse width is loaded: {format_array_to_string(self.servo_max_pulse_width_microsec)}')
 
-    def on_joint_state_callback_limb(self, limb_index, joint_state):
-        # Update the q vector with the received joint state positions for this limb
-        index_start = limb_index * self.joints_per_limb
-        self.q[index_start:index_start+self.joints_per_limb] = joint_state.position[:self.joints_per_limb]
-        if not self.joints_pos_received:
-            self.joints_pos_received = True
 
 def main(args=None):
     rclpy.init(args=args)

@@ -28,6 +28,13 @@ def generate_launch_description():
         )
     )
 
+    # Include the joints_aggregator launch file
+    joints_aggregator_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(FindPackageShare('joints_aggregator').find('joints_aggregator'), 'launch', 'joints_aggregator.launch.py')
+        )
+    )
+
     # Include the penta_i2c_actuators launch file with the mode argument
     penta_i2c_actuators_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -40,5 +47,6 @@ def generate_launch_description():
         mode_arg,
         penta_pod_launch,
         gait_generator_launch,
+        joints_aggregator_launch,
         penta_i2c_actuators_launch,
     ])
