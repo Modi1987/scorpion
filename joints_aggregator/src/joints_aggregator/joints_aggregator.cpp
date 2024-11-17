@@ -10,7 +10,7 @@
 
 namespace penta_pod::kin::joints_aggregator {
 
-  const int DEAFAULT_UPDATE_INTERVAL_MILLIS{20};
+  const int DEAFAULT_UPDATE_INTERVAL_MILLIS{25};
 
   JointsAggregator::JointsAggregator() : node_{rclcpp::Node::make_shared("joints_aggregator_node")}
   {
