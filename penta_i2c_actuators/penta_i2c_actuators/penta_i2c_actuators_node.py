@@ -15,7 +15,7 @@ class PentaI2CActuators(Node):
         self.initialize_properties()
                 
         # Set mode (real or virtual)
-        self.real_mode_flag = False
+        self.real_mode_flag = True
         if self.real_mode_flag:
             from adafruit_servokit import ServoKit
             self.kit = ServoKit(channels=16)  # Use 16-channel board
@@ -38,7 +38,7 @@ class PentaI2CActuators(Node):
         self.q = [0.0] * self.joints_count # geometrical joint angle rads
         self.actuator_setpoint_degree = [0.0] * self.joints_count # servo motor angle degree
         for i in range(self.limbs_num):
-            for j in range(self.joints_per_limb):
+            for j in range(self.joints_per_limb[i]):
                 joint_name = f'limb{i}/joint{j}'
                 self.joints_states_names.append(joint_name)
 
@@ -93,7 +93,7 @@ class PentaI2CActuators(Node):
     def declare_params(self):
         # Declare robot geometry parameters
         self.declare_parameter('limbs_num', 5)  # Default value 5
-        self.declare_parameter('joints_per_limb', 3)  # Default value 3
+        self.declare_parameter('joints_per_limb', [3]*5)  # Default value 3
         self.declare_parameter('i2c_actuators_params.update_interval_millis', 100)  # Default 100 ms
         self.declare_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree', [0.0] * 15)  # Default bias
         self.declare_parameter('i2c_actuators_params.dir', [1.0] * 15)  # Default direction (1.0 for no inversion)
@@ -104,9 +104,15 @@ class PentaI2CActuators(Node):
     def load_params(self):
         # Load parameters and handle errors
         self.limbs_num = self.get_parameter('limbs_num').get_parameter_value().integer_value
-        self.joints_per_limb = self.get_parameter('joints_per_limb').get_parameter_value().integer_value
-        self.get_logger().info(f'Loaded limbs_num: {self.limbs_num}, joints_per_limb: {self.joints_per_limb}')
-        self.joints_count = self.limbs_num * self.joints_per_limb
+        # Helper to format array for logging
+        def format_array_to_string(x_list):
+            return '[' + ', '.join(map(str, x_list)) + ']'
+        self.joints_per_limb = self.get_parameter('joints_per_limb').get_parameter_value().integer_array_value
+        if (len(self.joints_per_limb) != self.limbs_num):
+            self.get_logger().error(f" Error, limbs_num paramters {self.limbs_num} is not equal to the size of the vector joints_per_limb {len(self.joints_per_limb)}")
+        self.get_logger().info(f'Loaded limbs_num: {self.limbs_num}, joints_per_limb: {format_array_to_string(self.joints_per_limb)}')
+        self.joints_count = sum(self.joints_per_limb)
+        self.get_logger().info(f'Total limbs joints count is: {self.joints_count}') 
         self.update_interval_millis = self.get_parameter('i2c_actuators_params.update_interval_millis').get_parameter_value().integer_value
         self.get_logger().info(f'Loaded update_interval_millis for I2C bus: {self.update_interval_millis} ms')
         self.initial_joints_bias_degree = self.get_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree').get_parameter_value().double_array_value
@@ -114,10 +120,6 @@ class PentaI2CActuators(Node):
         self.servo_actuation_range_degree = self.get_parameter('servo_parameters.servo_actuation_range_degree').get_parameter_value().double_array_value
         self.servo_min_pulse_width_microsec = self.get_parameter('servo_parameters.servo_min_pulse_width_microsec').get_parameter_value().double_array_value
         self.servo_max_pulse_width_microsec = self.get_parameter('servo_parameters.servo_max_pulse_width_microsec').get_parameter_value().double_array_value
-
-        # Helper to format array for logging
-        def format_array_to_string(x_list):
-            return '[' + ', '.join(map(str, x_list)) + ']'
 
         if len(self.initial_joints_bias_degree) != self.joints_count:
             self.get_logger().error('ERROR: actuator_angle_bias_at_joint_zero_degree parameter size mismatch!')

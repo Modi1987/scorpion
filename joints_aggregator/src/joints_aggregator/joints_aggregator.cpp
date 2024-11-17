@@ -23,12 +23,14 @@ namespace penta_pod::kin::joints_aggregator {
     
     int joints_count = 0;
     for(int i=0; i < limbs_num_; i++) {
-      for(int j = 0; j < joints_per_limb_; j++) {
+      for(int j = 0; j < joints_per_limb_[i]; j++) {
         joints_count = joints_count + 1;
         std::string temp = "limb" + std::to_string(i) + "/joint" + std::to_string(j);
+        RCLCPP_INFO(node_->get_logger(), "joint state [%d] name is %s", joints_count, temp.c_str());
         joints_states_names.push_back(temp);
       }
     }
+    RCLCPP_INFO(node_->get_logger(), "total joints count is %d", joints_count);
 
     this->q_ = std::vector<double>(joints_count, 0.);
     
@@ -42,6 +44,7 @@ namespace penta_pod::kin::joints_aggregator {
             this->on_joint_state_callback_limb(i, msg);
         }
       ));
+      RCLCPP_INFO(node_->get_logger(), "subscriber is created, listining on topic name %s", topic_string.c_str());
     }
 
     timer_ = node_->create_wall_timer(
@@ -63,24 +66,34 @@ namespace penta_pod::kin::joints_aggregator {
   void JointsAggregator::declare_parameters(){
     // robot geometry
     node_->declare_parameter<int>("limbs_num");
-    node_->declare_parameter<int>("joints_per_limb");
+    node_->declare_parameter<std::vector<long int>>("joints_per_limb", std::vector<long int>{});
     // joint_states publish rate (time)
     node_->declare_parameter<int>("update_interval_millis", DEAFAULT_UPDATE_INTERVAL_MILLIS); // here DEAFAULT_UPDATE_INTERVAL_MILLIS is default value
   }
 
   auto JointsAggregator::get_parameters() -> bool {
     if(node_->get_parameter("limbs_num", limbs_num_)) {
-      RCLCPP_INFO_STREAM(node_->get_logger(), "(limbs_num)) parameter loaded and equal to: " << limbs_num_);
+      RCLCPP_INFO_STREAM(node_->get_logger(), "(limbs_num) parameter loaded and equal to: " << limbs_num_);
     } else {
       RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load (limbs_num) parameter");
       return false;
     }
 
     if(node_->get_parameter("joints_per_limb", joints_per_limb_)) {
-      RCLCPP_INFO_STREAM(node_->get_logger(), "(joints_per_limb) parameter loaded and equal to: " << joints_per_limb_);
+      std::string formatted_values = "[";
+      for (auto &value : joints_per_limb_) 
+          formatted_values += " " + std::to_string(value);
+      formatted_values += " ]";
+      RCLCPP_INFO_STREAM(node_->get_logger(), "(joints_per_limb) parameter loaded and equal to: " << formatted_values);
     } else {
       RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load (joints_per_limb) parameter");
       return false;
+    }
+    if (joints_per_limb_.size()!=static_cast<size_t>(limbs_num_)) {
+      RCLCPP_ERROR(node_->get_logger(), "ERROR, value of parameter (limbs_num) is not equal to the size of vector (joints_per_limb)!");
+      return false;
+    } else {
+      RCLCPP_INFO(node_->get_logger(), "Parameter (limbs_num) and size of vector (joints_per_limb) comply with a value %d", limbs_num_);
     }
     
     if(!node_->get_parameter("update_interval_millis", update_interval_millis_)) {
@@ -99,9 +112,12 @@ namespace penta_pod::kin::joints_aggregator {
   }
 
   void JointsAggregator::on_joint_state_callback_limb(int limb_index, const sensor_msgs::msg::JointState& joint_state) {
-    int index_start = limb_index * joints_per_limb_;
+    int index_start = 0;
+    for (int i = 0; i < limb_index; i++) {
+      index_start = index_start + joints_per_limb_[i];
+    }
     std::lock_guard<std::mutex> lock(q_mutex_);
-    for (int j = 0; j < joints_per_limb_; ++j) {
+    for (int j = 0; j < joints_per_limb_[limb_index]; ++j) {
       if (static_cast<size_t>(j) < joint_state.position.size()) {
         q_[index_start + j] = joint_state.position[j];
       } else {

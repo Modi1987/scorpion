@@ -28,7 +28,7 @@ namespace penta_pod::kin::joints_aggregator {
       std::mutex q_mutex_;
       std::vector<double> q_;
       int limbs_num_;
-      int joints_per_limb_;
+      std::vector<long int> joints_per_limb_;
       int update_interval_millis_;
       
       auto get_parameters() -> bool;
