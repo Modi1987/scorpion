@@ -25,7 +25,7 @@ namespace penta_pod::kin::gait_generator {
     this->declare_parameters();
     this->load_parameters();
     const double delta_t_milli = 50.;
-    feet_num_ = 5;
+
     current_phase_ = 0.;
     for(int i = 0; i < feet_num_; i++) {
         auto topic_name = "limb" + std::to_string(i) + "/xyz_msg";
@@ -119,6 +119,7 @@ namespace penta_pod::kin::gait_generator {
   }
   
   void GaitGenerator::declare_parameters(){
+    node_->declare_parameter<int>("limbs_num");
     node_->declare_parameter<std::vector<double>>("legs_body_transforms", std::vector<double>{});
     node_->declare_parameter<std::vector<double>>("init_feet_pos_in_basefootprint", std::vector<double>{});
     node_->declare_parameter<std::vector<double>>("init_body_basefootprint_transform", std::vector<double>{});
@@ -126,6 +127,13 @@ namespace penta_pod::kin::gait_generator {
 
   
   void GaitGenerator::load_parameters() {
+      if (!node_->get_parameter("limbs_num", feet_num_))
+      {
+          const char* message = "No limbs_num parameter found.";
+          RCLCPP_ERROR(node_->get_logger(), message);
+          throw std::runtime_error(message);
+      }
+      RCLCPP_INFO(node_->get_logger(), "Loaded limbs_num value is: %d", feet_num_);
       std::vector<double> transform_params;
       if (!node_->get_parameter("legs_body_transforms", transform_params))
       {
@@ -133,13 +141,13 @@ namespace penta_pod::kin::gait_generator {
           RCLCPP_ERROR(node_->get_logger(), message);
           throw std::runtime_error(message);
       }
-      if (transform_params.size() != 5 * 7)
+      if (static_cast<int>(transform_params.size()) != feet_num_ * 7)
       {
-          const char* message = "Invalid transform parameter size, expected 5x7 elements.";
-          RCLCPP_ERROR(node_->get_logger(), message);
-          throw std::runtime_error(message);
+          std::string message = "Invalid transform parameter size, expected " + std::to_string(feet_num_) + "x7 elements.";
+          RCLCPP_ERROR(node_->get_logger(), message.c_str());
+          throw std::runtime_error(message.c_str());
       }
-      for (int count = 0; count < 5; count++)
+      for (int count = 0; count < feet_num_; count++)
       {
           geometry_msgs::msg::Transform transform;
           transform.translation.x = transform_params[0 + 7 * count];
@@ -150,6 +158,15 @@ namespace penta_pod::kin::gait_generator {
           transform.rotation.z = transform_params[5 + 7 * count];
           transform.rotation.w = transform_params[6 + 7 * count];
           legs_body_transforms_.emplace_back(transform);
+          // log some usefull info
+          std::string message = "Shoulder [" + std::to_string(count) + "] transform in body frame is: \n";
+          message = message + "[ "; 
+          for (int i = 0; i < 7; i++) {
+            auto val = transform_params[i + 7 * count];
+            message = message +  double_to_string_formatted(val, 4) + " ";
+          }
+          message = message + "]";
+          RCLCPP_INFO(node_->get_logger(), message.c_str());
       }
 
       std::vector<double> init_feet_pos_params;
@@ -159,11 +176,11 @@ namespace penta_pod::kin::gait_generator {
           RCLCPP_ERROR(node_->get_logger(), message);
           throw std::runtime_error(message);
       }
-      if (init_feet_pos_params.size() != 5 * 3)
+      if (static_cast<int>(init_feet_pos_params.size()) != feet_num_ * 3)
       {
-          const char* message = "Invalid feet position parameter size, expected 5x3 elements.";
-          RCLCPP_ERROR(node_->get_logger(), message);
-          throw std::runtime_error(message);
+          std::string message = "Invalid feet position parameter size, expected " + std::to_string(feet_num_) + "x3 elements.";
+          RCLCPP_ERROR(node_->get_logger(), message.c_str());
+          throw std::runtime_error(message.c_str());
       }
       for (int count = 0; count < 7; count++)
       {

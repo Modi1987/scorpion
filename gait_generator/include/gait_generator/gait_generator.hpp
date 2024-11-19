@@ -15,7 +15,17 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <cmath>
 
+#include <iomanip>
+#include <sstream>
+
 namespace penta_pod::kin::gait_generator {
+
+  inline auto double_to_string_formatted(double number, int digits_after_point) -> std::string {
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(digits_after_point) << number;
+    std::string formatted_string = oss.str();
+    return formatted_string;
+  };
 
   class GaitGenerator {
     private:
