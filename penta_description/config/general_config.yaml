@@ -37,6 +37,9 @@
         1.0, 1.0, 1.0,
         1.0, 1.0, 1.0,
       ]
+    gait_parameters:
+      max_gait_linear_speed: 0.035 # meter per sec
+      max_gait_turning_speed: 0.25 # rad per sec
     servo_parameters:
       servo_actuation_range_degree: [ # servo angle range
         270.0, 270.0, 270.0,
