@@ -46,17 +46,15 @@ namespace penta_pod::kin::gait_generator {
   }
 
   void GaitGenerator::cmd_vel_sub_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
-    constexpr double MAX_VEL_M_PER_SEC = 0.025;
-    constexpr double MAX_W_RAD_PER_SEC = 0.025;
 
     auto mag = std::sqrt(msg->linear.x * msg->linear.x + msg->linear.y * msg->linear.y);
-    if (mag > MAX_VEL_M_PER_SEC) {
-        msg->linear.x = msg->linear.x * MAX_VEL_M_PER_SEC / mag;
-        msg->linear.y = msg->linear.y * MAX_VEL_M_PER_SEC / mag;
+    if (mag > max_gait_linear_speed_) {
+        msg->linear.x = msg->linear.x * max_gait_linear_speed_ / mag;
+        msg->linear.y = msg->linear.y * max_gait_linear_speed_ / mag;
     }
     mag = std::abs(msg->angular.z);
-    if (mag > MAX_W_RAD_PER_SEC) {
-        msg->angular.z = msg->angular.z * MAX_W_RAD_PER_SEC / mag;
+    if (mag > max_gait_turning_speed_) {
+        msg->angular.z = msg->angular.z * max_gait_turning_speed_ / mag;
     }
     cmd_vel_ = *msg;
     /*
@@ -123,10 +121,13 @@ namespace penta_pod::kin::gait_generator {
     node_->declare_parameter<std::vector<double>>("legs_body_transforms", std::vector<double>{});
     node_->declare_parameter<std::vector<double>>("init_feet_pos_in_basefootprint", std::vector<double>{});
     node_->declare_parameter<std::vector<double>>("init_body_basefootprint_transform", std::vector<double>{});
+    node_->declare_parameter<double>("gait_parameters.max_gait_linear_speed");
+    node_->declare_parameter<double>("gait_parameters.max_gait_turning_speed");
   }
 
   
   void GaitGenerator::load_parameters() {
+      // robot kinematic parameters
       if (!node_->get_parameter("limbs_num", feet_num_))
       {
           const char* message = "No limbs_num parameter found.";
@@ -216,6 +217,23 @@ namespace penta_pod::kin::gait_generator {
           init_body_basefootprint_ = transform;
           body_basefootprint_ = transform;
       }
+
+      // gait max velocities parameters
+      if (!node_->get_parameter("gait_parameters.max_gait_linear_speed", max_gait_linear_speed_))
+      {
+          const char* message = "Parameter gait_parameters.max_gait_linear_speed was not found.";
+          RCLCPP_ERROR(node_->get_logger(), message);
+          throw std::runtime_error(message);
+      }
+      RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.max_gait_linear_speed value is: %f [m/sec]", max_gait_linear_speed_);
+      
+      if (!node_->get_parameter("gait_parameters.max_gait_turning_speed", max_gait_turning_speed_))
+      {
+          const char* message = "Parameter gait_parameters.max_gait_turning_speed was not found.";
+          RCLCPP_ERROR(node_->get_logger(), message);
+          throw std::runtime_error(message);
+      }
+      RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.max_gait_turning_speed value is: %f [rad/sec]", max_gait_turning_speed_);
   }
 
 }  // penta_pod::kin::gait_generator

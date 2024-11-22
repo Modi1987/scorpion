@@ -32,7 +32,7 @@ namespace penta_pod::kin::gait_generator {
       rclcpp::Node::SharedPtr node_;
       std::vector<double> q_state;
 
-      double current_phase_;
+      double current_phase_, max_gait_linear_speed_, max_gait_turning_speed_;
       int feet_num_;
 
       std::vector<geometry_msgs::msg::Transform> legs_body_transforms_;
