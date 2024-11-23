@@ -143,6 +143,26 @@ namespace penta_pod::kin::gait_generator {
         }
     };
 
+    // Helper function to create a transform from values
+    auto array_to_transform = [this](const std::vector<double> &transforms_vec, int frame_index) -> geometry_msgs::msg::Transform {
+        auto minimal_required_size = 7*frame_index+7;
+        if(transforms_vec.size() < static_cast<size_t>(minimal_required_size)) {
+            auto error_message = "Error, can not create trasform from array at index " + std::to_string(frame_index) + " since minimal required size is less than " + std::to_string(minimal_required_size);
+            RCLCPP_ERROR(node_->get_logger(), error_message.c_str());
+            throw std::runtime_error(error_message);
+        }
+        geometry_msgs::msg::Transform transform;
+        auto start_index = frame_index*7;
+        transform.translation.x = transforms_vec[start_index + 0];
+        transform.translation.y = transforms_vec[start_index + 1];
+        transform.translation.z = transforms_vec[start_index + 2];
+        transform.rotation.x = transforms_vec[start_index + 3];
+        transform.rotation.y = transforms_vec[start_index + 4];
+        transform.rotation.z = transforms_vec[start_index + 5];
+        transform.rotation.w = transforms_vec[start_index + 6];
+        return transform;
+    };
+
     // Load limbs number
     load_param("limbs_num", feet_num_, "No limbs_num parameter found.");
     RCLCPP_INFO(node_->get_logger(), "Loaded limbs_num value is: %d", feet_num_);
@@ -153,20 +173,13 @@ namespace penta_pod::kin::gait_generator {
     validate_vector_size(transform_params, feet_num_ * 7, 
         "Invalid transform parameter size, expected " + std::to_string(feet_num_) + "x7 elements.");
     
-    for (int count = 0; count < feet_num_; ++count) {
-        geometry_msgs::msg::Transform transform;
-        transform.translation.x = transform_params[0 + 7 * count];
-        transform.translation.y = transform_params[1 + 7 * count];
-        transform.translation.z = transform_params[2 + 7 * count];
-        transform.rotation.x = transform_params[3 + 7 * count];
-        transform.rotation.y = transform_params[4 + 7 * count];
-        transform.rotation.z = transform_params[5 + 7 * count];
-        transform.rotation.w = transform_params[6 + 7 * count];
+    for (int frame_index = 0; frame_index < feet_num_; ++frame_index) {
+        auto transform = array_to_transform(transform_params, frame_index);
         legs_body_transforms_.emplace_back(transform);
 
-        std::string message = "Shoulder [" + std::to_string(count) + "] transform in body frame is: [ ";
+        std::string message = "Shoulder [" + std::to_string(frame_index) + "] transform in body frame is: [ ";
         for (int i = 0; i < 7; ++i) {
-            message += double_to_string_formatted(transform_params[i + 7 * count], 4) + " ";
+            message += double_to_string_formatted(transform_params[i + 7 * frame_index], 4) + " ";
         }
         message += "]";
         RCLCPP_INFO(node_->get_logger(), message.c_str());
@@ -194,14 +207,7 @@ namespace penta_pod::kin::gait_generator {
     validate_vector_size(body_basefootprint_params, 7,
         "Size of init_body_basefootprint_transform must be 7 (3 for position followed by 4 quaternion).");
     
-    geometry_msgs::msg::Transform transform;
-    transform.translation.x = body_basefootprint_params[0];
-    transform.translation.y = body_basefootprint_params[1];
-    transform.translation.z = body_basefootprint_params[2];
-    transform.rotation.x = body_basefootprint_params[3];
-    transform.rotation.y = body_basefootprint_params[4];
-    transform.rotation.z = body_basefootprint_params[5];
-    transform.rotation.w = body_basefootprint_params[6];
+    auto transform = array_to_transform(body_basefootprint_params, 0);
     init_body_basefootprint_ = transform;
     body_basefootprint_ = transform;
 
