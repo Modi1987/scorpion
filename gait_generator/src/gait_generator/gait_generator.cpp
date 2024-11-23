@@ -127,113 +127,92 @@ namespace penta_pod::kin::gait_generator {
 
   
   void GaitGenerator::load_parameters() {
-      // robot kinematic parameters
-      if (!node_->get_parameter("limbs_num", feet_num_))
-      {
-          const char* message = "No limbs_num parameter found.";
-          RCLCPP_ERROR(node_->get_logger(), message);
-          throw std::runtime_error(message);
-      }
-      RCLCPP_INFO(node_->get_logger(), "Loaded limbs_num value is: %d", feet_num_);
-      std::vector<double> transform_params;
-      if (!node_->get_parameter("legs_body_transforms", transform_params))
-      {
-          const char* message = "No transform parameters found.";
-          RCLCPP_ERROR(node_->get_logger(), message);
-          throw std::runtime_error(message);
-      }
-      if (static_cast<int>(transform_params.size()) != feet_num_ * 7)
-      {
-          std::string message = "Invalid transform parameter size, expected " + std::to_string(feet_num_) + "x7 elements.";
-          RCLCPP_ERROR(node_->get_logger(), message.c_str());
-          throw std::runtime_error(message.c_str());
-      }
-      for (int count = 0; count < feet_num_; count++)
-      {
-          geometry_msgs::msg::Transform transform;
-          transform.translation.x = transform_params[0 + 7 * count];
-          transform.translation.y = transform_params[1 + 7 * count];
-          transform.translation.z = transform_params[2 + 7 * count];
-          transform.rotation.x = transform_params[3 + 7 * count];
-          transform.rotation.y = transform_params[4 + 7 * count];
-          transform.rotation.z = transform_params[5 + 7 * count];
-          transform.rotation.w = transform_params[6 + 7 * count];
-          legs_body_transforms_.emplace_back(transform);
-          // log some usefull info
-          std::string message = "Shoulder [" + std::to_string(count) + "] transform in body frame is: \n";
-          message = message + "[ "; 
-          for (int i = 0; i < 7; i++) {
-            auto val = transform_params[i + 7 * count];
-            message = message +  double_to_string_formatted(val, 4) + " ";
-          }
-          message = message + "]";
-          RCLCPP_INFO(node_->get_logger(), message.c_str());
-      }
+    // Helper function to load a parameter and throw error if not found
+    auto load_param = [this](const std::string &param_name, auto &param_value, const std::string &error_message) {
+        if (!node_->get_parameter(param_name, param_value)) {
+            RCLCPP_ERROR(node_->get_logger(), error_message.c_str());
+            throw std::runtime_error(error_message);
+        }
+    };
 
-      std::vector<double> init_feet_pos_params;
-      if (!node_->get_parameter("init_feet_pos_in_basefootprint", init_feet_pos_params))
-      {
-          const char* message = "No feet position parameters found.";
-          RCLCPP_ERROR(node_->get_logger(), message);
-          throw std::runtime_error(message);
-      }
-      if (static_cast<int>(init_feet_pos_params.size()) != feet_num_ * 3)
-      {
-          std::string message = "Invalid feet position parameter size, expected " + std::to_string(feet_num_) + "x3 elements.";
-          RCLCPP_ERROR(node_->get_logger(), message.c_str());
-          throw std::runtime_error(message.c_str());
-      }
-      for (int count = 0; count < 7; count++)
-      {
-          geometry_msgs::msg::Point xyz;
-          xyz.x = init_feet_pos_params[0 + count * 3];
-          xyz.y = init_feet_pos_params[1 + count * 3];
-          xyz.z = init_feet_pos_params[2 + count * 3];
-          feet_pos_in_footprint_.emplace_back(xyz);
-          init_feet_pos_in_footprint_.emplace_back(xyz);
-      }
+    // Helper function to validate vector size
+    auto validate_vector_size = [this](const std::vector<double> &vec, int expected_size, const std::string &error_message) {
+        if (static_cast<int>(vec.size()) != expected_size) {
+            RCLCPP_ERROR(node_->get_logger(), error_message.c_str());
+            throw std::runtime_error(error_message);
+        }
+    };
 
-      std::vector<double> body_basefootprint_params;
-      if (!node_->get_parameter("init_body_basefootprint_transform", body_basefootprint_params)) 
-      {
-          const char* message = "No init transform body to basefootprint found.";
-          RCLCPP_ERROR(node_->get_logger(), message);
-          throw std::runtime_error(message);
-      }
-      if (body_basefootprint_params.size()!=7)
-      {
-          const char* message = "Size of init_body_basefootprint_transform must be 7 (3 for position followed by 4 quaternion).";
-          RCLCPP_ERROR(node_->get_logger(), message);
-          throw std::runtime_error(message);
-      } else {
-          geometry_msgs::msg::Transform transform;
-          transform.translation.x = body_basefootprint_params[0];
-          transform.translation.y = body_basefootprint_params[1];
-          transform.translation.z = body_basefootprint_params[2];
-          transform.rotation.x = body_basefootprint_params[3];
-          transform.rotation.y = body_basefootprint_params[4];
-          transform.rotation.z = body_basefootprint_params[5];
-          transform.rotation.w = body_basefootprint_params[6];
-          init_body_basefootprint_ = transform;
-          body_basefootprint_ = transform;
-      }
+    // Load limbs number
+    load_param("limbs_num", feet_num_, "No limbs_num parameter found.");
+    RCLCPP_INFO(node_->get_logger(), "Loaded limbs_num value is: %d", feet_num_);
 
-      // gait max velocities parameters
-      if (!node_->get_parameter("gait_parameters.max_gait_linear_speed", max_gait_linear_speed_))
-      {
-          const char* message = "Parameter gait_parameters.max_gait_linear_speed was not found.";
-          RCLCPP_ERROR(node_->get_logger(), message);
-          throw std::runtime_error(message);
-      }
-      RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.max_gait_linear_speed value is: %f [m/sec]", max_gait_linear_speed_);
-      
-      if (!node_->get_parameter("gait_parameters.max_gait_turning_speed", max_gait_turning_speed_))
-      {
-          const char* message = "Parameter gait_parameters.max_gait_turning_speed was not found.";
-          RCLCPP_ERROR(node_->get_logger(), message);
-          throw std::runtime_error(message);
-      }
-      RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.max_gait_turning_speed value is: %f [rad/sec]", max_gait_turning_speed_);
-  }
+    // Load and validate leg-body transforms
+    std::vector<double> transform_params;
+    load_param("legs_body_transforms", transform_params, "No transform parameters found.");
+    validate_vector_size(transform_params, feet_num_ * 7, 
+        "Invalid transform parameter size, expected " + std::to_string(feet_num_) + "x7 elements.");
+    
+    for (int count = 0; count < feet_num_; ++count) {
+        geometry_msgs::msg::Transform transform;
+        transform.translation.x = transform_params[0 + 7 * count];
+        transform.translation.y = transform_params[1 + 7 * count];
+        transform.translation.z = transform_params[2 + 7 * count];
+        transform.rotation.x = transform_params[3 + 7 * count];
+        transform.rotation.y = transform_params[4 + 7 * count];
+        transform.rotation.z = transform_params[5 + 7 * count];
+        transform.rotation.w = transform_params[6 + 7 * count];
+        legs_body_transforms_.emplace_back(transform);
+
+        std::string message = "Shoulder [" + std::to_string(count) + "] transform in body frame is: [ ";
+        for (int i = 0; i < 7; ++i) {
+            message += double_to_string_formatted(transform_params[i + 7 * count], 4) + " ";
+        }
+        message += "]";
+        RCLCPP_INFO(node_->get_logger(), message.c_str());
+    }
+
+    // Load and validate initial feet positions
+    std::vector<double> init_feet_pos_params;
+    load_param("init_feet_pos_in_basefootprint", init_feet_pos_params, "No feet position parameters found.");
+    validate_vector_size(init_feet_pos_params, feet_num_ * 3,
+        "Invalid feet position parameter size, expected " + std::to_string(feet_num_) + "x3 elements.");
+    
+    for (int count = 0; count < feet_num_; ++count) {
+        geometry_msgs::msg::Point xyz;
+        xyz.x = init_feet_pos_params[0 + count * 3];
+        xyz.y = init_feet_pos_params[1 + count * 3];
+        xyz.z = init_feet_pos_params[2 + count * 3];
+        feet_pos_in_footprint_.emplace_back(xyz);
+        init_feet_pos_in_footprint_.emplace_back(xyz);
+    }
+
+    // Load and validate initial body-to-basefootprint transform
+    std::vector<double> body_basefootprint_params;
+    load_param("init_body_basefootprint_transform", body_basefootprint_params,
+        "No init transform body to basefootprint found.");
+    validate_vector_size(body_basefootprint_params, 7,
+        "Size of init_body_basefootprint_transform must be 7 (3 for position followed by 4 quaternion).");
+    
+    geometry_msgs::msg::Transform transform;
+    transform.translation.x = body_basefootprint_params[0];
+    transform.translation.y = body_basefootprint_params[1];
+    transform.translation.z = body_basefootprint_params[2];
+    transform.rotation.x = body_basefootprint_params[3];
+    transform.rotation.y = body_basefootprint_params[4];
+    transform.rotation.z = body_basefootprint_params[5];
+    transform.rotation.w = body_basefootprint_params[6];
+    init_body_basefootprint_ = transform;
+    body_basefootprint_ = transform;
+
+    // Load gait parameters
+    load_param("gait_parameters.max_gait_linear_speed", max_gait_linear_speed_,
+        "Parameter gait_parameters.max_gait_linear_speed was not found.");
+    RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.max_gait_linear_speed value is: %f [m/sec]", max_gait_linear_speed_);
+
+    load_param("gait_parameters.max_gait_turning_speed", max_gait_turning_speed_,
+        "Parameter gait_parameters.max_gait_turning_speed was not found.");
+    RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.max_gait_turning_speed value is: %f [rad/sec]", max_gait_turning_speed_);
+ }
 
 }  // penta_pod::kin::gait_generator
