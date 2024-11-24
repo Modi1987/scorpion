@@ -10,8 +10,6 @@
 
 namespace penta_pod::kin::joints_aggregator {
 
-  const int DEAFAULT_UPDATE_INTERVAL_MILLIS{25};
-
   JointsAggregator::JointsAggregator() : node_{rclcpp::Node::make_shared("joints_aggregator_node")}
   {
     RCLCPP_INFO(node_->get_logger(), "Starting joints aggregator node");
@@ -67,8 +65,8 @@ namespace penta_pod::kin::joints_aggregator {
     // robot geometry
     node_->declare_parameter<int>("limbs_num");
     node_->declare_parameter<std::vector<long int>>("joints_per_limb", std::vector<long int>{});
-    // joint_states publish rate (time)
-    node_->declare_parameter<int>("update_interval_millis", DEAFAULT_UPDATE_INTERVAL_MILLIS); // here DEAFAULT_UPDATE_INTERVAL_MILLIS is default value
+    // joint_states publish rate (time interval)
+    node_->declare_parameter<int>("joints_aggregator.joints_update_interval_millis");
   }
 
   auto JointsAggregator::get_parameters() -> bool {
@@ -96,15 +94,15 @@ namespace penta_pod::kin::joints_aggregator {
       RCLCPP_INFO(node_->get_logger(), "Parameter (limbs_num) and size of vector (joints_per_limb) comply with a value %d", limbs_num_);
     }
     
-    if(!node_->get_parameter("update_interval_millis", update_interval_millis_)) {
-      RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load update_interval_millis defaulting to %d milliseconds", DEAFAULT_UPDATE_INTERVAL_MILLIS);
-      update_interval_millis_ = DEAFAULT_UPDATE_INTERVAL_MILLIS;
+    if(!node_->get_parameter("joints_aggregator.joints_update_interval_millis", update_interval_millis_)) {
+      RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load joints_aggregator.joints_update_interval_millis");
+      return false;
     }
     if (update_interval_millis_ <= 0.0) {
       RCLCPP_ERROR(node_->get_logger(), "ERROR, specified update_interval_millis %d can not be zero nor negative!", update_interval_millis_);
-      RCLCPP_ERROR(node_->get_logger(), "ERROR, defaulting update_interval_millis to %d milliseconds", DEAFAULT_UPDATE_INTERVAL_MILLIS);
-      update_interval_millis_ = DEAFAULT_UPDATE_INTERVAL_MILLIS;
+      return false;
     }
+    RCLCPP_INFO_STREAM(node_->get_logger(), "loaded joints_aggregator.joints_update_interval_millis is: " << update_interval_millis_ << " milliseconds");
     auto rate = 1000.0 / update_interval_millis_;
     RCLCPP_INFO_STREAM(node_->get_logger(), "/joints_states: publish rate is: " << rate << " Hz");
 
