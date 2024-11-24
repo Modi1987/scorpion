@@ -94,7 +94,6 @@ class PentaI2CActuators(Node):
         # Declare robot geometry parameters
         self.declare_parameter('limbs_num', 5)  # Default value 5
         self.declare_parameter('joints_per_limb', [3]*5)  # Default value 3
-        self.declare_parameter('i2c_actuators_params.update_interval_millis', 100)  # Default 100 ms
         self.declare_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree', [0.0] * 15)  # Default bias
         self.declare_parameter('i2c_actuators_params.dir', [1.0] * 15)  # Default direction (1.0 for no inversion)
         self.declare_parameter('servo_parameters.servo_actuation_range_degree', [180.0] * 15) # angular range degree
@@ -113,8 +112,6 @@ class PentaI2CActuators(Node):
         self.get_logger().info(f'Loaded limbs_num: {self.limbs_num}, joints_per_limb: {format_array_to_string(self.joints_per_limb)}')
         self.joints_count = sum(self.joints_per_limb)
         self.get_logger().info(f'Total limbs joints count is: {self.joints_count}') 
-        self.update_interval_millis = self.get_parameter('i2c_actuators_params.update_interval_millis').get_parameter_value().integer_value
-        self.get_logger().info(f'Loaded update_interval_millis for I2C bus: {self.update_interval_millis} ms')
         self.initial_joints_bias_degree = self.get_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree').get_parameter_value().double_array_value
         self.dir = self.get_parameter('i2c_actuators_params.dir').get_parameter_value().double_array_value
         self.servo_actuation_range_degree = self.get_parameter('servo_parameters.servo_actuation_range_degree').get_parameter_value().double_array_value
