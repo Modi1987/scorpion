@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>base_twerk</name>
+  <name>commons</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="xx@xx.xx">mohammad.safeea</maintainer>
@@ -12,9 +12,6 @@
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
-  <depend>base_twerk_msgs</depend>
-
-  <depend>commons</depend>
 
   <depend>launch_testing</depend>
 

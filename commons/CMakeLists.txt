@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(base_twerk)
+project(commons)
 
 # Default to C++20
 if(NOT CMAKE_CXX_STANDARD)
@@ -14,16 +14,11 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(limb_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(tf2 REQUIRED)
-find_package(tf2_geometry_msgs REQUIRED)
-find_package(base_twerk_msgs REQUIRED)
-find_package(commons REQUIRED)
 
-# Declare library
+# # Declare library
 add_library(${PROJECT_NAME}
-        src/${PROJECT_NAME}/${PROJECT_NAME}_cmd_publisher.cpp
+        src/${PROJECT_NAME}/transofrm_utils.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
@@ -31,18 +26,13 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
+
 ament_target_dependencies(${PROJECT_NAME}
         rclcpp
         std_msgs
         geometry_msgs
-        base_twerk_msgs
-        commons
         )
 
-add_executable(${PROJECT_NAME}_node src/${PROJECT_NAME}_node.cpp)
-target_link_libraries(${PROJECT_NAME}_node
-        ${PROJECT_NAME}
-        )
 
 #############
 ## Install ##
@@ -53,23 +43,20 @@ install(
         DESTINATION include
 )
 
-install(TARGETS 
-        ${PROJECT_NAME}_node
-        DESTINATION lib/${PROJECT_NAME}
-        )
-
-install(DIRECTORY
-  launch
-  DESTINATION share/${PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include
 )
 
-##############
+ament_export_include_directories(include)
+
+##############.
 ## Testing  ##
 ##############
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
 endif()
 
 ament_package()
