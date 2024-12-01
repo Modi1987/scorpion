@@ -13,7 +13,7 @@ namespace penta_pod::kin::base_twerk_cmd_publisher {
   using Transform        = geometry_msgs::msg::Transform;
   using BasePoseSetpoint = base_twerk_msgs::srv::BasePoseSetpoint;
   
-  class BaseTwerkCmdMux {
+  class BaseTwerkCmdPuplisher {
     private:
       rclcpp::Node::SharedPtr node_;
       rclcpp::Publisher<Transform>::SharedPtr base_to_footprint_tarnsform_publisher_;
@@ -23,6 +23,8 @@ namespace penta_pod::kin::base_twerk_cmd_publisher {
       Transform body_basefootprint_transform_;
       Transform setpoint_body_basefootprint_transform_;
       int update_interval_millis_;
+      double tracking_linear_velocity_;
+      double tracking_angular_velocity_;
 
       void declare_parameters();
       void load_parameters();
@@ -30,7 +32,7 @@ namespace penta_pod::kin::base_twerk_cmd_publisher {
       void create_setpoint_service();
 
     public:
-      explicit BaseTwerkCmdMux();
+      explicit BaseTwerkCmdPuplisher();
       void spin() {rclcpp::spin(node_);};
   };
 

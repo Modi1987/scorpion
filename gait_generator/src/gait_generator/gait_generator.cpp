@@ -65,9 +65,9 @@ namespace penta_pod::kin::gait_generator {
 
   void GaitGenerator::cmd_null_pos_sub_callback(const geometry_msgs::msg::Transform::SharedPtr msg) {
     // add to the initial displacement
-    body_basefootprint_.translation.x = init_body_basefootprint_.translation.x + msg->translation.x;
-    body_basefootprint_.translation.y = init_body_basefootprint_.translation.y + msg->translation.y;
-    body_basefootprint_.translation.z = init_body_basefootprint_.translation.z + msg->translation.z;
+    body_basefootprint_.translation.x = msg->translation.x;
+    body_basefootprint_.translation.y = msg->translation.y;
+    body_basefootprint_.translation.z = msg->translation.z;
     // consider the rotation absolute (initial rotation must be the identity)
     body_basefootprint_.rotation = msg->rotation;
     RCLCPP_INFO(node_->get_logger(), "Received nullspace translation from equilibrium (default): displacement.x=%.2f, displacement.y=%.2f, displacement.z=%.2f",
@@ -208,7 +208,6 @@ namespace penta_pod::kin::gait_generator {
         "Size of init_body_basefootprint_transform must be 7 (3 for position followed by 4 quaternion).");
     
     auto transform = array_to_transform(body_basefootprint_params, 0);
-    init_body_basefootprint_ = transform;
     body_basefootprint_ = transform;
 
     // Load gait parameters

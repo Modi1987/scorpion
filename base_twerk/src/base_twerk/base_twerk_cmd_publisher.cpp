@@ -8,7 +8,7 @@
 
 namespace penta_pod::kin::base_twerk_cmd_publisher {
 
-  BaseTwerkCmdMux::BaseTwerkCmdMux() : node_{rclcpp::Node::make_shared("base_twerk_cmd_publisher")}
+  BaseTwerkCmdPuplisher::BaseTwerkCmdPuplisher() : node_{rclcpp::Node::make_shared("base_twerk_cmd_publisher")}
   {
     RCLCPP_INFO(node_->get_logger(), "Starting base_twerk_cmd_publisher");
     this->declare_parameters();
@@ -23,7 +23,7 @@ namespace penta_pod::kin::base_twerk_cmd_publisher {
     create_setpoint_service();
   }
 
-  void BaseTwerkCmdMux::create_setpoint_service() {
+  void BaseTwerkCmdPuplisher::create_setpoint_service() {
     auto lambda
         = [this](const BasePoseSetpoint::Request::SharedPtr& request, const BasePoseSetpoint::Response::SharedPtr& response) -> bool {
       auto frame_id = request->pose.header.frame_id;
@@ -50,15 +50,13 @@ namespace penta_pod::kin::base_twerk_cmd_publisher {
     setpoint_service_ = node_->create_service<BasePoseSetpoint>("cmd_null_setpoint", lambda);
   }
 
-  void BaseTwerkCmdMux::timer_callback(){
-    body_basefootprint_transform_ = setpoint_body_basefootprint_transform_;
-    const double LINEAR_VEL = 0.001;
-    const double ANGULAR_VEL = 0.001;
+  void BaseTwerkCmdPuplisher::timer_callback(){
     double deta_t_sec = update_interval_millis_ / 1000.0;
     using namespace penta_pod::kin::commons;
-    auto transform_optional = interpolate_transform(setpoint_body_basefootprint_transform_, 
+    auto transform_optional = interpolate_transform(node_, setpoint_body_basefootprint_transform_, 
                                                             body_basefootprint_transform_, 
-                                                            LINEAR_VEL, ANGULAR_VEL,
+                                                            tracking_linear_velocity_,
+                                                            tracking_angular_velocity_,
                                                             deta_t_sec);
     if(!transform_optional.has_value()) {
       RCLCPP_ERROR(node_->get_logger(), "Error, transofrm interpolation failed");
@@ -68,13 +66,15 @@ namespace penta_pod::kin::base_twerk_cmd_publisher {
     base_to_footprint_tarnsform_publisher_->publish(body_basefootprint_transform_);
   }
   
-  void BaseTwerkCmdMux::declare_parameters(){
+  void BaseTwerkCmdPuplisher::declare_parameters(){
     node_->declare_parameter<int>("base_twerk.base_frame_transform_update_interval_millis");
+    node_->declare_parameter<double>("base_twerk.tracking_linear_velocity");
+    node_->declare_parameter<double>("base_twerk.tracking_angular_velocity");
     node_->declare_parameter<std::vector<double>>("init_body_basefootprint_transform", std::vector<double>{});
   }
 
   
-  void BaseTwerkCmdMux::load_parameters() {
+  void BaseTwerkCmdPuplisher::load_parameters() {
     // Helper function to load a parameter and throw error if not found
     auto load_param = [this](const std::string &param_name, auto &param_value, const std::string &error_message) {
         if (!node_->get_parameter(param_name, param_value)) {
@@ -86,6 +86,14 @@ namespace penta_pod::kin::base_twerk_cmd_publisher {
     load_param("base_twerk.base_frame_transform_update_interval_millis", update_interval_millis_,
         "No parameter base_twerk.base_frame_transform_update_interval_millis is found.");
     RCLCPP_INFO(node_->get_logger(), " base_twerk.update_interval_millis is %d [milliseconds]", update_interval_millis_);
+
+    load_param("base_twerk.tracking_linear_velocity", tracking_linear_velocity_,
+        "No parameter base_twerk.tracking_linear_velocity is found.");
+    RCLCPP_INFO(node_->get_logger(), " base_twerk.tracking_linear_velocity is %f [m/sec]", tracking_linear_velocity_);
+
+    load_param("base_twerk.tracking_angular_velocity", tracking_angular_velocity_,
+        "No parameter base_twerk.tracking_angular_velocity is found.");
+    RCLCPP_INFO(node_->get_logger(), " base_twerk.tracking_angular_velocity is %f [rad/sec]", tracking_angular_velocity_);
 
     // Helper function to validate vector size
     auto validate_vector_size = [this](const std::vector<double> &vec, int expected_size, const std::string &error_message) {

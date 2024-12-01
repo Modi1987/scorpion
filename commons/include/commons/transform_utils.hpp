@@ -7,6 +7,7 @@
 #include <vector>
 #include <numeric>
 #include "geometry_msgs/msg/transform.hpp"
+#include "rclcpp/rclcpp.hpp" 
 
 namespace penta_pod::kin::commons {
 
@@ -19,8 +20,11 @@ namespace penta_pod::kin::commons {
   }
 
   auto get_norm_from_vec(const std::vector<double>& vec) -> double {
-    return std::sqrt(std::accumulate(vec.begin(), vec.end(), 0.0, 
-                                     [](double sum, double v) { return sum + v * v; }));
+    double sum = 0.0;
+    for (auto v : vec) {
+      sum += v * v;
+    }
+    return std::sqrt(sum);
   }
 
   auto get_direction_from_vec(const std::vector<double>& vec, double norm) -> std::optional<std::vector<double>> {
@@ -35,7 +39,8 @@ namespace penta_pod::kin::commons {
     return output_vec;
   }
 
-  auto interpolate_transform(Transform target, Transform source, 
+  auto interpolate_transform(const rclcpp::Node::SharedPtr node,
+                              Transform target, Transform source, 
                               double linear_vel, double /*angular_vel*/,
                               double dt_sec) -> std::optional<Transform> {
 
@@ -47,6 +52,7 @@ namespace penta_pod::kin::commons {
 
     double linear_displacement = linear_vel * dt_sec;
     if (norm < linear_displacement) { // almost near eachothers
+      RCLCPP_INFO(node->get_logger(), "norm %f is less than the discrete displacement %f ", norm, linear_displacement);
       interpolated = source;
       return interpolated;
     }
@@ -57,9 +63,9 @@ namespace penta_pod::kin::commons {
     }
     auto dir = dir_optional.value();
 
-    interpolated.translation.x += dir[0] * linear_displacement;
-    interpolated.translation.y += dir[1] * linear_displacement;
-    interpolated.translation.z += dir[2] * linear_displacement;
+    interpolated.translation.x = source.translation.x + dir[0] * linear_displacement;
+    interpolated.translation.y = source.translation.y + dir[1] * linear_displacement;
+    interpolated.translation.z = source.translation.z + dir[2] * linear_displacement;
 
     return interpolated;
   }

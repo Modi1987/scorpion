@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
-    penta_pod::kin::base_twerk_cmd_publisher::BaseTwerkCmdMux().spin();
+    penta_pod::kin::base_twerk_cmd_publisher::BaseTwerkCmdPuplisher().spin();
     rclcpp::shutdown();
     return 0;
 }
