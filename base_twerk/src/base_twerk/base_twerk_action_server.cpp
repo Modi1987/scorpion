@@ -52,6 +52,17 @@ auto BaseTwerkActionServer::execute(const std::shared_ptr<GoalHandle> goal_handl
   const auto goal = goal_handle->get_goal();
   auto result = std::make_shared<BaseTwerkAction::Result>();
 
+  double mag_displacement = std::sqrt(goal->rx*goal->rx + goal->ry*goal->ry + goal->rz*goal->rz);
+  if (mag_displacement > max_permissible_displacement_meter_) {
+    auto message = "Action aborted for the specified displacement is: " + std::to_string(mag_displacement)
+      + " [meter], which is bigger than the permissible value specified in yaml as " 
+      + std::to_string(max_permissible_displacement_meter_);
+    result->result_message = message;
+    goal_handle->abort(result);
+    RCLCPP_ERROR(node_->get_logger(), message.c_str());
+    return;
+  }
+
   const auto  millis_in_a_second = 1000.0;
   rclcpp::Rate rate(millis_in_a_second / update_interval_millis_double_);
 
@@ -64,8 +75,8 @@ auto BaseTwerkActionServer::execute(const std::shared_ptr<GoalHandle> goal_handl
     return false;
   };
 
+  // get current null pose
   auto start_time = node_->now();
-
   while (rclcpp::ok()) {
     rate.sleep();
 
@@ -90,8 +101,8 @@ auto BaseTwerkActionServer::execute(const std::shared_ptr<GoalHandle> goal_handl
 
   auto dance_time_millis = std::chrono::milliseconds(static_cast<int>(goal->dance_time_millis));
 
+  // start control loop for base pose motion
   start_time = node_->now();
-
   while (rclcpp::ok()) {
     rate.sleep();
 
@@ -157,6 +168,7 @@ auto BaseTwerkActionServer::call_setpoint_client(const PoseStamped& base_to_base
 
 auto BaseTwerkActionServer::declare_parameters() -> void {
   node_->declare_parameter<int>("base_twerk.action_server_service_call_interval_millis");
+  node_->declare_parameter<double>("base_twerk.max_permissible_displacement");
 }
 
 auto BaseTwerkActionServer::get_parameters() -> void {
@@ -171,6 +183,10 @@ auto BaseTwerkActionServer::get_parameters() -> void {
       "No parameter base_twerk.action_server_service_call_interval_millis is found.");
   RCLCPP_INFO(node_->get_logger(), " base_twerk.action_server_service_call_interval_millis is %d [milliseconds]", update_interval_millis_int_);
   update_interval_millis_double_ = static_cast<double>(update_interval_millis_int_);
+
+  load_param("base_twerk.max_permissible_displacement", max_permissible_displacement_meter_,
+      "No parameter base_twerk.max_permissible_displacement is found.");
+  RCLCPP_INFO(node_->get_logger(), " base_twerk.max_permissible_displacement is %f [m]", max_permissible_displacement_meter_);
 }
 
 }  // namespace penta_pod::kin::base_twerk

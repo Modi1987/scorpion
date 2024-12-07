@@ -74,51 +74,57 @@ namespace penta_pod::kin::gait_generator {
                 body_basefootprint_.translation.x, body_basefootprint_.translation.y, body_basefootprint_.translation.z);
   }
 
-  void GaitGenerator::timer_callback(double delta_t_milli){
-      auto delta_t_sec = delta_t_milli/1000.;
-      double dx = cmd_vel_.linear.x*delta_t_sec;
-      double dy = cmd_vel_.linear.y*delta_t_sec;
-      double d_theta = cmd_vel_.angular.z*delta_t_sec;
-      double w = 2.5;
-      double b = 0.05;
-      
-      // check if cmd_vel is zero and feet near the equilibrium
-      double vel_mag = std::sqrt(cmd_vel_.linear.x*cmd_vel_.linear.x + cmd_vel_.linear.y*cmd_vel_.linear.y);
-      auto collective_xy_distance_from_equilibrium = 0.0;
-      for(int i = 0; i < feet_num_; i++) {
-        collective_xy_distance_from_equilibrium += std::abs(feet_pos_in_footprint_[i].x - init_feet_pos_in_footprint_[i].x) + 
-        std::abs(feet_pos_in_footprint_[i].y - init_feet_pos_in_footprint_[i].y);
-      }
+  void GaitGenerator::update_phase(double delta_t_milli) {
+    
+    auto delta_t_sec = delta_t_milli/1000.;
+    double w = 2.5;
 
-      if ((collective_xy_distance_from_equilibrium < 0.005) && (vel_mag < 0.001)) {
-        auto check_z_near_zero = current_phase_ - std::floor(current_phase_ / (2 * pi)) * 2 * pi;
-        if (check_z_near_zero < w*delta_t_sec + 0.001)
-        {
-          w = 0.0;
-          current_phase_ = std::floor(current_phase_ / (2 * pi)) * 2 * pi;
+    // check if cmd_vel is zero and feet near the equilibrium
+    double vel_mag = std::sqrt(cmd_vel_.linear.x*cmd_vel_.linear.x + cmd_vel_.linear.y*cmd_vel_.linear.y);
+    auto collective_xy_distance_from_equilibrium = 0.0;
+    for(int i = 0; i < feet_num_; i++) {
+      collective_xy_distance_from_equilibrium += std::abs(feet_pos_in_footprint_[i].x - init_feet_pos_in_footprint_[i].x) + 
+      std::abs(feet_pos_in_footprint_[i].y - init_feet_pos_in_footprint_[i].y);
+    }
+
+    if ((collective_xy_distance_from_equilibrium < 0.005) && (vel_mag < 0.001)) {
+      auto check_z_near_zero = current_phase_ - std::floor(current_phase_ / (2 * pi)) * 2 * pi;
+      if (check_z_near_zero < w*delta_t_sec + 0.001)
+      {
+        w = 0.0;
+        current_phase_ = std::floor(current_phase_ / (2 * pi)) * 2 * pi;
+      }
+    }
+    current_phase_ = current_phase_ + w*delta_t_sec;
+  }
+
+  void GaitGenerator::update_feet_positions(double delta_t_milli) {
+
+    auto delta_t_sec = delta_t_milli/1000.;
+    
+    double dx = cmd_vel_.linear.x*delta_t_sec;
+    double dy = cmd_vel_.linear.y*delta_t_sec;
+    double d_theta = cmd_vel_.angular.z*delta_t_sec;
+    double b = 0.05;
+    
+    for(int i = 0; i < feet_num_; i++) {
+        auto temp = foot_pos_z_generator(b,current_phase_,phase_shift_vec_[i],feet_num_);
+        if(temp==0.) {
+            double x = feet_pos_in_footprint_[i].x;
+            double y = feet_pos_in_footprint_[i].y;
+            feet_pos_in_footprint_[i].x = x + dx - d_theta*y;
+            feet_pos_in_footprint_[i].y = y + dy + d_theta*x;
+            feet_pos_in_footprint_[i].z = 0.;
+            final_displacement_[i].x = feet_pos_in_footprint_[i].x - init_feet_pos_in_footprint_[i].x;
+            final_displacement_[i].y = feet_pos_in_footprint_[i].y - init_feet_pos_in_footprint_[i].y;
+        } else {
+            feet_pos_in_footprint_[i].x = init_feet_pos_in_footprint_[i].x + 
+                                            foot_pos_xy_generator(current_phase_, phase_shift_vec_[i], final_displacement_[i].x, feet_num_);
+            feet_pos_in_footprint_[i].y = init_feet_pos_in_footprint_[i].y + 
+                                            foot_pos_xy_generator(current_phase_, phase_shift_vec_[i], final_displacement_[i].y, feet_num_);
+            feet_pos_in_footprint_[i].z = temp;
         }
-      }
-      current_phase_ = current_phase_ + w*delta_t_sec;
-
-      for(int i = 0; i < feet_num_; i++) {
-          auto temp = foot_pos_z_generator(b,current_phase_,phase_shift_vec_[i],feet_num_);
-          if(temp==0.) {
-              double x = feet_pos_in_footprint_[i].x;
-              double y = feet_pos_in_footprint_[i].y;
-              feet_pos_in_footprint_[i].x = x + dx - d_theta*y;
-              feet_pos_in_footprint_[i].y = y + dy + d_theta*x;
-              feet_pos_in_footprint_[i].z = feet_pos_in_footprint_[i].z;
-              final_displacement_[i].x = feet_pos_in_footprint_[i].x - init_feet_pos_in_footprint_[i].x;
-              final_displacement_[i].y = feet_pos_in_footprint_[i].y - init_feet_pos_in_footprint_[i].y;
-          } else {
-              feet_pos_in_footprint_[i].x = init_feet_pos_in_footprint_[i].x + 
-                                              foot_pos_xy_generator(current_phase_, phase_shift_vec_[i], final_displacement_[i].x, feet_num_);
-              feet_pos_in_footprint_[i].y = init_feet_pos_in_footprint_[i].y + 
-                                              foot_pos_xy_generator(current_phase_, phase_shift_vec_[i], final_displacement_[i].y, feet_num_);
-              feet_pos_in_footprint_[i].z = temp;
-          }
-
-          if (i < static_cast<int>(legs_body_transforms_.size())) {
+        if (i < static_cast<int>(legs_body_transforms_.size())) {
             auto  point = applyInverseTransform(feet_pos_in_footprint_[i], body_basefootprint_);
             point = applyInverseTransform(point, legs_body_transforms_[i]);
             limb_msgs::msg::Pxyz xyz_msg;
@@ -127,10 +133,15 @@ namespace penta_pod::kin::gait_generator {
             xyz_msg.z = point.z;
 
             xyz_publishers_[i]->publish(xyz_msg);
-          } else {
-              RCLCPP_ERROR_STREAM(node_->get_logger(), "No transform available for limb " << i);
-          }
+        } else {
+            RCLCPP_ERROR_STREAM(node_->get_logger(), "No transform available for limb " << i);
+        }
       }    
+  }
+
+  void GaitGenerator::timer_callback(double delta_t_milli){
+    update_phase(delta_t_milli);
+    update_feet_positions(delta_t_milli);
   }
   
   void GaitGenerator::declare_parameters(){

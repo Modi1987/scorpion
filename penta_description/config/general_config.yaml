@@ -29,6 +29,7 @@
     base_twerk:
       base_frame_transform_update_interval_millis: 20
       action_server_service_call_interval_millis: 100
+      max_permissible_displacement: 0.075
       tracking_linear_velocity: 0.5 # [m/sec]
       tracking_angular_velocity: 1.0 # [rad/sec]
     i2c_actuators_params:

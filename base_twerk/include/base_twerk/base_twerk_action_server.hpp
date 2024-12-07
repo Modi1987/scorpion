@@ -49,6 +49,7 @@ namespace penta_pod::kin::base_twerk {
         const std::shared_ptr<GoalHandle> goal_handle) -> PoseStamped;
 
       double update_interval_millis_double_;
+      double max_permissible_displacement_meter_;
 
       struct ReceviedPoseStamped {
         rclcpp::Time timestamp;

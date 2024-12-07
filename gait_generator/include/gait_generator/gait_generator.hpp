@@ -56,6 +56,9 @@ namespace penta_pod::kin::gait_generator {
       void cmd_vel_sub_callback(const geometry_msgs::msg::Twist::SharedPtr msg);
       void cmd_null_pos_sub_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
+      void update_phase(double delta_t_milli);
+      void update_feet_positions(double delta_t_milli);
+      
       // move feet up (z up) calculation
       double foot_pos_z_generator(double b, double q, double phase_shift, int n) {
         q = q + phase_shift; // add the phase
