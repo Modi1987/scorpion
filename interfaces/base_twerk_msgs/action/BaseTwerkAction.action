@@ -1,0 +1,11 @@
+float64 rx
+float64 ry
+float64 rz
+float64 phi_x
+float64 phi_y
+float64 phi_z
+float64 w
+float64 dance_time_millis
+---
+string result_message
+---

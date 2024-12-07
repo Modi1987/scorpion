@@ -1,7 +1,7 @@
 /**:
   ros__parameters:
     limbs_num: 5
-    joints_per_limb: 3
+    joints_per_limb: [3, 3, 3, 3, 3] # the number of joints per limb shall comply with dof paramter inside the limb_xx_mdh.yaml file
     max_v: 0.005 # meter per sec
     max_w: 0.05 # rad per sec
     legs_body_transforms: [
@@ -21,8 +21,18 @@
     init_body_basefootprint_transform: [
       0.0, 0.0, 0.075, 0.0, 0.0, 0.0, 1.0
     ]
+    gait_parameters:
+      max_gait_linear_speed: 0.035 # meter per sec
+      max_gait_turning_speed: 0.25 # rad per sec
+    joints_aggregator:
+      joints_update_interval_millis: 50
+    base_twerk:
+      base_frame_transform_update_interval_millis: 20
+      action_server_service_call_interval_millis: 100
+      max_permissible_displacement: 0.075
+      tracking_linear_velocity: 0.5 # [m/sec]
+      tracking_angular_velocity: 1.0 # [rad/sec]
     i2c_actuators_params:
-      update_interval_millis: 20
       actuator_angle_bias_at_joint_zero_degree: [ # considering the motors are at their midrange at 135 degrees when robot joint is at zero"
         135.0, 135.0, 135.0,
         135.0, 135.0, 135.0,
