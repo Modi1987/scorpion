@@ -12,7 +12,7 @@ def generate_launch_description():
     ld = LaunchDescription()
     ld.add_action(Node(
         package="base_twerk",
-        executable="base_twerk_node",
+        executable="base_twerk_publisher_node",
         output="screen",
         parameters=[config],
     ))

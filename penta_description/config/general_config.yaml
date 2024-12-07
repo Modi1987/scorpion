@@ -28,7 +28,8 @@
       joints_update_interval_millis: 50
     base_twerk:
       base_frame_transform_update_interval_millis: 20
-      tracking_linear_velocity: 1.0 # [m/sec]
+      action_server_service_call_interval_millis: 100
+      tracking_linear_velocity: 0.5 # [m/sec]
       tracking_angular_velocity: 1.0 # [rad/sec]
     i2c_actuators_params:
       actuator_angle_bias_at_joint_zero_degree: [ # considering the motors are at their midrange at 135 degrees when robot joint is at zero"

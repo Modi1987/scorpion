@@ -7,6 +7,7 @@
 // include messages
 #include "limb_msgs/msg/pxyz.hpp"
 #include "geometry_msgs/msg/transform.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/point.hpp"
 
@@ -45,7 +46,7 @@ namespace penta_pod::kin::gait_generator {
 
       std::vector<rclcpp::Publisher<limb_msgs::msg::Pxyz>::SharedPtr> xyz_publishers_;
       rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscription_;
-      rclcpp::Subscription<geometry_msgs::msg::Transform>::SharedPtr cmd_null_pos_subscription_; // null space motion transform (body to basefootprint)
+      rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr cmd_null_pos_subscription_; // null space motion transform (body to basefootprint)
       rclcpp::TimerBase::SharedPtr timer_;
       geometry_msgs::msg::Twist cmd_vel_{};
 
@@ -53,10 +54,10 @@ namespace penta_pod::kin::gait_generator {
       void load_parameters();
       void timer_callback(double delta_t_milli);
       void cmd_vel_sub_callback(const geometry_msgs::msg::Twist::SharedPtr msg);
-      void cmd_null_pos_sub_callback(const geometry_msgs::msg::Transform::SharedPtr msg);
+      void cmd_null_pos_sub_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
       // move feet up (z up) calculation
-      double stepFunOneLegOff_2(double b, double q, double phase_shift, int n) {
+      double foot_pos_z_generator(double b, double q, double phase_shift, int n) {
         q = q + phase_shift; // add the phase
         q = q - std::floor(q / (2 * M_PI)) * 2 * M_PI; // remove multiples of 2*pi (resulting q is always less than 2*pi)
         double epsilon = M_PI / n;
@@ -72,7 +73,7 @@ namespace penta_pod::kin::gait_generator {
       }
 
       // moving foot back to equilbrium
-      double stepFunOneLegOff_3(double q, double phase_shift, double delta_xFinal, int legsNum) {
+      double foot_pos_xy_generator(double q, double phase_shift, double delta_xFinal, int legsNum) {
           q = q + phase_shift;
           q = q - std::floor(q / (2 * M_PI)) * 2 * M_PI;
           double epsilon = M_PI / legsNum;

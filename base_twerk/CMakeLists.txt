@@ -23,6 +23,7 @@ find_package(commons REQUIRED)
 # Declare library
 add_library(${PROJECT_NAME}
         src/${PROJECT_NAME}/${PROJECT_NAME}_cmd_publisher.cpp
+        src/${PROJECT_NAME}/${PROJECT_NAME}_action_server.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
@@ -31,15 +32,21 @@ target_include_directories(${PROJECT_NAME}
         $<INSTALL_INTERFACE:include>)
 
 ament_target_dependencies(${PROJECT_NAME}
-        rclcpp
+        "rclcpp_action"
+        "rclcpp_components"
         std_msgs
         geometry_msgs
         base_twerk_msgs
         commons
         )
 
-add_executable(${PROJECT_NAME}_node src/${PROJECT_NAME}_node.cpp)
-target_link_libraries(${PROJECT_NAME}_node
+add_executable(${PROJECT_NAME}_publisher_node src/${PROJECT_NAME}_publisher_node.cpp)
+target_link_libraries(${PROJECT_NAME}_publisher_node
+        ${PROJECT_NAME}
+        )
+
+add_executable(${PROJECT_NAME}_action_server_node src/${PROJECT_NAME}_action_server_node.cpp)
+target_link_libraries(${PROJECT_NAME}_action_server_node
         ${PROJECT_NAME}
         )
 
@@ -53,7 +60,8 @@ install(
 )
 
 install(TARGETS 
-        ${PROJECT_NAME}_node
+        ${PROJECT_NAME}_publisher_node
+        ${PROJECT_NAME}_action_server_node
         DESTINATION lib/${PROJECT_NAME}
         )
 

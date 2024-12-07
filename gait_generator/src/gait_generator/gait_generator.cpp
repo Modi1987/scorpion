@@ -24,7 +24,7 @@ namespace penta_pod::kin::gait_generator {
     RCLCPP_INFO(node_->get_logger(), "Starting gait_generator_node");
     this->declare_parameters();
     this->load_parameters();
-    const double delta_t_milli = 50.;
+    const double delta_t_milli = 10.;
 
     current_phase_ = 0.;
     for(int i = 0; i < feet_num_; i++) {
@@ -37,8 +37,8 @@ namespace penta_pod::kin::gait_generator {
     cmd_vel_subscription_ = node_->create_subscription<geometry_msgs::msg::Twist>(
         "cmd_vel", 10, [this](const geometry_msgs::msg::Twist::SharedPtr msg){ cmd_vel_sub_callback(msg); });
 
-    cmd_null_pos_subscription_ = node_->create_subscription<geometry_msgs::msg::Transform>(
-        "cmd_null_position", 10, [this](const geometry_msgs::msg::Transform::SharedPtr msg){ cmd_null_pos_sub_callback(msg); });
+    cmd_null_pos_subscription_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
+        "null_space_pose", 10, [this](const geometry_msgs::msg::PoseStamped::SharedPtr msg){ cmd_null_pos_sub_callback(msg); });
 
     timer_ = node_->create_wall_timer(
         std::chrono::milliseconds(static_cast<int>(delta_t_milli)),
@@ -63,15 +63,15 @@ namespace penta_pod::kin::gait_generator {
     */
   }
 
-  void GaitGenerator::cmd_null_pos_sub_callback(const geometry_msgs::msg::Transform::SharedPtr msg) {
+  void GaitGenerator::cmd_null_pos_sub_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
     // add to the initial displacement
-    body_basefootprint_.translation.x = msg->translation.x;
-    body_basefootprint_.translation.y = msg->translation.y;
-    body_basefootprint_.translation.z = msg->translation.z;
+    body_basefootprint_.translation.x = msg->pose.position.x;
+    body_basefootprint_.translation.y = msg->pose.position.y;
+    body_basefootprint_.translation.z = msg->pose.position.z;
     // consider the rotation absolute (initial rotation must be the identity)
-    body_basefootprint_.rotation = msg->rotation;
+    // body_basefootprint_.rotation. = msg->rotation;
     RCLCPP_INFO(node_->get_logger(), "Received nullspace translation from equilibrium (default): displacement.x=%.2f, displacement.y=%.2f, displacement.z=%.2f",
-                msg->translation.x, msg->translation.y, msg->translation.z);
+                body_basefootprint_.translation.x, body_basefootprint_.translation.y, body_basefootprint_.translation.z);
   }
 
   void GaitGenerator::timer_callback(double delta_t_milli){
@@ -81,10 +81,27 @@ namespace penta_pod::kin::gait_generator {
       double d_theta = cmd_vel_.angular.z*delta_t_sec;
       double w = 2.5;
       double b = 0.05;
-      current_phase_=current_phase_+w*delta_t_sec;
+      
+      // check if cmd_vel is zero and feet near the equilibrium
+      double vel_mag = std::sqrt(cmd_vel_.linear.x*cmd_vel_.linear.x + cmd_vel_.linear.y*cmd_vel_.linear.y);
+      auto collective_xy_distance_from_equilibrium = 0.0;
+      for(int i = 0; i < feet_num_; i++) {
+        collective_xy_distance_from_equilibrium += std::abs(feet_pos_in_footprint_[i].x - init_feet_pos_in_footprint_[i].x) + 
+        std::abs(feet_pos_in_footprint_[i].y - init_feet_pos_in_footprint_[i].y);
+      }
+
+      if ((collective_xy_distance_from_equilibrium < 0.005) && (vel_mag < 0.001)) {
+        auto check_z_near_zero = current_phase_ - std::floor(current_phase_ / (2 * pi)) * 2 * pi;
+        if (check_z_near_zero < w*delta_t_sec + 0.001)
+        {
+          w = 0.0;
+          current_phase_ = std::floor(current_phase_ / (2 * pi)) * 2 * pi;
+        }
+      }
+      current_phase_ = current_phase_ + w*delta_t_sec;
 
       for(int i = 0; i < feet_num_; i++) {
-          auto temp = stepFunOneLegOff_2(b,current_phase_,phase_shift_vec_[i],feet_num_);
+          auto temp = foot_pos_z_generator(b,current_phase_,phase_shift_vec_[i],feet_num_);
           if(temp==0.) {
               double x = feet_pos_in_footprint_[i].x;
               double y = feet_pos_in_footprint_[i].y;
@@ -95,9 +112,9 @@ namespace penta_pod::kin::gait_generator {
               final_displacement_[i].y = feet_pos_in_footprint_[i].y - init_feet_pos_in_footprint_[i].y;
           } else {
               feet_pos_in_footprint_[i].x = init_feet_pos_in_footprint_[i].x + 
-                                              stepFunOneLegOff_3(current_phase_, phase_shift_vec_[i], final_displacement_[i].x, feet_num_);
+                                              foot_pos_xy_generator(current_phase_, phase_shift_vec_[i], final_displacement_[i].x, feet_num_);
               feet_pos_in_footprint_[i].y = init_feet_pos_in_footprint_[i].y + 
-                                              stepFunOneLegOff_3(current_phase_, phase_shift_vec_[i], final_displacement_[i].y, feet_num_);
+                                              foot_pos_xy_generator(current_phase_, phase_shift_vec_[i], final_displacement_[i].y, feet_num_);
               feet_pos_in_footprint_[i].z = temp;
           }
 

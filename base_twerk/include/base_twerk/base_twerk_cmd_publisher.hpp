@@ -2,26 +2,27 @@
 #define BASE_TWERK_PUBLISHER_HPP_
 
 #include <rclcpp/executors.hpp>
-#include "rclcpp/rclcpp.hpp"                      // for rclcpp
+#include "rclcpp/rclcpp.hpp"
 
 // include messages
-#include "geometry_msgs/msg/transform.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
 #include "base_twerk_msgs/srv/base_pose_setpoint.hpp"
 
-namespace penta_pod::kin::base_twerk_cmd_publisher {
+namespace penta_pod::kin::base_twerk {
 
-  using Transform        = geometry_msgs::msg::Transform;
+  using PoseStamped      = geometry_msgs::msg::PoseStamped;
   using BasePoseSetpoint = base_twerk_msgs::srv::BasePoseSetpoint;
   
   class BaseTwerkCmdPuplisher {
     private:
       rclcpp::Node::SharedPtr node_;
-      rclcpp::Publisher<Transform>::SharedPtr base_to_footprint_tarnsform_publisher_;
+      rclcpp::Publisher<PoseStamped>::SharedPtr base_pose_publisher_;
       rclcpp::Service<BasePoseSetpoint>::SharedPtr setpoint_service_;
+      rclcpp::CallbackGroup::SharedPtr callback_group_;
       rclcpp::TimerBase::SharedPtr timer_;
 
-      Transform body_basefootprint_transform_;
-      Transform setpoint_body_basefootprint_transform_;
+      PoseStamped base_pose_;
+      PoseStamped setpoint_base_pose_;
       int update_interval_millis_;
       double tracking_linear_velocity_;
       double tracking_angular_velocity_;
@@ -36,6 +37,6 @@ namespace penta_pod::kin::base_twerk_cmd_publisher {
       void spin() {rclcpp::spin(node_);};
   };
 
-} // namespace penta_pod::kin::base_twerk_cmd_publisher
+} // namespace penta_pod::kin::base_twerk
 
 #endif  // BASE_TWERK_PUBLISHER_HPP_

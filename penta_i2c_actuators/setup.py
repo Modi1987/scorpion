@@ -16,7 +16,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='modi',
-    maintainer_email='mohammad.safeea@hilti.com',
+    maintainer_email='xx.xx@xx.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],

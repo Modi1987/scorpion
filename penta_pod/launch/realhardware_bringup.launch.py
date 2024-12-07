@@ -43,10 +43,26 @@ def generate_launch_description():
         launch_arguments={'mode': mode}.items()  # Pass the mode argument
     )
 
+        # Include the null space cmd publisher launch file
+    null_space_publisher = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(FindPackageShare('base_twerk').find('base_twerk'), 'launch', 'null_pose_publisher.launch.py')
+        )
+    )
+
+    # Include the twerk action server launch file
+    twerk_action_server = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(FindPackageShare('base_twerk').find('base_twerk'), 'launch', 'base_twerk_action_server.launch.py')
+        )
+    )
+
     return LaunchDescription([
         mode_arg,
         penta_pod_launch,
         gait_generator_launch,
         joints_aggregator_launch,
         penta_i2c_actuators_launch,
+        null_space_publisher,
+        twerk_action_server
     ])
