@@ -7,7 +7,7 @@ for i in range(5):
      theta = 2*i*pi/5.
      x = r*cos(theta)
      y = r*sin(theta)
-     z = 0.05
+     z = 0.0
      qw = cos(theta/2.)
      qx = 0.
      qy = 0.
@@ -17,12 +17,12 @@ for i in range(5):
 
 print('***************')
 
-# generate initial feet position in body frame
-r = 0.25
+# generate initial feet position in base footprint
+r = 0.085+0.0455+0.096
 for i in range(5):
      theta = 2*i*pi/5.
      x = r*cos(theta)
      y = r*sin(theta)
-     z = -0.05
+     z = 0.0
      pos = [x, y, z]
      print(pos)
