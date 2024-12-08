@@ -81,12 +81,12 @@ void GaitGenerator::cmd_null_pos_sub_callback(
   body_basefootprint_.translation.z = msg->pose.position.z;
   // consider the rotation absolute (initial rotation must be the identity)
   // body_basefootprint_.rotation. = msg->rotation;
-  RCLCPP_INFO(node_->get_logger(),
-              "Received nullspace translation from equilibrium (default): "
-              "displacement.x=%.2f, displacement.y=%.2f, displacement.z=%.2f",
-              body_basefootprint_.translation.x,
-              body_basefootprint_.translation.y,
-              body_basefootprint_.translation.z);
+  // RCLCPP_INFO(node_->get_logger(),
+  //             "Received nullspace translation from equilibrium (default): "
+  //             "displacement.x=%.2f, displacement.y=%.2f, displacement.z=%.2f",
+  //             body_basefootprint_.translation.x,
+  //             body_basefootprint_.translation.y,
+  //             body_basefootprint_.translation.z);
 }
 
 void GaitGenerator::update_phase(double delta_t_milli) {
