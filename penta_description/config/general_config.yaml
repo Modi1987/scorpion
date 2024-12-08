@@ -21,6 +21,13 @@
     init_body_basefootprint_transform: [
       0.0, 0.0, 0.158, 0.0, 0.0, 0.0, 1.0
     ]
+    joint_angles_at_initial_pose_degree: [
+      0.0, 0.0, 90.0,
+      0.0, 0.0, 90.0,
+      0.0, 0.0, 90.0,
+      0.0, 0.0, 90.0,
+      0.0, 0.0, 90.0,
+    ]
     gait_parameters:
       max_gait_linear_speed: 0.035 # meter per sec
       max_gait_turning_speed: 0.25 # rad per sec
@@ -39,13 +46,6 @@
         135.0, 135.0, 60.0,
         135.0, 135.0, 60.0,
         135.0, 135.0, 60.0,
-      ]
-      geometrical_angles_at_initial_pose_degree: [
-        0.0, 0.0, 90.0,
-        0.0, 0.0, 90.0,
-        0.0, 0.0, 90.0,
-        0.0, 0.0, 90.0,
-        0.0, 0.0, 90.0,
       ]
       dir: [
         1.0, 1.0, 1.0,

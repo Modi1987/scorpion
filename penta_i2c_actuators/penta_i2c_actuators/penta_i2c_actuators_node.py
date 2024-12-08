@@ -61,7 +61,7 @@ class PentaI2CActuators(Node):
         # Calculate actuator setpoints in degrees
         for i in range(self.joints_count):
             q_i_degree = self.q[i] * 180.0 / math.pi
-            dq = q_i_degree - self.geometrical_angles_at_initial_pose_degree[i]
+            dq = q_i_degree - self.joint_angles_at_initial_pose_degree[i]
             servo_setpoint = self.dir[i] * dq + self.actuator_angles_at_initial_pose_degree[i]
             max_val = self.servo_actuation_range_degree[i]
             self.actuator_setpoint_degree[i] = self.clamp(servo_setpoint, i, 0.0, max_val)
@@ -97,7 +97,7 @@ class PentaI2CActuators(Node):
         self.declare_parameter('limbs_num', 5)  # Default value 5
         self.declare_parameter('joints_per_limb', [3]*5)  # Default value 3
         self.declare_parameter('i2c_actuators_params.actuator_angles_at_initial_pose_degree', [0.0] * 15)    # Actuator angles at initial pose
-        self.declare_parameter('i2c_actuators_params.geometrical_angles_at_initial_pose_degree', [0.0] * 15) # Geometrical angles at initial pose 
+        self.declare_parameter('joint_angles_at_initial_pose_degree', [0.0] * 15) # Geometrical angles at initial pose 
         self.declare_parameter('i2c_actuators_params.dir', [1.0] * 15)  # Default direction (1.0 for no inversion)
         self.declare_parameter('servo_parameters.servo_actuation_range_degree', [180.0] * 15) # angular range degree
         self.declare_parameter('servo_parameters.servo_min_pulse_width_microsec', [500.0] * 15) # microseconds
@@ -116,7 +116,7 @@ class PentaI2CActuators(Node):
         self.joints_count = sum(self.joints_per_limb)
         self.get_logger().info(f'Total limbs joints count is: {self.joints_count}') 
         self.actuator_angles_at_initial_pose_degree = self.get_parameter('i2c_actuators_params.actuator_angles_at_initial_pose_degree').get_parameter_value().double_array_value
-        self.geometrical_angles_at_initial_pose_degree = self.get_parameter('i2c_actuators_params.geometrical_angles_at_initial_pose_degree').get_parameter_value().double_array_value
+        self.joint_angles_at_initial_pose_degree = self.get_parameter('joint_angles_at_initial_pose_degree').get_parameter_value().double_array_value
         self.dir = self.get_parameter('i2c_actuators_params.dir').get_parameter_value().double_array_value
         self.servo_actuation_range_degree = self.get_parameter('servo_parameters.servo_actuation_range_degree').get_parameter_value().double_array_value
         self.servo_min_pulse_width_microsec = self.get_parameter('servo_parameters.servo_min_pulse_width_microsec').get_parameter_value().double_array_value
@@ -127,8 +127,8 @@ class PentaI2CActuators(Node):
         else:
             self.get_logger().info(f'Initial joints bias in degree is loaded: {format_array_to_string(self.actuator_angles_at_initial_pose_degree)}')
 
-        if len(self.geometrical_angles_at_initial_pose_degree) != self.joints_count:
-            self.get_logger().error('ERROR: geometrical_angles_at_initial_pose_degree parameter size mismatch!')
+        if len(self.joint_angles_at_initial_pose_degree) != self.joints_count:
+            self.get_logger().error('ERROR: joint_angles_at_initial_pose_degree parameter size mismatch!')
         else:
             self.get_logger().info(f'Initial joints bias in degree is loaded: {format_array_to_string(self.actuator_angles_at_initial_pose_degree)}')
 
