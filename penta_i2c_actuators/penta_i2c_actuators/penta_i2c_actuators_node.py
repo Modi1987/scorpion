@@ -130,7 +130,7 @@ class PentaI2CActuators(Node):
         if len(self.joint_angles_at_initial_pose_degree) != self.joints_count:
             self.get_logger().error('ERROR: joint_angles_at_initial_pose_degree parameter size mismatch!')
         else:
-            self.get_logger().info(f'Joints angles at initial configuration is loaded: {format_array_to_string(self.actuator_angles_at_initial_pose_degree)}')
+            self.get_logger().info(f'Joints angles at initial configuration is loaded: {format_array_to_string(self.joint_angles_at_initial_pose_degree)}')
 
         if len(self.dir) != self.joints_count:
             self.get_logger().error('ERROR: Direction array size mismatch with joints count!')
