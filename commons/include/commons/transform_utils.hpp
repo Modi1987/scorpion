@@ -52,10 +52,10 @@ auto get_direction_from_vec(const std::vector<double> &vec, double norm)
   return output_vec;
 }
 
-auto interpolate_transform(const rclcpp::Node::SharedPtr /*node*/, Transform target,
-                           Transform source, double linear_vel,
-                           double /*angular_vel*/, double dt_sec)
-    -> std::optional<Transform> {
+auto interpolate_transform(const rclcpp::Node::SharedPtr /*node*/,
+                           Transform target, Transform source,
+                           double linear_vel, double /*angular_vel*/,
+                           double dt_sec) -> std::optional<Transform> {
 
   Transform interpolated{};
 

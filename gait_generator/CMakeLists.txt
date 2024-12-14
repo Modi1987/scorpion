@@ -16,6 +16,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(limb_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(gait_generator_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 
@@ -34,6 +35,7 @@ ament_target_dependencies(${PROJECT_NAME}
         std_msgs
         geometry_msgs
         limb_msgs
+        gait_generator_msgs
         tf2
         tf2_geometry_msgs
         )

@@ -1,0 +1,6 @@
+uint8 pattern
+---
+bool success
+string message
+
+

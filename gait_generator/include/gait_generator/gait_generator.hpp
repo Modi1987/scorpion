@@ -5,6 +5,7 @@
 #include <rclcpp/executors.hpp>
 
 // include messages
+#include "gait_generator_msgs/srv/set_gait_pattern.hpp"
 #include "geometry_msgs/msg/point.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/transform.hpp"
@@ -21,6 +22,8 @@
 
 namespace penta_pod::kin::gait_generator {
 
+using SetGaitPattern = gait_generator_msgs::srv::SetGaitPattern;
+
 inline auto double_to_string_formatted(double number, int digits_after_point)
     -> std::string {
   std::ostringstream oss;
@@ -35,7 +38,25 @@ private:
   std::vector<double> q_state;
 
   double current_phase_, max_gait_linear_speed_, max_gait_turning_speed_;
+  bool is_walking_{false};
   int feet_num_;
+
+  struct GatiPatterns {
+    int active_gait_index_ = 0;
+    int gaits_num_ = 0;
+    std::vector<std::vector<long int>> patterns_;
+    std::vector<long int> get_active_pattern() {
+      return patterns_[active_gait_index_];
+    }
+    bool set_active_pattern(int i) {
+      if (i < 0)
+        return false;
+      if (i >= gaits_num_)
+        return false;
+      active_gait_index_ = i;
+      return true;
+    }
+  } gait_patterns_;
 
   std::vector<geometry_msgs::msg::Transform> legs_body_transforms_;
   geometry_msgs::msg::Transform body_basefootprint_;
@@ -58,6 +79,8 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   geometry_msgs::msg::Twist cmd_vel_{};
 
+  rclcpp::Service<SetGaitPattern>::SharedPtr set_gait_pattern_server_;
+  void create_set_gait_pattern_service();
   void declare_parameters();
   void load_parameters();
   void timer_callback(double delta_t_milli);

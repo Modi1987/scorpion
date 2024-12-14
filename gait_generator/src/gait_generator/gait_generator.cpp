@@ -50,6 +50,44 @@ GaitGenerator::GaitGenerator()
   timer_ = node_->create_wall_timer(
       std::chrono::milliseconds(static_cast<int>(delta_t_milli)),
       [this, delta_t_milli]() { timer_callback(delta_t_milli); });
+
+  create_set_gait_pattern_service();
+}
+
+void GaitGenerator::create_set_gait_pattern_service() {
+  auto lambda =
+      [this](const SetGaitPattern::Request::SharedPtr &request,
+             const SetGaitPattern::Response::SharedPtr &response) -> bool {
+    int pattern = request->pattern;
+    if (is_walking_) {
+      std::string error_message =
+          "Can not change gait pattern while the robot is moving";
+      RCLCPP_WARN(node_->get_logger(), error_message.c_str());
+      response->message = error_message;
+      response->success = false;
+      return true;
+    }
+    if (!gait_patterns_.set_active_pattern(pattern)) {
+      std::string error_message = "Could not set gait pattern to " +
+                                  std::to_string(pattern) +
+                                  ", make sure u r using a valid value";
+      RCLCPP_WARN(node_->get_logger(), error_message.c_str());
+      response->message = error_message;
+      response->success = false;
+      return true;
+    }
+    std::string message =
+        "Changed successfully to gait pattern: " + std::to_string(pattern);
+    response->message = message;
+    response->success = true;
+    return true;
+  };
+
+  set_gait_pattern_server_ = node_->create_service<SetGaitPattern>(
+      "gait_generator/set_gait_pattern", lambda,
+      rmw_qos_profile_services_default,
+      node_->create_callback_group(
+          rclcpp::CallbackGroupType::MutuallyExclusive));
 }
 
 void GaitGenerator::cmd_vel_sub_callback(
@@ -83,8 +121,8 @@ void GaitGenerator::cmd_null_pos_sub_callback(
   // body_basefootprint_.rotation. = msg->rotation;
   // RCLCPP_INFO(node_->get_logger(),
   //             "Received nullspace translation from equilibrium (default): "
-  //             "displacement.x=%.2f, displacement.y=%.2f, displacement.z=%.2f",
-  //             body_basefootprint_.translation.x,
+  //             "displacement.x=%.2f, displacement.y=%.2f,
+  //             displacement.z=%.2f", body_basefootprint_.translation.x,
   //             body_basefootprint_.translation.y,
   //             body_basefootprint_.translation.z);
 }
@@ -114,6 +152,7 @@ void GaitGenerator::update_phase(double delta_t_milli) {
       current_phase_ = std::floor(current_phase_ / (2 * pi)) * 2 * pi;
     }
   }
+  is_walking_ = (w == 0.0) ? false : true;
   current_phase_ = current_phase_ + w * delta_t_sec;
 }
 
@@ -125,41 +164,44 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
   double dy = cmd_vel_.linear.y * delta_t_sec;
   double d_theta = cmd_vel_.angular.z * delta_t_sec;
   double b = 0.05;
-
+  auto gait_pattern = gait_patterns_.get_active_pattern();
   for (int i = 0; i < feet_num_; i++) {
-    auto temp =
-        foot_pos_z_generator(b, current_phase_, phase_shift_vec_[i], feet_num_);
+    int foot_index = gait_pattern[i];
+    auto temp = foot_pos_z_generator(b, current_phase_,
+                                     phase_shift_vec_[foot_index], feet_num_);
     if (temp == 0.) {
-      double x = feet_pos_in_footprint_[i].x;
-      double y = feet_pos_in_footprint_[i].y;
-      feet_pos_in_footprint_[i].x = x + dx - d_theta * y;
-      feet_pos_in_footprint_[i].y = y + dy + d_theta * x;
-      feet_pos_in_footprint_[i].z = 0.;
-      final_displacement_[i].x =
-          feet_pos_in_footprint_[i].x - init_feet_pos_in_footprint_[i].x;
-      final_displacement_[i].y =
-          feet_pos_in_footprint_[i].y - init_feet_pos_in_footprint_[i].y;
+      double x = feet_pos_in_footprint_[foot_index].x;
+      double y = feet_pos_in_footprint_[foot_index].y;
+      feet_pos_in_footprint_[foot_index].x = x + dx - d_theta * y;
+      feet_pos_in_footprint_[foot_index].y = y + dy + d_theta * x;
+      feet_pos_in_footprint_[foot_index].z = 0.;
+      final_displacement_[foot_index].x =
+          feet_pos_in_footprint_[foot_index].x -
+          init_feet_pos_in_footprint_[foot_index].x;
+      final_displacement_[foot_index].y =
+          feet_pos_in_footprint_[foot_index].y -
+          init_feet_pos_in_footprint_[foot_index].y;
     } else {
-      feet_pos_in_footprint_[i].x =
-          init_feet_pos_in_footprint_[i].x +
-          foot_pos_xy_generator(current_phase_, phase_shift_vec_[i],
-                                final_displacement_[i].x, feet_num_);
-      feet_pos_in_footprint_[i].y =
-          init_feet_pos_in_footprint_[i].y +
-          foot_pos_xy_generator(current_phase_, phase_shift_vec_[i],
-                                final_displacement_[i].y, feet_num_);
-      feet_pos_in_footprint_[i].z = temp;
+      feet_pos_in_footprint_[foot_index].x =
+          init_feet_pos_in_footprint_[foot_index].x +
+          foot_pos_xy_generator(current_phase_, phase_shift_vec_[foot_index],
+                                final_displacement_[foot_index].x, feet_num_);
+      feet_pos_in_footprint_[foot_index].y =
+          init_feet_pos_in_footprint_[foot_index].y +
+          foot_pos_xy_generator(current_phase_, phase_shift_vec_[foot_index],
+                                final_displacement_[foot_index].y, feet_num_);
+      feet_pos_in_footprint_[foot_index].z = temp;
     }
     if (i < static_cast<int>(legs_body_transforms_.size())) {
-      auto point =
-          applyInverseTransform(feet_pos_in_footprint_[i], body_basefootprint_);
-      point = applyInverseTransform(point, legs_body_transforms_[i]);
+      auto point = applyInverseTransform(feet_pos_in_footprint_[foot_index],
+                                         body_basefootprint_);
+      point = applyInverseTransform(point, legs_body_transforms_[foot_index]);
       limb_msgs::msg::Pxyz xyz_msg;
       xyz_msg.x = point.x;
       xyz_msg.y = point.y;
       xyz_msg.z = point.z;
 
-      xyz_publishers_[i]->publish(xyz_msg);
+      xyz_publishers_[foot_index]->publish(xyz_msg);
     } else {
       RCLCPP_ERROR_STREAM(node_->get_logger(),
                           "No transform available for limb " << i);
@@ -182,6 +224,9 @@ void GaitGenerator::declare_parameters() {
       "init_body_basefootprint_transform", std::vector<double>{});
   node_->declare_parameter<double>("gait_parameters.max_gait_linear_speed");
   node_->declare_parameter<double>("gait_parameters.max_gait_turning_speed");
+  node_->declare_parameter<int>("gait_parameters.gait_patterns.num");
+  node_->declare_parameter<std::vector<long int>>(
+      "gait_parameters.gait_patterns.feet_order", std::vector<long int>{});
 }
 
 void GaitGenerator::load_parameters() {
@@ -195,14 +240,14 @@ void GaitGenerator::load_parameters() {
   };
 
   // Helper function to validate vector size
-  auto validate_vector_size = [this](const std::vector<double> &vec,
-                                     int expected_size,
-                                     const std::string &error_message) {
-    if (static_cast<int>(vec.size()) != expected_size) {
-      RCLCPP_ERROR(node_->get_logger(), error_message.c_str());
-      throw std::runtime_error(error_message);
-    }
-  };
+  auto validate_vector_size =
+      [this]<typename T>(const std::vector<T> &vec, int expected_size,
+                         const std::string &error_message) {
+        if (static_cast<int>(vec.size()) != expected_size) {
+          RCLCPP_ERROR(node_->get_logger(), error_message.c_str());
+          throw std::runtime_error(error_message);
+        }
+      };
 
   // Helper function to create a transform from values
   auto array_to_transform =
@@ -299,6 +344,55 @@ void GaitGenerator::load_parameters() {
       node_->get_logger(),
       "Loaded gait_parameters.max_gait_turning_speed value is: %f [rad/sec]",
       max_gait_turning_speed_);
+
+  // load gait patterns
+  load_param("gait_parameters.gait_patterns.num", gait_patterns_.gaits_num_,
+             "Parameter gait_parameters.gait_patterns.num was not found.");
+  RCLCPP_INFO(node_->get_logger(),
+              "Loaded gait_parameters.gait_patterns value is: %d",
+              gait_patterns_.gaits_num_);
+
+  std::vector<long int> vector_gait_patterns;
+  load_param("gait_parameters.gait_patterns.feet_order", vector_gait_patterns,
+             "No init gait_parameters.gait_patterns.feet_order found.");
+  int assert_vector_size = feet_num_ * gait_patterns_.gaits_num_;
+  std::string if_error_message =
+      "Size of gait_parameters.gait_patterns.feet_order must be " +
+      std::to_string(assert_vector_size);
+  validate_vector_size(vector_gait_patterns, assert_vector_size,
+                       if_error_message);
+  // Populate the patterns.
+  int count = 0;
+  gait_patterns_.patterns_.resize(
+      gait_patterns_.gaits_num_); // resize to number of gaits
+  for (int i = 0; i < gait_patterns_.gaits_num_; i++) {
+    gait_patterns_.patterns_[i].resize(feet_num_); // resize to fit the feet
+    std::string log_message =
+        "Loaded gait_pattern [" + std::to_string(i) + "]: ";
+    for (int j = 0; j < feet_num_; j++) {
+      int temp = vector_gait_patterns[count];
+      if (temp < 0) {
+        std::string error_message =
+            "Foot index at gait_parameters.gait_patterns.feet_order[" +
+            std::to_string(count) + "] shall not be less than zero";
+        throw std::runtime_error(error_message);
+      }
+      if (temp >= feet_num_) {
+        std::string error_message =
+            "Foot index at gait_parameters.gait_patterns.feet_order[" +
+            std::to_string(count) +
+            "] shall not be more nor equal to the number of feet, specified "
+            "as " +
+            std::to_string(feet_num_);
+        throw std::runtime_error(error_message);
+      }
+      int foot_index = vector_gait_patterns[count];
+      log_message = log_message + std::to_string(foot_index) + " |";
+      gait_patterns_.patterns_[i][j] = foot_index;
+      count++;
+    }
+    RCLCPP_INFO(node_->get_logger(), log_message.c_str());
+  }
 }
 
 } // namespace penta_pod::kin::gait_generator
