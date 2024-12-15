@@ -80,7 +80,9 @@ private:
   geometry_msgs::msg::Twist cmd_vel_{};
 
   rclcpp::Service<SetGaitPattern>::SharedPtr set_gait_pattern_server_;
+  rclcpp::CallbackGroup::SharedPtr service_callback_group_;
   void create_set_gait_pattern_service();
+
   void declare_parameters();
   void load_parameters();
   void timer_callback(double delta_t_milli);
