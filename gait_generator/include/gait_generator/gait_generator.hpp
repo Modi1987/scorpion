@@ -56,6 +56,14 @@ private:
       active_gait_index_ = i;
       return true;
     }
+    std::string active_pattern_to_string() {
+      auto active_pattern = get_active_pattern();
+      std::string log_message = "Feet pattern: ";
+      for (auto foot_index : active_pattern) {
+        log_message = log_message + std::to_string(foot_index) + " |";
+      }
+      return log_message;
+    }
   } gait_patterns_;
 
   std::vector<geometry_msgs::msg::Transform> legs_body_transforms_;

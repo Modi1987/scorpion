@@ -76,10 +76,14 @@ void GaitGenerator::create_set_gait_pattern_service() {
       response->success = false;
       return true;
     }
-    std::string message =
+    std::string info_message =
         "Changed successfully to gait pattern: " + std::to_string(pattern);
-    response->message = message;
+    RCLCPP_INFO(node_->get_logger(), info_message.c_str());
+    response->message = info_message;
     response->success = true;
+
+    auto log_message = gait_patterns_.active_pattern_to_string();
+    RCLCPP_INFO(node_->get_logger(), log_message.c_str());
     return true;
   };
   service_callback_group_ = node_->create_callback_group(
@@ -165,9 +169,9 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
   double b = 0.05;
   auto gait_pattern = gait_patterns_.get_active_pattern();
   for (int i = 0; i < feet_num_; i++) {
-    int foot_index = gait_pattern[i];
+    auto foot_index = gait_pattern[i];
     auto temp = foot_pos_z_generator(b, current_phase_,
-                                     phase_shift_vec_[foot_index], feet_num_);
+                                     phase_shift_vec_[i], feet_num_);
     if (temp == 0.) {
       double x = feet_pos_in_footprint_[foot_index].x;
       double y = feet_pos_in_footprint_[foot_index].y;
@@ -183,15 +187,15 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
     } else {
       feet_pos_in_footprint_[foot_index].x =
           init_feet_pos_in_footprint_[foot_index].x +
-          foot_pos_xy_generator(current_phase_, phase_shift_vec_[foot_index],
+          foot_pos_xy_generator(current_phase_, phase_shift_vec_[i],
                                 final_displacement_[foot_index].x, feet_num_);
       feet_pos_in_footprint_[foot_index].y =
           init_feet_pos_in_footprint_[foot_index].y +
-          foot_pos_xy_generator(current_phase_, phase_shift_vec_[foot_index],
+          foot_pos_xy_generator(current_phase_, phase_shift_vec_[i],
                                 final_displacement_[foot_index].y, feet_num_);
       feet_pos_in_footprint_[foot_index].z = temp;
     }
-    if (i < static_cast<int>(legs_body_transforms_.size())) {
+    if (foot_index < static_cast<int>(legs_body_transforms_.size())) {
       auto point = applyInverseTransform(feet_pos_in_footprint_[foot_index],
                                          body_basefootprint_);
       point = applyInverseTransform(point, legs_body_transforms_[foot_index]);
@@ -203,7 +207,7 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
       xyz_publishers_[foot_index]->publish(xyz_msg);
     } else {
       RCLCPP_ERROR_STREAM(node_->get_logger(),
-                          "No transform available for limb " << i);
+                          "No transform available for limb " << foot_index);
     }
   }
 }
