@@ -13,7 +13,7 @@
     </visual>
   </link>
 
-  <joint name="joint_robot_body_center" type="fixed">
+  <joint name="joint_robot_body_center" type="floating">
     <parent link="base_footprint"/>
     <child link="base_link"/>
     <origin xyz="0.0 0.0 0.075" rpy="0 0 0"/>

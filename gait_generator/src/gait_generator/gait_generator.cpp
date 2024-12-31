@@ -13,6 +13,8 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
+#include "tf2_ros/transform_broadcaster.h"
+
 #include <stdexcept>
 
 #define pi 3.141592
@@ -52,6 +54,16 @@ GaitGenerator::GaitGenerator()
       [this, delta_t_milli]() { timer_callback(delta_t_milli); });
 
   create_set_gait_pattern_service();
+}
+
+void GaitGenerator::publish_base_to_basefootprint_transform() {
+  geometry_msgs::msg::TransformStamped transformStamped;
+  transformStamped.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  transformStamped.header.frame_id = "base_footprint";
+  transformStamped.child_frame_id = "base_link";
+  transformStamped.transform = body_basefootprint_;
+  static auto br = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
+  br->sendTransform(transformStamped);
 }
 
 void GaitGenerator::create_set_gait_pattern_service() {
@@ -215,6 +227,7 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
 void GaitGenerator::timer_callback(double delta_t_milli) {
   update_phase(delta_t_milli);
   update_feet_positions(delta_t_milli);
+  publish_base_to_basefootprint_transform();
 }
 
 void GaitGenerator::declare_parameters() {
