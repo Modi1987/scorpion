@@ -147,7 +147,8 @@ auto interpolate_pose(const rclcpp::Node::SharedPtr node, PoseStamped target,
   interpolated.pose.position.z =
       source.pose.position.z + dir[2] * linear_displacement;
 
-  interpolated.pose.orientation = source.pose.orientation;
+  // ToDo interpolate orientation
+  interpolated.pose.orientation = target.pose.orientation;
 
   return interpolated;
 }
