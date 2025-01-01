@@ -39,7 +39,7 @@
           0, 4, 3, 2, 1
         ]
     joints_aggregator:
-      joints_update_interval_millis: 50
+      joints_update_interval_millis: 10
     base_twerk:
       base_frame_transform_update_interval_millis: 20
       action_server_service_call_interval_millis: 100
