@@ -183,7 +183,10 @@ auto BaseTwerkActionServer::calculate_twerk_pose_from_goal(
     rpy[i-3] = goal->r[i] * sin(goal->w * delta_t_seconds + goal->phi[i]);
   }
 
-  pose.pose.orientation = rpy_to_quaternion(rpy[0], rpy[1], rpy[2]);
+  auto roll = rpy[0];
+  auto pitch = rpy[1];
+  auto yaw = rpy[2];
+  pose.pose.orientation = rpy_to_quaternion(yaw, pitch, roll);
   return pose;
 }
 
