@@ -66,7 +66,7 @@ auto BaseTwerkActionServer::execute(
   auto result = std::make_shared<BaseTwerkAction::Result>();
 
   double mag_displacement = std::sqrt(
-      goal->rx * goal->rx + goal->ry * goal->ry + goal->rz * goal->rz);
+      goal->r[0] * goal->r[0] + goal->r[1] * goal->r[1] + goal->r[2] * goal->r[2]);
   if (mag_displacement > max_permissible_displacement_meter_) {
     auto message = "Action aborted for the specified displacement is: " +
                    std::to_string(mag_displacement) +
@@ -130,9 +130,9 @@ auto BaseTwerkActionServer::execute(
   while (rclcpp::ok()) {
     rate.sleep();
 
-    auto current_pose =
+    auto updated_pose =
         calculate_twerk_pose_from_goal(start_time, start_pose, goal_handle);
-    if (!call_setpoint_client(current_pose)) {
+    if (!call_setpoint_client(updated_pose)) {
       return;
     }
 
@@ -148,6 +148,9 @@ auto BaseTwerkActionServer::execute(
     }
 
     if (goal_handle->is_canceling()) {
+      if (!call_setpoint_client(start_pose)) {
+        return;
+      }
       result->result_message = "action canceled";
       goal_handle->canceled(result);
       RCLCPP_INFO(node_->get_logger(), "Goal canceled");
@@ -166,13 +169,18 @@ auto BaseTwerkActionServer::calculate_twerk_pose_from_goal(
 
   pose.pose.position.x =
       start_pose.pose.position.x +
-      goal->rx * sin(goal->w * delta_t_seconds + goal->phi_x);
+      goal->r[0] * sin(goal->w * delta_t_seconds + goal->phi[0]);
   pose.pose.position.y =
       start_pose.pose.position.y +
-      goal->ry * sin(goal->w * delta_t_seconds + goal->phi_y);
+      goal->r[1] * sin(goal->w * delta_t_seconds + goal->phi[1]);
   pose.pose.position.z =
       start_pose.pose.position.z +
-      goal->rz * sin(goal->w * delta_t_seconds + goal->phi_z);
+      goal->r[2] * sin(goal->w * delta_t_seconds + goal->phi[2]);
+  
+  std::vector<double> rpy = {0., 0., 0.};
+  for (int i = 3; i < 6; i++) {
+    rpy[i-3] = goal->r[i] * sin(goal->w * delta_t_seconds + goal->phi[i]);
+  }
 
   return pose;
 }

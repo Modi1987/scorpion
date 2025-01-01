@@ -1,9 +1,8 @@
-float64 rx
-float64 ry
-float64 rz
-float64 phi_x
-float64 phi_y
-float64 phi_z
+# pose displacement
+float64[6] r # [rx, ry, rz, roll, pitch, yaw]
+# phase shift
+float64[6] phi  # [phi_x, phi_y, phi_z, phi_roll, phi_pitch, phi_yaw]
+# motion frequency and duration
 float64 w
 float64 dance_time_millis
 ---
