@@ -22,7 +22,8 @@ find_package(tf2_geometry_msgs REQUIRED)
 
 # Declare library
 add_library(${PROJECT_NAME}
-        src/${PROJECT_NAME}/${PROJECT_NAME}.cpp
+        src/${PROJECT_NAME}/${PROJECT_NAME}_parameters.cpp
+        src/${PROJECT_NAME}/${PROJECT_NAME}_core.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
