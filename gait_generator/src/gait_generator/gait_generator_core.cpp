@@ -132,6 +132,11 @@ void GaitGenerator::cmd_null_pos_sub_callback(
   body_basefootprint_.translation.x = msg->pose.position.x;
   body_basefootprint_.translation.y = msg->pose.position.y;
   body_basefootprint_.translation.z = msg->pose.position.z;
+
+  body_basefootprint_.rotation.x = msg->pose.orientation.x;
+  body_basefootprint_.rotation.y = msg->pose.orientation.y;
+  body_basefootprint_.rotation.z = msg->pose.orientation.z;
+  body_basefootprint_.rotation.w = msg->pose.orientation.w;
   
   // consider the rotation absolute (initial rotation must be the identity)
   // body_basefootprint_.rotation. = msg->rotation;
