@@ -1,4 +1,5 @@
 #include "base_twerk/base_twerk_action_server.hpp"
+#include "commons/quaternion_utils.hpp"
 
 namespace penta_pod::kin::base_twerk {
 
@@ -182,6 +183,7 @@ auto BaseTwerkActionServer::calculate_twerk_pose_from_goal(
     rpy[i-3] = goal->r[i] * sin(goal->w * delta_t_seconds + goal->phi[i]);
   }
 
+  pose.pose.orientation = rpy_to_quaternion(rpy[0], rpy[1], rpy[2]);
   return pose;
 }
 
