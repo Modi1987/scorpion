@@ -6,6 +6,13 @@ from launch.substitutions import LaunchConfiguration
 import os
 
 def generate_launch_description():
+    # Include scorption_cmd_vel_mux launcer
+    scorption_cmd_vel_mux_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(FindPackageShare('scorpion_cmd_vel_mux').find('scorpion_cmd_vel_mux'), 'launch', 'cmd_vel_mux.launch.py')
+        )
+    )
+
     # Include RVIZ launch file
     rviz_penta_pod_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -49,6 +56,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        scorption_cmd_vel_mux_launch,
         rviz_penta_pod_launch,
         penta_pod_launch,
         gait_generator_launch,

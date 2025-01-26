@@ -1,0 +1,28 @@
+scorpion_cmd_vel_mux:
+  ros__parameters:
+    subscribers:
+        joystick_teleop:
+          topic:       "input/cmd_vel_teleop_joy"
+          timeout:     0.1
+          priority:    9
+          short_desc:  "Remote control joystick"
+        keyboard_teleop:
+          topic:       "input/cmd_vel_teleop_keyboard"
+          timeout:     0.1
+          priority:    8
+          short_desc:  "Keyboard operation"
+        navigation_stack:
+          topic:       "input/cmd_vel_nav2"
+          timeout:     0.5
+          priority:    1
+          short_desc:  "Navigation stack controller"
+        web_application:
+          topic:       "input/cmd_vel_teleop_web"
+          timeout:     0.3
+          priority:    7
+          short_desc:  "Web application"
+        handheld_device:
+          topic:       "cmd_vel_mux_input/cmd_vel_teleop_handheld_joy"
+          timeout:     0.3
+          priority:    6
+          short_desc:  "handheld device teleoperation"
