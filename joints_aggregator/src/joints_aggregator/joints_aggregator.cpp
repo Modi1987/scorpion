@@ -33,6 +33,7 @@ JointsAggregator::JointsAggregator()
   RCLCPP_INFO(node_->get_logger(), "total joints count is %d", joints_count);
 
   this->q_ = std::vector<double>(joints_count, 0.);
+  this->previous_q_ = std::vector<double>(joints_count, 0.);
 
   joint_state_publisher_ =
       node_->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
@@ -61,7 +62,38 @@ JointsAggregator::JointsAggregator()
           msg.name = joints_states_names;
           msg.position = q_;
         }
-        joint_state_publisher_->publish(msg);
+
+        // publish logic
+        auto force_publish_on_startup = [this]() -> bool {
+          constexpr long times_to_publish_on_startup = 1000;
+          if (publish_on_startup_counter_ < times_to_publish_on_startup) {
+            publish_on_startup_counter_++;
+            return true;
+          }
+          return false;
+        };
+
+        bool force_publish = !publish_joints_only_on_value_change_;
+
+        auto check_joints_value_change = [this]() -> bool {
+          constexpr auto epsilon = 1e-10;
+          auto total_angular_change_squared = 0.0;
+          for (size_t i = 0; i < q_.size(); i++) {
+            auto value = q_[i] - previous_q_[i];
+            total_angular_change_squared += (value * value);
+          }
+          return (total_angular_change_squared > epsilon);
+        };
+
+        if (force_publish_on_startup()) {
+          joint_state_publisher_->publish(msg);
+        } else if (force_publish || check_joints_value_change()) {
+          joint_state_publisher_->publish(msg);
+        }
+
+        for (size_t i = 0; i < q_.size(); i++) {
+          previous_q_[i] = q_[i];
+        }
       });
 }
 
@@ -73,9 +105,13 @@ void JointsAggregator::declare_parameters() {
   // joint_states publish rate (time interval)
   node_->declare_parameter<int>(
       "joints_aggregator.joints_update_interval_millis");
+  // publish only on value change
+  node_->declare_parameter<bool>(
+      "joints_aggregator.publish_joints_only_on_value_change");
 }
 
 auto JointsAggregator::get_parameters() -> bool {
+  // load limbs_num
   if (node_->get_parameter("limbs_num", limbs_num_)) {
     RCLCPP_INFO_STREAM(
         node_->get_logger(),
@@ -85,7 +121,7 @@ auto JointsAggregator::get_parameters() -> bool {
                  "ERROR, can not load (limbs_num) parameter");
     return false;
   }
-
+  // load joints_per_limb vector
   if (node_->get_parameter("joints_per_limb", joints_per_limb_)) {
     std::string formatted_values = "[";
     for (auto &value : joints_per_limb_)
@@ -99,6 +135,7 @@ auto JointsAggregator::get_parameters() -> bool {
                  "ERROR, can not load (joints_per_limb) parameter");
     return false;
   }
+  // sanity check
   if (joints_per_limb_.size() != static_cast<size_t>(limbs_num_)) {
     RCLCPP_ERROR(node_->get_logger(),
                  "ERROR, value of parameter (limbs_num) is not equal to the "
@@ -110,7 +147,7 @@ auto JointsAggregator::get_parameters() -> bool {
                 "comply with a value %d",
                 limbs_num_);
   }
-
+  // load joints_update_interval_millis
   if (!node_->get_parameter("joints_aggregator.joints_update_interval_millis",
                             update_interval_millis_)) {
     RCLCPP_ERROR(
@@ -132,6 +169,22 @@ auto JointsAggregator::get_parameters() -> bool {
   auto rate = 1000.0 / update_interval_millis_;
   RCLCPP_INFO_STREAM(node_->get_logger(),
                      "/joints_states: publish rate is: " << rate << " Hz");
+  // load publish_joints_only_on_value_change
+  if (node_->get_parameter(
+          "joints_aggregator.publish_joints_only_on_value_change",
+          publish_joints_only_on_value_change_)) {
+    RCLCPP_INFO_STREAM(
+        node_->get_logger(),
+        "loaded joints_aggregator.publish_joints_only_on_value_change) is: "
+            << publish_joints_only_on_value_change_);
+  } else {
+    RCLCPP_ERROR(
+        node_->get_logger(),
+        "ERROR, can not load "
+        "joints_aggregator.publish_joints_only_on_value_change parameter");
+    rclcpp::shutdown();
+    return false;
+  }
 
   return true;
 }
