@@ -4,10 +4,9 @@ import yaml
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import Command, LaunchConfiguration
-from launch_ros.parameter_descriptions import ParameterValue
-
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.substitutions import FindPackageShare
 
 def get_robot_limbs_num_from_yaml(package_name, config_folder_name, config_file_name):
     message = """
@@ -51,4 +50,11 @@ def generate_launch_description():
             # remappings=[(individual_joint_state_topic, '/joint_states')]
         )
         ld.add_action(temp_node)  # Added the Node to LaunchDescription
+    # Include the joystick teleoperation launch file
+    joystick_teleop_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(FindPackageShare('penta_teleop').find('penta_teleop'), 'launch', 'teleop_joystick.launch.py')
+        )
+    )
+    ld.add_action(joystick_teleop_launch)
     return ld
