@@ -9,6 +9,7 @@
 
 #include "base_twerk_msgs/action/base_twerk_action.hpp"
 #include "base_twerk_msgs/srv/base_pose_setpoint.hpp"
+#include "base_twerk_msgs/srv/get_current_base_pose.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 
 namespace penta_pod::kin::base_twerk {
@@ -16,6 +17,7 @@ namespace penta_pod::kin::base_twerk {
 using BaseTwerkAction = base_twerk_msgs::action::BaseTwerkAction;
 using GoalHandle = rclcpp_action::ServerGoalHandle<BaseTwerkAction>;
 using BasePoseSetpointSrv = base_twerk_msgs::srv::BasePoseSetpoint;
+using GetCurrentBasePose = base_twerk_msgs::srv::GetCurrentBasePose;
 using geometry_msgs::msg::PoseStamped;
 using penta_pod::kin::commons::service_call_template;
 
@@ -27,7 +29,7 @@ private:
 
   rclcpp::Client<BasePoseSetpointSrv>::SharedPtr setpoint_client_;
 
-  rclcpp::Subscription<PoseStamped>::SharedPtr base_pose_subscriber_;
+  rclcpp::Client<GetCurrentBasePose>::SharedPtr get_currnet_pose_client_;
 
   rclcpp::CallbackGroup::SharedPtr callback_group_;
 
@@ -46,9 +48,12 @@ private:
   auto get_parameters() -> void;
 
   auto call_setpoint_client(const PoseStamped &base_to_basefootprint) -> bool;
+
   auto calculate_twerk_pose_from_goal(
       rclcpp::Time start_time, PoseStamped start_pose,
       const std::shared_ptr<GoalHandle> goal_handle) -> PoseStamped;
+      
+  auto quiry_current_base_pose() -> std::optional<GetCurrentBasePose::Response>;
 
   double update_interval_millis_double_;
   double max_permissible_displacement_meter_;

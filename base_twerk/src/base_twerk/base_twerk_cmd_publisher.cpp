@@ -20,17 +20,18 @@ BaseTwerkCmdPuplisher::BaseTwerkCmdPuplisher()
       std::chrono::milliseconds(static_cast<int>(update_interval_millis_)),
       [this]() { timer_callback(); });
 
+  callback_group_ = node_->create_callback_group(
+      rclcpp::CallbackGroupType::MutuallyExclusive);
+
   create_setpoint_service();
+  create_get_current_base_pose_service();
 }
 
 void BaseTwerkCmdPuplisher::create_setpoint_service() {
-  callback_group_ = node_->create_callback_group(
-      rclcpp::CallbackGroupType::MutuallyExclusive);
   auto lambda =
       [this](const BasePoseSetpoint::Request::SharedPtr &request,
              const BasePoseSetpoint::Response::SharedPtr &response) -> bool {
     auto frame_id = request->pose.header.frame_id;
-    const auto base_footprint = "base_footprint";
     if (frame_id == "") {
       frame_id = base_footprint;
     }
@@ -51,6 +52,22 @@ void BaseTwerkCmdPuplisher::create_setpoint_service() {
 
   setpoint_service_ = node_->create_service<BasePoseSetpoint>(
       "cmd_null_setpoint", lambda, rmw_qos_profile_services_default,
+      callback_group_);
+}
+
+void BaseTwerkCmdPuplisher::create_get_current_base_pose_service() {
+  auto lambda =
+      [this](const GetCurrentBasePose::Request::SharedPtr & /*request*/,
+             const GetCurrentBasePose::Response::SharedPtr &response) -> bool {
+    auto pose = base_pose_;
+    pose.header.stamp = node_->now();
+    pose.header.frame_id = base_footprint;
+    response->pose = pose;
+    return true;
+  };
+
+  get_current_base_pose_ = node_->create_service<GetCurrentBasePose>(
+      "get_current_null_pose", lambda, rmw_qos_profile_services_default,
       callback_group_);
 }
 

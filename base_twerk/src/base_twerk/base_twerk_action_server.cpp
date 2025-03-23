@@ -17,14 +17,9 @@ BaseTwerkActionServer::BaseTwerkActionServer()
   this->setpoint_client_ = node_->create_client<BasePoseSetpointSrv>(
       "cmd_null_setpoint", rmw_qos_profile_services_default, callback_group_);
 
-  this->base_pose_subscriber_ = node_->create_subscription<PoseStamped>(
-      "null_space_pose", 10, [this](const PoseStamped &msg) -> void {
-        {
-          std::lock_guard<std::mutex> lock(received_base_pose_mutex_);
-          received_base_pose_.timestamp = node_->now();
-          received_base_pose_.value = msg;
-        }
-      });
+  this->get_currnet_pose_client_ = node_->create_client<GetCurrentBasePose>(
+      "get_current_null_pose", rmw_qos_profile_services_default,
+      callback_group_);
 
   this->base_twerk_action_server_ =
       rclcpp_action::create_server<BaseTwerkAction>(
@@ -66,8 +61,9 @@ auto BaseTwerkActionServer::execute(
   const auto goal = goal_handle->get_goal();
   auto result = std::make_shared<BaseTwerkAction::Result>();
 
-  double mag_displacement = std::sqrt(
-      goal->r[0] * goal->r[0] + goal->r[1] * goal->r[1] + goal->r[2] * goal->r[2]);
+  double mag_displacement =
+      std::sqrt(goal->r[0] * goal->r[0] + goal->r[1] * goal->r[1] +
+                goal->r[2] * goal->r[2]);
   if (mag_displacement > max_permissible_displacement_meter_) {
     auto message = "Action aborted for the specified displacement is: " +
                    std::to_string(mag_displacement) +
@@ -97,26 +93,19 @@ auto BaseTwerkActionServer::execute(
     return false;
   };
 
-  // get current null pose
-  auto start_time = node_->now();
-  while (rclcpp::ok()) {
-    rate.sleep();
-
-    if (received_base_pose_.timestamp > start_time) {
-      break;
-    }
-
-    if (is_timed_out(start_time, 1s)) {
-      result->result_message = "Timed out, did not receive transform message";
-      goal_handle->abort(result);
-      RCLCPP_WARN(node_->get_logger(), "Time out, breaking out from action");
-      return;
-    }
+  // get current null space pose
+  auto get_currnet_pose_response = quiry_current_base_pose();
+  if (!get_currnet_pose_response.has_value()) {
+    result->result_message = "Failed to get current base pose";
+    goal_handle->abort(result);
+    return;
   }
 
   PoseStamped start_pose{};
   {
     std::lock_guard<std::mutex> lock(received_base_pose_mutex_);
+    received_base_pose_ = {node_->now(),
+                           get_currnet_pose_response.value().pose};
     start_pose = received_base_pose_.value;
     RCLCPP_INFO(node_->get_logger(), "Current base pose is: x:%f y:%f z:%f",
                 start_pose.pose.position.x, start_pose.pose.position.y,
@@ -127,7 +116,7 @@ auto BaseTwerkActionServer::execute(
       std::chrono::milliseconds(static_cast<int>(goal->dance_time_millis));
 
   // start control loop for base pose motion
-  start_time = node_->now();
+  auto start_time = node_->now();
   while (rclcpp::ok()) {
     rate.sleep();
 
@@ -160,6 +149,54 @@ auto BaseTwerkActionServer::execute(
   }
 }
 
+auto BaseTwerkActionServer::quiry_current_base_pose()
+    -> std::optional<GetCurrentBasePose::Response> {
+
+  // check if service is available
+  auto service_name = get_currnet_pose_client_->get_service_name();
+  if (!get_currnet_pose_client_->wait_for_service(1s)) {
+    RCLCPP_ERROR(node_->get_logger(), "Service %s not online!", service_name);
+    return std::nullopt;
+  }
+
+  // send request
+  auto get_current_pose_request =
+      std::make_shared<GetCurrentBasePose::Request>();
+
+  auto start_time = node_->now();
+
+  auto future =
+      get_currnet_pose_client_->async_send_request(get_current_pose_request);
+
+  using namespace std::chrono_literals;
+  const auto timeout_millis = std::chrono::milliseconds(500);
+
+  auto status = future.wait_for(timeout_millis);
+
+  if (status != std::future_status::ready) {
+    RCLCPP_ERROR(node_->get_logger(), "Service %s response timed out!",
+                 service_name);
+    return std::nullopt;
+  }
+
+  if (!future.valid()) {
+    RCLCPP_ERROR(node_->get_logger(), "Future from service %s is not valid!",
+                 service_name);
+    return std::nullopt;
+  }
+
+  auto result = future.get();
+  if (!result) {
+    RCLCPP_ERROR(node_->get_logger(), "Returned null Service %s response!",
+                 service_name);
+    return std::nullopt;
+  }
+
+  RCLCPP_INFO(node_->get_logger(), "Service %s response is ready!",
+              service_name);
+  return *result;
+}
+
 auto BaseTwerkActionServer::calculate_twerk_pose_from_goal(
     rclcpp::Time start_time, PoseStamped start_pose,
     const std::shared_ptr<GoalHandle> goal_handle) -> PoseStamped {
@@ -177,10 +214,10 @@ auto BaseTwerkActionServer::calculate_twerk_pose_from_goal(
   pose.pose.position.z =
       start_pose.pose.position.z +
       goal->r[2] * sin(goal->w * delta_t_seconds + goal->phi[2]);
-  
+
   std::vector<double> rpy = {0., 0., 0.};
   for (int i = 3; i < 6; i++) {
-    rpy[i-3] = goal->r[i] * sin(goal->w * delta_t_seconds + goal->phi[i]);
+    rpy[i - 3] = goal->r[i] * sin(goal->w * delta_t_seconds + goal->phi[i]);
   }
 
   auto roll = rpy[0];
