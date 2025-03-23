@@ -1,0 +1,45 @@
+#ifndef JOYSTICK_EXTRA_CONTROLS_HPP_
+#define JOYSTICK_EXTRA_CONTROLS_HPP_
+
+#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/executors.hpp>
+
+// include messages
+#include "base_twerk_msgs/srv/base_pose_setpoint.hpp"
+#include "base_twerk_msgs/srv/get_current_base_pose.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
+#include "sensor_msgs/msg/joy.hpp"
+
+namespace penta_pod::teleop::joystick_extra_controls {
+
+using PoseStamped = geometry_msgs::msg::PoseStamped;
+using BasePoseSetpoint = base_twerk_msgs::srv::BasePoseSetpoint;
+using GetCurrentBasePose = base_twerk_msgs::srv::GetCurrentBasePose;
+
+class JoystickExtraControls {
+private:
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscriber_;
+
+  rclcpp::Client<GetCurrentBasePose>::SharedPtr get_current_base_pose_client_;
+  rclcpp::Client<BasePoseSetpoint>::SharedPtr set_base_pose_client_;
+  rclcpp::CallbackGroup::SharedPtr callback_group_;
+
+  rclcpp::TimerBase::SharedPtr timer_;
+
+  void joy_sub_callback(const sensor_msgs::msg::Joy::SharedPtr msg);
+
+  void handle_get_base_pose_response(
+      rclcpp::Client<GetCurrentBasePose>::SharedFuture response,
+      double z_disp_base_command);
+  void handle_set_base_pose_response(
+      rclcpp::Client<BasePoseSetpoint>::SharedFuture response);
+
+public:
+  explicit JoystickExtraControls();
+  auto get_node() { return node_; };
+};
+
+} // namespace penta_pod::teleop::joystick_extra_controls
+
+#endif // JOYSTICK_EXTRA_CONTROLS_HPP_
