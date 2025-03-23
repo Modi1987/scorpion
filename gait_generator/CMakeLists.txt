@@ -24,6 +24,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 add_library(${PROJECT_NAME}
         src/${PROJECT_NAME}/${PROJECT_NAME}_parameters.cpp
         src/${PROJECT_NAME}/${PROJECT_NAME}_core.cpp
+        src/${PROJECT_NAME}/base_tf_broadcaster.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
@@ -46,6 +47,11 @@ target_link_libraries(${PROJECT_NAME}_node
         ${PROJECT_NAME}
         )
 
+
+add_executable(base_tf_broadcaster_node src/base_tf_broadcaster_node.cpp)
+target_link_libraries(base_tf_broadcaster_node
+        ${PROJECT_NAME}
+        )
 #############
 ## Install ##
 #############
@@ -57,6 +63,7 @@ install(
 
 install(TARGETS 
         ${PROJECT_NAME}_node
+        base_tf_broadcaster_node
         DESTINATION lib/${PROJECT_NAME}
         )
 
