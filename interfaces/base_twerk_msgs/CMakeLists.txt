@@ -13,6 +13,7 @@ find_package(geometry_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
           "srv/BasePoseSetpoint.srv"
+          "srv/GetCurrentBasePose.srv"
           "action/BaseTwerkAction.action"
         DEPENDENCIES
           builtin_interfaces
