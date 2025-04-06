@@ -16,12 +16,15 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(limb_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(gait_generator_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 
 # Declare library
 add_library(${PROJECT_NAME}
-        src/${PROJECT_NAME}/${PROJECT_NAME}.cpp
+        src/${PROJECT_NAME}/${PROJECT_NAME}_parameters.cpp
+        src/${PROJECT_NAME}/${PROJECT_NAME}_core.cpp
+        src/${PROJECT_NAME}/base_tf_broadcaster.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
@@ -34,6 +37,7 @@ ament_target_dependencies(${PROJECT_NAME}
         std_msgs
         geometry_msgs
         limb_msgs
+        gait_generator_msgs
         tf2
         tf2_geometry_msgs
         )
@@ -43,6 +47,11 @@ target_link_libraries(${PROJECT_NAME}_node
         ${PROJECT_NAME}
         )
 
+
+add_executable(base_tf_broadcaster_node src/base_tf_broadcaster_node.cpp)
+target_link_libraries(base_tf_broadcaster_node
+        ${PROJECT_NAME}
+        )
 #############
 ## Install ##
 #############
@@ -54,6 +63,7 @@ install(
 
 install(TARGETS 
         ${PROJECT_NAME}_node
+        base_tf_broadcaster_node
         DESTINATION lib/${PROJECT_NAME}
         )
 

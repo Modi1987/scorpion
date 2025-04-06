@@ -30,9 +30,12 @@ private:
 
   std::mutex q_mutex_;
   std::vector<double> q_;
+  std::vector<double> previous_q_;
   int limbs_num_;
   std::vector<long int> joints_per_limb_;
   int update_interval_millis_;
+  int publish_on_startup_counter_ {0};
+  bool publish_joints_only_on_value_change_{false};
 
   auto get_parameters() -> bool;
 

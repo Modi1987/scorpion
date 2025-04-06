@@ -1,0 +1,3 @@
+# returns the current pose of the base
+---
+geometry_msgs/PoseStamped pose

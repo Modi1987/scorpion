@@ -52,10 +52,10 @@ auto get_direction_from_vec(const std::vector<double> &vec, double norm)
   return output_vec;
 }
 
-auto interpolate_transform(const rclcpp::Node::SharedPtr node, Transform target,
-                           Transform source, double linear_vel,
-                           double /*angular_vel*/, double dt_sec)
-    -> std::optional<Transform> {
+auto interpolate_transform(const rclcpp::Node::SharedPtr /*node*/,
+                           Transform target, Transform source,
+                           double linear_vel, double /*angular_vel*/,
+                           double dt_sec) -> std::optional<Transform> {
 
   Transform interpolated{};
 
@@ -65,9 +65,11 @@ auto interpolate_transform(const rclcpp::Node::SharedPtr node, Transform target,
 
   double linear_displacement = linear_vel * dt_sec;
   if (norm < linear_displacement) { // almost near eachothers
+    /*
     RCLCPP_INFO(node->get_logger(),
                 "norm %f is less than the discrete displacement %f ", norm,
                 linear_displacement);
+    */
     interpolated = target;
     return interpolated;
   }
@@ -123,9 +125,11 @@ auto interpolate_pose(const rclcpp::Node::SharedPtr node, PoseStamped target,
 
   double linear_displacement = linear_vel * dt_sec;
   if (norm < linear_displacement) {
+    /*
     RCLCPP_INFO(node->get_logger(),
                 "norm %f is less than the discrete displacement %f", norm,
                 linear_displacement);
+    */
     interpolated = target;
     return interpolated;
   }
@@ -143,7 +147,8 @@ auto interpolate_pose(const rclcpp::Node::SharedPtr node, PoseStamped target,
   interpolated.pose.position.z =
       source.pose.position.z + dir[2] * linear_displacement;
 
-  interpolated.pose.orientation = source.pose.orientation;
+  // ToDo interpolate orientation
+  interpolated.pose.orientation = target.pose.orientation;
 
   return interpolated;
 }

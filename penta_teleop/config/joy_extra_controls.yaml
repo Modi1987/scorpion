@@ -1,0 +1,8 @@
+/**:
+  ros__parameters:
+    base_height_ctl: # parameters to change the ehight of the robot base using joystick DPad
+      d_pad_up_down_axis_index: 7
+      z_base_min_value: 0.01
+      z_base_max_value: 0.15
+    gait_patterns_ctl:
+      button_index: 2

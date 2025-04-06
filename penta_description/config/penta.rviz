@@ -3,7 +3,8 @@ Panels:
     Help Height: 70
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /Global Options1
       Splitter Ratio: 0.5
     Tree Height: 296
   - Class: rviz_common/Views
@@ -59,6 +60,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        head_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         limb0_lower_arm_link:
           Alpha: 1
           Show Axes: false
@@ -135,6 +141,26 @@ Visualization Manager:
           Show Trail: false
           Value: true
         limb3_upper_arm_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        limb4_lower_arm_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        limb4_shoulder_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        limb4_shoulder_motor:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        limb4_upper_arm_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -148,80 +174,23 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: rviz_default_plugins/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        base_footprint:
-          Value: true
-        base_link:
-          Value: true
-        limb0_lower_arm_link:
-          Value: true
-        limb0_shoulder_link:
-          Value: true
-        limb0_shoulder_motor:
-          Value: true
-        limb0_upper_arm_link:
-          Value: true
-        limb1_lower_arm_link:
-          Value: true
-        limb1_shoulder_link:
-          Value: true
-        limb1_shoulder_motor:
-          Value: true
-        limb1_upper_arm_link:
-          Value: true
-        limb2_lower_arm_link:
-          Value: true
-        limb2_shoulder_link:
-          Value: true
-        limb2_shoulder_motor:
-          Value: true
-        limb2_upper_arm_link:
-          Value: true
-        limb3_lower_arm_link:
-          Value: true
-        limb3_shoulder_link:
-          Value: true
-        limb3_shoulder_motor:
-          Value: true
-        limb3_upper_arm_link:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        base_footprint:
-          base_link:
-            limb0_shoulder_motor:
-              limb0_shoulder_link:
-                limb0_upper_arm_link:
-                  limb0_lower_arm_link:
-                    {}
-            limb1_shoulder_motor:
-              limb1_shoulder_link:
-                limb1_upper_arm_link:
-                  limb1_lower_arm_link:
-                    {}
-            limb2_shoulder_motor:
-              limb2_shoulder_link:
-                limb2_upper_arm_link:
-                  limb2_lower_arm_link:
-                    {}
-            limb3_shoulder_motor:
-              limb3_shoulder_link:
-                limb3_upper_arm_link:
-                  limb3_lower_arm_link:
-                    {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base_link
+    Fixed Frame: base_footprint
     Frame Rate: 30
   Name: root
   Tools:
@@ -233,35 +202,35 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 1.7000000476837158
+      Distance: 0.7511907815933228
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.01839996874332428
+        Y: -0.016720440238714218
+        Z: 0.056901950389146805
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6899999380111694
+      Pitch: 0.49500012397766113
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.414999961853027
+      Yaw: 2.1449995040893555
     Saved: ~
 Window Geometry:
   Displays:
-    collapsed: false
+    collapsed: true
   Height: 800
-  Hide Left Dock: false
+  Hide Left Dock: true
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000001cb000002c6fc0200000002fb000000100044006900730070006c006100790073010000003d000001ab000000c900fffffffb0000000a0056006900650077007301000001ee00000115000000a400ffffff000002df000002c600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000001cb000002c6fc0200000002fb000000100044006900730070006c006100790073000000003d000001ab000000c900fffffffb0000000a0056006900650077007300000001ee00000115000000a400ffffff000004b0000002c600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
-    collapsed: false
+    collapsed: true
   Width: 1200
   X: 413
   Y: 99

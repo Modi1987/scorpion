@@ -60,7 +60,9 @@ class PentaI2CActuators(Node):
                 self.get_logger().error(f"Joint {name} not found in the current message.")
         # Calculate actuator setpoints in degrees
         for i in range(self.joints_count):
-            servo_setpoint = self.dir[i] * (self.q[i] * 180.0 / math.pi) + self.initial_joints_bias_degree[i]
+            q_i_degree = self.q[i] * 180.0 / math.pi
+            dq = q_i_degree - self.joint_angles_at_initial_pose_degree[i]
+            servo_setpoint = self.dir[i] * dq + self.actuator_angles_at_initial_pose_degree[i]
             max_val = self.servo_actuation_range_degree[i]
             self.actuator_setpoint_degree[i] = self.clamp(servo_setpoint, i, 0.0, max_val)
         # Publish actuators setpoint
@@ -94,7 +96,8 @@ class PentaI2CActuators(Node):
         # Declare robot geometry parameters
         self.declare_parameter('limbs_num', 5)  # Default value 5
         self.declare_parameter('joints_per_limb', [3]*5)  # Default value 3
-        self.declare_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree', [0.0] * 15)  # Default bias
+        self.declare_parameter('i2c_actuators_params.actuator_angles_at_initial_pose_degree', [0.0] * 15)    # Actuator angles at initial pose
+        self.declare_parameter('joint_angles_at_initial_pose_degree', [0.0] * 15) # Geometrical angles at initial pose 
         self.declare_parameter('i2c_actuators_params.dir', [1.0] * 15)  # Default direction (1.0 for no inversion)
         self.declare_parameter('servo_parameters.servo_actuation_range_degree', [180.0] * 15) # angular range degree
         self.declare_parameter('servo_parameters.servo_min_pulse_width_microsec', [500.0] * 15) # microseconds
@@ -112,16 +115,22 @@ class PentaI2CActuators(Node):
         self.get_logger().info(f'Loaded limbs_num: {self.limbs_num}, joints_per_limb: {format_array_to_string(self.joints_per_limb)}')
         self.joints_count = sum(self.joints_per_limb)
         self.get_logger().info(f'Total limbs joints count is: {self.joints_count}') 
-        self.initial_joints_bias_degree = self.get_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree').get_parameter_value().double_array_value
+        self.actuator_angles_at_initial_pose_degree = self.get_parameter('i2c_actuators_params.actuator_angles_at_initial_pose_degree').get_parameter_value().double_array_value
+        self.joint_angles_at_initial_pose_degree = self.get_parameter('joint_angles_at_initial_pose_degree').get_parameter_value().double_array_value
         self.dir = self.get_parameter('i2c_actuators_params.dir').get_parameter_value().double_array_value
         self.servo_actuation_range_degree = self.get_parameter('servo_parameters.servo_actuation_range_degree').get_parameter_value().double_array_value
         self.servo_min_pulse_width_microsec = self.get_parameter('servo_parameters.servo_min_pulse_width_microsec').get_parameter_value().double_array_value
         self.servo_max_pulse_width_microsec = self.get_parameter('servo_parameters.servo_max_pulse_width_microsec').get_parameter_value().double_array_value
 
-        if len(self.initial_joints_bias_degree) != self.joints_count:
-            self.get_logger().error('ERROR: actuator_angle_bias_at_joint_zero_degree parameter size mismatch!')
+        if len(self.actuator_angles_at_initial_pose_degree) != self.joints_count:
+            self.get_logger().error('ERROR: actuator_angles_at_initial_pose_degree parameter size mismatch!')
         else:
-            self.get_logger().info(f'Initial joints bias in degree is loaded: {format_array_to_string(self.initial_joints_bias_degree)}')
+            self.get_logger().info(f'Actuators angles at initial configuration is loaded: {format_array_to_string(self.actuator_angles_at_initial_pose_degree)}')
+
+        if len(self.joint_angles_at_initial_pose_degree) != self.joints_count:
+            self.get_logger().error('ERROR: joint_angles_at_initial_pose_degree parameter size mismatch!')
+        else:
+            self.get_logger().info(f'Joints angles at initial configuration is loaded: {format_array_to_string(self.joint_angles_at_initial_pose_degree)}')
 
         if len(self.dir) != self.joints_count:
             self.get_logger().error('ERROR: Direction array size mismatch with joints count!')
