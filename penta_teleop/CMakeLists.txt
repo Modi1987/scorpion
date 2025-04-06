@@ -14,6 +14,7 @@ find_package(sensor_msgs REQUIRED)
 # Declare library
 add_library(${PROJECT_NAME}
         src/${PROJECT_NAME}/joystick_extra_controls.cpp
+        src/${PROJECT_NAME}/declare_load_parameters.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
