@@ -7,6 +7,9 @@ JoystickExtraControls::JoystickExtraControls()
   RCLCPP_INFO(node_->get_logger(),
               "Starting joystick_extra_controls, subscribing to joy topic and "
               "calling base_pose_setpoint service");
+  // load parameters
+  this->declare_parameters();
+  this->get_parameters();
 
   callback_group_ = node_->create_callback_group(
       rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -28,7 +31,7 @@ JoystickExtraControls::JoystickExtraControls()
 void JoystickExtraControls::joy_sub_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
 
-  if (msg->axes[7] != 0) {
+  if (msg->axes[this->d_pad_up_down_axis_index_] != 0) {
     double delta_z = 0.001;
     double z_disp_base_command = msg->axes[7] * delta_z;
 
@@ -64,6 +67,22 @@ void JoystickExtraControls::handle_get_base_pose_response(
     return;
   }
 
+  // Sanity checks
+  if ((result->pose.pose.position.z > this->z_base_max_value_) &&
+      z_disp_base_command > 0.) {
+    RCLCPP_ERROR(node_->get_logger(),
+                 "Already above the max Z limit, can not move up any further.");
+    return;
+  }
+
+  if ((result->pose.pose.position.z < this->z_base_min_value_) &&
+      z_disp_base_command < 0.) {
+    RCLCPP_ERROR(
+        node_->get_logger(),
+        "Already below the min Z limit, can not move down any further.");
+    return;
+  }
+
   RCLCPP_INFO(node_->get_logger(), "Current base pose: %f %f %f %f %f %f %f",
               result->pose.pose.position.x, result->pose.pose.position.y,
               result->pose.pose.position.z, result->pose.pose.orientation.x,
@@ -93,6 +112,45 @@ void JoystickExtraControls::handle_set_base_pose_response(
   } else {
     RCLCPP_INFO(node_->get_logger(), "Base pose set successfully.");
   }
+}
+
+void JoystickExtraControls::declare_parameters() {
+  node_->declare_parameter<int>("base_height_ctl.d_pad_up_down_axis_index");
+  node_->declare_parameter<double>("base_height_ctl.z_base_min_value");
+  node_->declare_parameter<double>("base_height_ctl.z_base_max_value");
+}
+
+bool JoystickExtraControls::get_parameters() {
+  std::string param_name;
+
+  param_name = "base_height_ctl.d_pad_up_down_axis_index";
+  if (!node_->get_parameter(param_name, this->d_pad_up_down_axis_index_)) {
+    RCLCPP_ERROR(node_->get_logger(), "Can not load parameters %s",
+                 param_name.c_str());
+    return false;
+  }
+  RCLCPP_INFO(node_->get_logger(), "Loaded parameter %s with value %d",
+              param_name.c_str(), this->d_pad_up_down_axis_index_);
+
+  param_name = "base_height_ctl.z_base_max_value";
+  if (!node_->get_parameter(param_name, this->z_base_max_value_)) {
+    RCLCPP_ERROR(node_->get_logger(), "Can not load parameters %s",
+                 param_name.c_str());
+    return false;
+  }
+  RCLCPP_INFO(node_->get_logger(), "Loaded parameter %s with value %f",
+              param_name.c_str(), this->z_base_max_value_);
+
+  param_name = "base_height_ctl.z_base_min_value";
+  if (!node_->get_parameter(param_name, this->z_base_min_value_)) {
+    RCLCPP_ERROR(node_->get_logger(), "Can not load parameters %s",
+                 param_name.c_str());
+    return false;
+  }
+  RCLCPP_INFO(node_->get_logger(), "Loaded parameter %s with value %f",
+              param_name.c_str(), this->z_base_min_value_);
+
+  return true;
 }
 
 } // namespace penta_pod::teleop::joystick_extra_controls

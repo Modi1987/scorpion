@@ -25,17 +25,17 @@ def generate_launch_description():
         # remappings=[("/cmd_vel", "/input/cmd_vel_teleop_joy")],
     )
 
+    joystick_extra_controls_configs = os.path.join(
+        get_package_share_directory("penta_teleop"), "config", "joy_extra_controls.yaml"
+    )
+
     joystick_extra_controls_node = Node(
         package="penta_teleop",
         executable="joystick_extra_controls_node",
         name="joystick_extra_controls_node",
-        parameters=[joy_params],
+        parameters=[joystick_extra_controls_configs],
     )
 
     return LaunchDescription(
-        [
-            joy_node,
-            teleop_twist_joy_node,
-            joystick_extra_controls_node
-        ]
+        [joy_node, teleop_twist_joy_node, joystick_extra_controls_node]
     )

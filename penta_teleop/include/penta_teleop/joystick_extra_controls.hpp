@@ -34,7 +34,13 @@ private:
       double z_disp_base_command);
   void handle_set_base_pose_response(
       rclcpp::Client<BasePoseSetpoint>::SharedFuture response);
-
+  void declare_parameters();
+  bool get_parameters();
+  
+  int d_pad_up_down_axis_index_{7};
+  double z_base_max_value_{0.01};
+  double z_base_min_value_{0.15};
+  
 public:
   explicit JoystickExtraControls();
   auto get_node() { return node_; };
