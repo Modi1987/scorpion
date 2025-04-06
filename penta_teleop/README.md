@@ -8,7 +8,7 @@ Tested with wirless Xbox contorller provided with a dongle
 Connect the dongle to Raspberry PI, to control the robot as follows:
 
 
-1- Left joystick for x and y motion 
+1- Left joystick for linear motion in the plane (x and y)
 
 2- Right joystick for rotations
 
