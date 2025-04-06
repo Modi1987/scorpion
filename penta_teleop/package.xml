@@ -13,6 +13,7 @@
   <depend>joy</depend>
   <depend>teleop_twist_joy</depend>
   <depend>base_twerk_msgs</depend>
+  <depend>gait_generator_msgs</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

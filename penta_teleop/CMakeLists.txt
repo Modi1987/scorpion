@@ -8,8 +8,9 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(base_twerk_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(base_twerk_msgs REQUIRED)
+find_package(gait_generator_msgs REQUIRED)
 
 # Declare library
 add_library(${PROJECT_NAME}
@@ -24,8 +25,9 @@ target_include_directories(${PROJECT_NAME}
 
 ament_target_dependencies(${PROJECT_NAME}
         rclcpp
-        base_twerk_msgs
         sensor_msgs
+        base_twerk_msgs
+        gait_generator_msgs
         )
 
 add_executable(joystick_extra_controls_node src/joystick_extra_controls_node.cpp)

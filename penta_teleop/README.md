@@ -14,8 +14,12 @@ Connect the dongle to Raspberry PI, to control the robot as follows:
 
 3- D-Pad up and down buttons, to move the robot up and down
 
+4- X button to change walking pattern
+
 Note, make sure to enable the motion using:
 
 1- Use Right Trigger button (RT) to enable the turbo mode
 
 2- Use Left Trigger button (LT) to enable slow motion mode
+
+3- Walking pattern changes only when the robot is in stand-still

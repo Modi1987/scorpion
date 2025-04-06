@@ -26,11 +26,71 @@ JoystickExtraControls::JoystickExtraControls()
       callback_group_);
   set_base_pose_client_ = node_->create_client<BasePoseSetpoint>(
       "cmd_null_setpoint", rmw_qos_profile_services_default, callback_group_);
+  // Service cleint to change walking pattern
+  set_gait_pattern_client_ = node_->create_client<SetGaitPattern>(
+      "/gait_generator/set_gait_pattern", rmw_qos_profile_services_default,
+      callback_group_);
 }
 
 void JoystickExtraControls::joy_sub_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
 
+  // move base up and down
+  dpad_up_down(msg);
+  // change walking pattern
+  set_gait_pattern(msg);
+}
+
+void JoystickExtraControls::set_gait_pattern(
+    const sensor_msgs::msg::Joy::SharedPtr msg) {
+
+  static int last_button_state = 0;
+  static int walking_pattern = 0;
+  int current_button_state =
+      msg->buttons[this->gait_patterns_ctl_button_index_];
+  if (current_button_state == 1 && last_button_state == 0) {
+    walking_pattern++;
+    if (walking_pattern > num_of_gait_patterns_) {
+      walking_pattern = 0;
+    }
+    // Button was pressed
+    RCLCPP_INFO(node_->get_logger(),
+                "Button index %d pressed, changing walking pattern",
+                this->gait_patterns_ctl_button_index_);
+    // Check if the service is available before calling
+    if (!set_gait_pattern_client_->wait_for_service(
+            std::chrono::seconds(100))) {
+      RCLCPP_ERROR(node_->get_logger(),
+                   "Service set_gait_pattern_client_ is unavailable.");
+      return;
+    }
+    // Add your logic to change the walking pattern here
+    auto request = std::make_shared<SetGaitPattern::Request>();
+    request->pattern = walking_pattern;
+    // Call the service asynchronously
+    auto future = set_gait_pattern_client_->async_send_request(
+        request, [this](rclcpp::Client<SetGaitPattern>::SharedFuture response) {
+          auto result = response.get();
+
+          if (!result) {
+            RCLCPP_ERROR(node_->get_logger(),
+                         "Failed change walking pattern (null return).");
+            return;
+          }
+          if (result->success) {
+            RCLCPP_INFO(node_->get_logger(),
+                        "Walking pattern changed successfully.");
+          } else {
+            RCLCPP_ERROR(node_->get_logger(),
+                         "Failed to change walking pattern.");
+          }
+        });
+  }
+  last_button_state = current_button_state;
+}
+
+void JoystickExtraControls::dpad_up_down(
+    const sensor_msgs::msg::Joy::SharedPtr msg) {
   if (msg->axes[this->d_pad_up_down_axis_index_] != 0) {
     double delta_z = 0.001;
     double z_disp_base_command = msg->axes[7] * delta_z;

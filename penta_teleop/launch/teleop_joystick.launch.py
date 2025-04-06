@@ -29,11 +29,15 @@ def generate_launch_description():
         get_package_share_directory("penta_teleop"), "config", "joy_extra_controls.yaml"
     )
 
+    general_config_params = os.path.join(
+        get_package_share_directory("penta_description"), "config", "general_config.yaml"
+    )
+
     joystick_extra_controls_node = Node(
         package="penta_teleop",
         executable="joystick_extra_controls_node",
         name="joystick_extra_controls_node",
-        parameters=[joystick_extra_controls_configs],
+        parameters=[joystick_extra_controls_configs, general_config_params],
     )
 
     return LaunchDescription(
