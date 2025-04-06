@@ -13,3 +13,9 @@ Connect the dongle to Raspberry PI, to control the robot as follows:
 2- Right joystick for rotations
 
 3- D-Pad up and down buttons, to move the robot up and down
+
+Note, make sure to enable the motion using:
+
+1- Use Right Trigger button (RT) to enable the turbo mode
+
+2- Use Left Trigger button (LT) to enable slow motion mode
