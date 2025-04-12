@@ -15,6 +15,12 @@
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0 0 ${base_visual_yaw}"/>
     </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Chassi_middle.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 ${base_visual_yaw}"/>
+    </collision>
   </link>
 
   <joint name="joint_robot_body_center" type="floating">
@@ -91,6 +97,12 @@
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="-${PI2} ${PI2} 0.4"/>
       </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Lower_arm.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <origin xyz="0.0 0.0 0.0" rpy="-${PI2} ${PI2} 0.4"/>
+      </collision>
     </link>
 
     <joint name="${prefix}/joint_shoulder_motor" type="fixed">
