@@ -8,6 +8,24 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch.substitutions import Command, LaunchConfiguration
 from launch import LaunchDescription
 import os
+import subprocess
+
+def load_penta_pod_urdf():
+    pkg_share = get_package_share_directory('penta_description')
+    xacro_path = os.path.join(
+        pkg_share,
+        'urdf',
+        'penta.urdf.xacro'
+    )
+    xacro_cmd = ['xacro', xacro_path]
+    completed_process = subprocess.run(xacro_cmd, text=True, capture_output=True)
+    if completed_process.returncode != 0:
+        raise RuntimeError(f"Command '{' '.join(xacro_cmd)}' failed with error code {completed_process.returncode}")
+    urdf_text = completed_process.stdout
+    hard_path = f"file://{pkg_share}"
+    urdf_remove_relatvie_path = urdf_text.replace('package://penta_description', hard_path)
+    return urdf_remove_relatvie_path 
+
 
 # This is a launch rviz2 on a laptop for the toperware_bot
 def generate_launch_description():
@@ -18,10 +36,8 @@ def generate_launch_description():
         "urdf",
         "penta.urdf.xacro",
     )
-    model_arg = DeclareLaunchArgument(name='model', default_value=str(urdf_path),
-                                      description='Absolute path to robot urdf file')
-    robot_description = ParameterValue(Command(['xacro ', LaunchConfiguration('model')]),
-                                       value_type=str)
+    robot_description = load_penta_pod_urdf()
+    print("robot_description: ", robot_description)
     return LaunchDescription([
         DeclareLaunchArgument(
             'config_file',
@@ -35,7 +51,6 @@ def generate_launch_description():
             output='screen',
             arguments=['-d', LaunchConfiguration('config_file')]
         ),
-        model_arg,
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',

@@ -21,6 +21,11 @@
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="1.0"/>
+      <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+    </inertial>
   </link>
 
   <joint name="joint_robot_body_center" type="floating">
@@ -70,6 +75,11 @@
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
       </visual>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+        <mass value="1.0"/>
+        <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+      </inertial>
     </link>
 
     <link name="${prefix}_shoulder_link">
@@ -79,6 +89,11 @@
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="-${PI2} 0 0"/>
       </visual>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+        <mass value="1.0"/>
+        <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+      </inertial>
     </link>
 
     <link name="${prefix}_upper_arm_link">
@@ -88,6 +103,11 @@
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
       </visual>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+        <mass value="1.0"/>
+        <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+      </inertial>
     </link>
 
     <link name="${prefix}_lower_arm_link">
@@ -103,6 +123,11 @@
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="-${PI2} ${PI2} 0.4"/>
       </collision>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+        <mass value="1.0"/>
+        <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+      </inertial>
     </link>
 
     <joint name="${prefix}/joint_shoulder_motor" type="fixed">
