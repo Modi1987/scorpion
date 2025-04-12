@@ -17,9 +17,9 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Chassi_middle.stl" scale="0.001 0.001 0.001"/>
+        <cylinder radius="0.15" length="0.085"/>
       </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0 0 ${base_visual_yaw}"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </collision>
   </link>
 
