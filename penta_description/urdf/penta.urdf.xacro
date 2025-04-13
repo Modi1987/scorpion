@@ -6,6 +6,18 @@
   <xacro:property name="PI2" value="${PI/2}" />
   <xacro:property name="base_visual_yaw" value="0.32" />
 
+  <xacro:macro name="add_material_green">
+      <material name="green">
+        <color rgba="0 1 0 1"/>
+      </material>
+  </xacro:macro>
+
+  <xacro:macro name="add_material_red">
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+  </xacro:macro>
+
   <link name="base_footprint"/>
 
   <link name="base_link">
@@ -14,6 +26,7 @@
         <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Chassi_middle.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0 0 ${base_visual_yaw}"/>
+      <xacro:add_material_red/>
     </visual>
     <collision>
       <geometry>
@@ -28,7 +41,7 @@
     </inertial>
   </link>
 
-  <joint name="joint_robot_body_center" type="floating">
+  <joint name="joint_robot_body_center" type="fixed">
     <parent link="base_footprint"/>
     <child link="base_link"/>
     <origin xyz="0.0 0.0 0.075" rpy="0 0 0"/>
@@ -39,9 +52,7 @@
       <geometry>
         <sphere radius="0.01"/>
       </geometry>
-      <material name="green">
-        <color rgba="0 1 0 1"/>
-      </material>
+      <xacro:add_material_green/>
     </visual>
   </link>
 
@@ -58,6 +69,7 @@
           <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/${stl_file_name}" scale="0.001 0.001 0.001"/>
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 ${base_visual_yaw}"/>
+        <xacro:add_material_red/>
       </visual>
     </link>
     <joint name="${name}_joint" type="fixed">
@@ -74,6 +86,7 @@
           <cylinder radius="0.0350" length="0.035"/>
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+        <xacro:add_material_red/>
       </visual>
       <inertial>
         <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -88,6 +101,7 @@
           <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Shoulder.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="-${PI2} 0 0"/>
+        <xacro:add_material_red/>
       </visual>
       <inertial>
         <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -102,6 +116,7 @@
           <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Upper_arm.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+        <xacro:add_material_red/>
       </visual>
       <inertial>
         <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -116,6 +131,7 @@
           <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Lower_arm.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="-${PI2} ${PI2} 0.4"/>
+        <xacro:add_material_red/>
       </visual>
       <collision>
         <geometry>
