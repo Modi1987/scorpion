@@ -91,4 +91,10 @@
 <xacro:add_base_plate name="upper_plate" stl_file_name="Chassi_top.stl" z="0.03"/>
 <xacro:add_base_plate name="lower_plate" stl_file_name="Chassi_bottom.stl" z="-0.03"/>
 
+<gazebo>
+  <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control" >
+    <parameters>$(find penta_description)/config/ros2_control_params.yaml</parameters>
+  </plugin>
+</gazebo>
+
 </robot>

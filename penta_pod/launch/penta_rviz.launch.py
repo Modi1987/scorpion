@@ -8,36 +8,22 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch.substitutions import Command, LaunchConfiguration
 from launch import LaunchDescription
 import os
-import subprocess
-
-def load_penta_pod_urdf():
-    pkg_share = get_package_share_directory('penta_description')
-    xacro_path = os.path.join(
-        pkg_share,
-        'urdf',
-        'penta.urdf.xacro'
-    )
-    xacro_cmd = ['xacro', xacro_path]
-    completed_process = subprocess.run(xacro_cmd, text=True, capture_output=True)
-    if completed_process.returncode != 0:
-        raise RuntimeError(f"Command '{' '.join(xacro_cmd)}' failed with error code {completed_process.returncode}")
-    urdf_text = completed_process.stdout
-    hard_path = f"file://{pkg_share}"
-    urdf_remove_relatvie_path = urdf_text.replace('package://penta_description', hard_path)
-    return urdf_remove_relatvie_path 
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 # This is a launch rviz2 on a laptop for the toperware_bot
 def generate_launch_description():
     rviz_config_file = PathJoinSubstitution(
         [FindPackageShare('penta_description'), 'config', 'penta.rviz'])
-    urdf_path = os.path.join(
-        get_package_share_directory("penta_description"),
-        "urdf",
-        "penta.urdf.xacro",
+    penta_description_pkg = get_package_share_directory("penta_description")
+
+    # RViz
+    robot_state_publisher_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(penta_description_pkg, "launch", "robot_state_publisher.launch.py")
+        )
     )
-    robot_description = load_penta_pod_urdf()
-    print("robot_description: ", robot_description)
     return LaunchDescription([
         DeclareLaunchArgument(
             'config_file',
@@ -51,13 +37,5 @@ def generate_launch_description():
             output='screen',
             arguments=['-d', LaunchConfiguration('config_file')]
         ),
-        Node(
-            package='robot_state_publisher',
-            executable='robot_state_publisher',
-            name='robot_state_publisher',
-            output='screen',
-            parameters=[
-                {'robot_description': robot_description}
-            ],
-        ),
+        robot_state_publisher_launch,
     ])
