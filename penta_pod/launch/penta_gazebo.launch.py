@@ -19,8 +19,11 @@ def generate_launch_description():
     # RViz
     penta_rviz_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(penta_pkg, "launch", "penta_sim_full_rviz.launch.py")
-        )
+            os.path.join(penta_pkg, "launch", "penta_rviz.launch.py")
+        ),
+        launch_arguments={
+            'joint_states_remappings': "/joint_states",
+        }.items()
     )
 
     # Gazebo
