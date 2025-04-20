@@ -36,10 +36,10 @@ JointsAggregator::JointsAggregator()
   this->previous_q_ = std::vector<double>(joints_count, 0.);
 
   joint_state_publisher_ =
-      node_->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
+      node_->create_publisher<sensor_msgs::msg::JointState>("joint_setpoints", 10);
 
   for (int i = 0; i < limbs_num_; i++) {
-    std::string topic_string = "limb" + std::to_string(i) + "/joint_state";
+    std::string topic_string = "limb" + std::to_string(i) + "/joint_setpoints";
     limb_joints_subscriber_.push_back(
         node_->create_subscription<sensor_msgs::msg::JointState>(
             topic_string, 10,

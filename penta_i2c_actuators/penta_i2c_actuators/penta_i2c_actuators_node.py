@@ -27,7 +27,7 @@ class PentaI2CActuators(Node):
         self.setpoint_publisher_ = self.create_publisher(JointState, '/actuator_setpoint_degree', 10)
         self.joint_states_subscriber = self.create_subscription(
                 JointState,
-                "/joint_states",
+                "joint_setpoints",
                 lambda msg : self.on_joint_states_callback(msg),
                 10  # Set QoS to 10
             )

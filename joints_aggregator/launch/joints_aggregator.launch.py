@@ -17,6 +17,9 @@ def generate_launch_description():
                 executable="joints_aggregator_node",
                 output="screen",
                 parameters=[config],
+                remappings=[
+                    ("joint_setpoints", "/joint_setpoints"),
+                ],
             ),
         ]
     )

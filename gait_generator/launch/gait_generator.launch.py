@@ -17,7 +17,12 @@ def generate_launch_description():
             executable="gait_generator_node",
             output="screen",
             parameters=[config],
-        )
+            remappings=[
+                # consumed topics
+                ("cmd_vel", "/cmd_vel"),
+                ("null_space_pose", "/null_space_pose"),
+            ],
+        ),
     )
     ld.add_action(
         Node(
@@ -25,6 +30,10 @@ def generate_launch_description():
             executable="base_tf_broadcaster_node",
             output="screen",
             parameters=[config],
+            remappings=[
+                # output topics
+                ("null_space_pose", "/null_space_pose"),
+            ],
         )
     )
     return ld

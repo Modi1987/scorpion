@@ -10,7 +10,10 @@ def generate_launch_description():
     rviz_penta_pod_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(FindPackageShare('penta_pod').find('penta_pod'), 'launch', 'penta_rviz.launch.py')
-        )
+        ),
+        launch_arguments={
+            'joint_states_remappings': '/joint_setpoints',
+        }.items()
     )
 
     # Include the penta_pod launch file
@@ -34,25 +37,9 @@ def generate_launch_description():
         )
     )
 
-    # Include the null space cmd publisher launch file
-    # null_space_publisher = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(
-    #         os.path.join(FindPackageShare('base_twerk').find('base_twerk'), 'launch', 'null_pose_publisher.launch.py')
-    #     )
-    # )
-
-    # Include the twerk action server launch file
-    # twerk_action_server = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(
-    #         os.path.join(FindPackageShare('base_twerk').find('base_twerk'), 'launch', 'base_twerk_action_server.launch.py')
-    #     )
-    # )
-
     return LaunchDescription([
         rviz_penta_pod_launch,
         penta_pod_launch,
         gait_generator_launch,
         joints_aggregator_launch,
-        # null_space_publisher,
-        # twerk_action_server
     ])

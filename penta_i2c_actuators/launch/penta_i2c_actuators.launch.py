@@ -29,7 +29,10 @@ def generate_launch_description():
         output='screen',
         parameters=[config],
         # Pass 'mode' argument to the node
-        arguments=[LaunchConfiguration('mode')]
+        arguments=[LaunchConfiguration('mode')],
+        remappings=[
+            ('joint_setpoints', '/joint_setpoints'),
+        ]
     )
 
     # Create a launch description and add the actions

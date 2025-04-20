@@ -17,7 +17,10 @@ def generate_launch_description():
     rviz_penta_pod_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(FindPackageShare('penta_pod').find('penta_pod'), 'launch', 'penta_rviz.launch.py')
-        )
+        ),
+        launch_arguments={
+            'joint_states_remappings': '/joint_setpoints',
+        }.items()
     )
 
     # Include the penta_pod launch file
