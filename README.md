@@ -76,10 +76,12 @@ cd ~/my_ws/src/scorpion/scripts
 
 ## Run in simulation
 
+### Using Rviz
+
 You can run the simulation using the command
 
 ```
-ros2 launch penta_pod penta_simn_rviz.launch.py
+ros2 launch penta_pod penta_sim_rviz.launch.py
 ```
 
 You can move the robot around using
@@ -88,6 +90,13 @@ You can move the robot around using
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
 
+### Gazebo simulation
+
+You can also run a gazebo simulation using
+
+```
+ros2 launch penta_pod penta_gazebo.launch.py
+```
 
 ## Using devcontainers
 
