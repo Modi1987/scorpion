@@ -17,6 +17,10 @@ def generate_launch_description():
             executable="base_twerk_action_server_node",
             output="screen",
             parameters=[config],
+            remappings=[
+                ("cmd_null_setpoint", "/cmd_null_setpoint"),
+                ("get_current_null_pose", "/get_current_null_pose"),
+            ]
         )
     )
     return ld
