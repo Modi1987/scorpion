@@ -28,7 +28,7 @@ JoystickExtraControls::JoystickExtraControls()
       "cmd_null_setpoint", rmw_qos_profile_services_default, callback_group_);
   // Service cleint to change walking pattern
   set_gait_pattern_client_ = node_->create_client<SetGaitPattern>(
-      "/gait_generator/set_gait_pattern", rmw_qos_profile_services_default,
+      "gait_generator/set_gait_pattern", rmw_qos_profile_services_default,
       callback_group_);
 }
 
