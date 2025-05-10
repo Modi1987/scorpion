@@ -4,6 +4,10 @@ from sensor_msgs.msg import JointState
 import math
 import sys
 
+class Mode:
+    REAL = 'real'
+    VIRTUAL = 'virtual'
+
 class PentaI2CActuators(Node):
     def __init__(self, mode):
         super().__init__('penta_i2c_actuators')
@@ -16,6 +20,11 @@ class PentaI2CActuators(Node):
                 
         # Set mode (real or virtual)
         self.real_mode_flag = True
+        if mode == Mode.VIRTUAL:
+            self.real_mode_flag = False
+            self.get_logger().info('Running in virtual mode, no actuators will be controlled')
+        else:
+            self.get_logger().info('Running in real mode, actuators will be controlled')
         if self.real_mode_flag:
             from adafruit_servokit import ServoKit
             self.kit = ServoKit(channels=16)  # Use 16-channel board
@@ -24,7 +33,7 @@ class PentaI2CActuators(Node):
                 self.kit.servo[i].actuation_range = self.servo_actuation_range_degree[i]
 
         # Publisher actuators setpoint from joint states
-        self.setpoint_publisher_ = self.create_publisher(JointState, '/actuator_setpoint_degree', 10)
+        self.setpoint_publisher_ = self.create_publisher(JointState, 'actuator_setpoint_degree', 10)
         self.joint_states_subscriber = self.create_subscription(
                 JointState,
                 "joint_setpoints",
@@ -157,7 +166,7 @@ def main(args=None):
     rclpy.init(args=args)
 
     # Retrieve the mode from arguments
-    mode = 'virtual'
+    mode = Mode.VIRTUAL
     if len(sys.argv) > 1:
         mode = sys.argv[1]
 
