@@ -7,10 +7,19 @@ services:
         COLCON_WORKSPACE: /root/ros_ws
     volumes:
       - ../:/root/ros_ws/src
+      - /dev:/dev
+      - /tmp/.X11-unix:/tmp/.X11-unix
     environment:
       - ROS_DOMAIN_ID=91
-    network_mode: "host"
-    command: ["/bin/bash", "-c", "/root/ros_ws/src/.devcontainer/entrypoint.sh"]
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    privileged: true
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+      - /dev/i2c-0:/dev/i2c-0
+      - /dev/i2c-1:/dev/i2c-1
+    tty: true
+    command: [ "/bin/bash", "-c", "/root/ros_ws/src/.devcontainer/entrypoint.sh" ]
 
   scorpion-ros2-test:
     build:
@@ -23,4 +32,4 @@ services:
     environment:
       - ROS_DOMAIN_ID=91
     network_mode: "host"
-    command: ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash && cd /root/ros_ws && colcon test"]
+    command: [ "/bin/bash", "-c", "source /opt/ros/humble/setup.bash && cd /root/ros_ws && colcon test" ]
