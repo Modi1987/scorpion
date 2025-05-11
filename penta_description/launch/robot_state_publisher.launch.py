@@ -31,16 +31,26 @@ def load_penta_pod_urdf():
 def generate_launch_description():
     robot_description = load_penta_pod_urdf()
     print("robot_description: ", robot_description)
+
+    """ Launch args """
+    name_space_arg = DeclareLaunchArgument(
+        "name_space",
+        default_value="",
+        description="Robot name space",
+    )
     remapping_arg = DeclareLaunchArgument(
         'joint_states_remappings',
         default_value='/joint_states',
         description='Robot state publisher input topic'
     )
+    """ Lauch description """
     return LaunchDescription([
+        name_space_arg,
         remapping_arg,
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
+            namespace=LaunchConfiguration('name_space'),
             name='robot_state_publisher',
             output='screen',
             parameters=[

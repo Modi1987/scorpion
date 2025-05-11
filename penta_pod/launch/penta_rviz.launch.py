@@ -14,13 +14,27 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 # This is a launch rviz2 on a laptop for the toperware_bot
 def generate_launch_description():
+    """ Launch args """
+    name_space_arg = DeclareLaunchArgument(
+        "name_space",
+        default_value="",
+        description="Robot name space",
+    )
+
     robot_state_publisher_remapping_arg = DeclareLaunchArgument(
         'joint_states_remappings',
         default_value='/joint_states',
         description='Robot state publisher input topic'
     )
+    
     rviz_config_file = PathJoinSubstitution(
         [FindPackageShare('penta_description'), 'config', 'penta.rviz'])
+    rviz_config_file_arg = DeclareLaunchArgument(
+            'config_file',
+            default_value=rviz_config_file,
+            description='Path to the RViz configuration file'
+        )
+    
     penta_description_pkg = get_package_share_directory("penta_description")
 
     # RViz
@@ -29,16 +43,14 @@ def generate_launch_description():
             os.path.join(penta_description_pkg, "launch", "robot_state_publisher.launch.py")
         ),
         launch_arguments={
+            'name_space': LaunchConfiguration('name_space'),
             'joint_states_remappings': LaunchConfiguration('joint_states_remappings'),
         }.items()
     )
     return LaunchDescription([
+        name_space_arg,
         robot_state_publisher_remapping_arg,
-        DeclareLaunchArgument(
-            'config_file',
-            default_value=rviz_config_file,
-            description='Path to the RViz configuration file'
-        ),
+        rviz_config_file_arg,
         Node(
             package='rviz2',
             executable='rviz2',

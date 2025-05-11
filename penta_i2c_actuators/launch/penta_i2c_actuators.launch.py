@@ -45,8 +45,8 @@ def generate_launch_description():
         # Pass 'mode' argument to the node
         arguments=[LaunchConfiguration('mode')],
         remappings=[
-            ('joint_setpoints', '/joint_setpoints'),
-            ('actuator_setpoint_degree', '/actuator_setpoint_degree'),
+            ('joint_setpoints', 'joint_setpoints'),
+            ('actuator_setpoint_degree', 'actuator_setpoint_degree'),
         ]
     )
     ld.add_action(i2c_actuators_node)
