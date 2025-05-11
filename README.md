@@ -141,3 +141,65 @@ source install/setup.bash
 
 ros2 launch penta_pod penta_pod.launch.py
 ```
+
+
+# Swarm of robots on same network
+
+You can create a swarm of the real robot, all of them connected to eachothers sharing the same network, each robot will be distnguished by its own namespace as the following:
+
+For 'robot1'
+
+```
+ros2 launch penta_pod realhardware_bringup.launch.py name_space:=robot1 mode:=real
+
+```
+
+For 'robot2'
+
+```
+ros2 launch penta_pod realhardware_bringup.launch.py name_space:=robot2 mode:=real
+
+```
+
+You can check that the topics are in the namespace, same for services and actions, you can use rqt introspection to show the ndoes graph.
+
+```
+~/ros_ws# ros2 topic list
+/parameter_events
+/robot1/actuator_setpoint_degree
+/robot1/cmd_vel
+/robot1/joint_setpoints
+/robot1/joy
+/robot1/joy/set_feedback
+/robot1/limb0/joint_setpoints
+/robot1/limb0/xyz_msg
+/robot1/limb1/joint_setpoints
+/robot1/limb1/xyz_msg
+/robot1/limb2/joint_setpoints
+/robot1/limb2/xyz_msg
+/robot1/limb3/joint_setpoints
+/robot1/limb3/xyz_msg
+/robot1/limb4/joint_setpoints
+/robot1/limb4/xyz_msg
+/robot1/null_space_pose
+/robot2/actuator_setpoint_degree
+/robot2/cmd_vel
+/robot2/joint_setpoints
+/robot2/joy
+/robot2/joy/set_feedback
+/robot2/limb0/joint_setpoints
+/robot2/limb0/xyz_msg
+/robot2/limb1/joint_setpoints
+/robot2/limb1/xyz_msg
+/robot2/limb2/joint_setpoints
+/robot2/limb2/xyz_msg
+/robot2/limb3/joint_setpoints
+/robot2/limb3/xyz_msg
+/robot2/limb4/joint_setpoints
+/robot2/limb4/xyz_msg
+/robot2/null_space_pose
+/rosout
+/tf
+```
+
+You can publish on `/robot1/cmd_vel` to control first robot, and on `robot2/cmd_vel` to control second robot and so forth. If you do not have real robot you can use `mode:=virtual` and test
