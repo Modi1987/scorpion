@@ -95,7 +95,7 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 You can also run a gazebo simulation using
 
 ```
-ros2 launch penta_pod penta_gazebo.launch.py
+ros2 launch penta_gazebo_sim penta_sim_full_gazebo.launch.py
 ```
 
 ## Using devcontainers
