@@ -53,20 +53,56 @@
         <geometry>
           <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Lower_arm.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <origin xyz="0.0 0.0 0.0" rpy="-${PI2} ${PI2} 0.4"/>
+        <origin xyz="0.0 0.0 0.0" rpy="-${PI2} ${PI2} 0.41"/>
         <xacro:add_material_red/>
       </visual>
-      <collision>
-        <geometry>
-          <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Lower_arm.stl" scale="0.001 0.001 0.001"/>
-        </geometry>
-        <origin xyz="0.0 0.0 0.0" rpy="-${PI2} ${PI2} 0.4"/>
-      </collision>
       <inertial>
         <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
         <mass value="1.0"/>
         <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
       </inertial>
+    </link>
+
+    <link name="${prefix}_foot">
+      <visual>
+        <geometry>
+          <sphere radius="0.01"/>
+        </geometry>
+        <origin xyz="0.158 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      </visual>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+        <mass value="0.1"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <collision>
+        <geometry>
+          <sphere radius="0.015"/>
+        </geometry>
+        <origin xyz="0.158 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <surface>
+            <friction>
+              <!-- this is for ODE -->
+              <ode>
+                <mu>2.0</mu>
+                <mu2>2.0</mu2>
+                <fdir1>1 0 0</fdir1>
+              </ode>
+              <!-- this is for Bullet -->
+              <bullet>
+                <friction>2.0</friction>
+              </bullet>           
+            </friction>
+            <contact>
+              <ode>
+                <kp>100000.0</kp>
+                <kd>100.0</kd>
+                <min_depth>0.001</min_depth>
+                <max_vel>0.1</max_vel>
+              </ode>
+            </contact>
+        </surface>
+      </collision>
     </link>
 
     <joint name="${prefix}/joint_shoulder_motor" type="fixed">
@@ -96,6 +132,12 @@
       <child link="${prefix}_lower_arm_link"/>
       <origin xyz="0.096 0.0 0.0" rpy="0 0 0"/>
       <axis xyz="0 0 1" />
+    </joint>
+
+    <joint name="${prefix}/joint3" type="fixed">
+      <parent link="${prefix}_lower_arm_link"/>
+      <child link="${prefix}_foot"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </joint>
 
     <!-- ros2_control interfaces for each joint -->
