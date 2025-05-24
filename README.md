@@ -1,7 +1,7 @@
 [![Powered by Dev Containers](https://img.shields.io/badge/Powered%20by-Dev%20Containers-blue?logo=devcontainers&logoColor=white)](https://containers.dev/)
 
 
-# Scorpion
+# Pentapod
 
 This is a ROS2 software for the following older project [youtube video available here.](https://youtu.be/kcvJR5mcb1o?si=lxt_06UO4189CPcX)
 
@@ -21,9 +21,9 @@ cd ~/my_ws/src
 Clone the repo
 
 ```
-git clone git@github.com:Modi1987/scorpion.git
+git clone git@github.com:Modi1987/pentapod.git
 
-cd scorpion
+cd pentapod
 
 git checkout i2c_actuators
 ```
@@ -31,7 +31,7 @@ git checkout i2c_actuators
 There are bash scripts that will allow you to build your workspace you can do this on your PC if you want to run RVIZ simulations, or on Raspberry-pi4 if you want to run on real-robot
 
 ```
-cd ~/my_ws/src/scorpion/scripts
+cd ~/my_ws/src/pentapod/scripts
 
 ./setup_penta_workspace.sh
 ```
@@ -41,7 +41,7 @@ cd ~/my_ws/src/scorpion/scripts
 besides to the previous steps to setup your workspace, to control the real-robot you will need to configure the i2c bus on Raspberry-pi 4, to do so on the Raspberry-pi 4:
 
 ```
-cd ~/my_ws/src/scorpion/scripts
+cd ~/my_ws/src/pentapod/scripts
 
 ./setup_i2c_on_raspberry_pi4.sh
 ```
@@ -69,7 +69,7 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 To bring-up the robot automatically each time you boot the robot (without having to launch the brinup manually), run the following script on the Raspberry Pi
 
 ```
-cd ~/my_ws/src/scorpion/scripts
+cd ~/my_ws/src/pentapod/scripts
 
 ./setup_service_penta_bringup_on_boot.sh
 ```
