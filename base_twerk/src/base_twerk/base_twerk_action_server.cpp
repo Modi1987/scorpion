@@ -15,10 +15,10 @@ BaseTwerkActionServer::BaseTwerkActionServer()
       rclcpp::CallbackGroupType::MutuallyExclusive);
 
   this->setpoint_client_ = node_->create_client<BasePoseSetpointSrv>(
-      "cmd_null_setpoint", rmw_qos_profile_services_default, callback_group_);
+      "cmd_null_setpoint", rclcpp::QoS(rclcpp::ServicesQoS()), callback_group_);
 
   this->get_currnet_pose_client_ = node_->create_client<GetCurrentBasePose>(
-      "get_current_null_pose", rmw_qos_profile_services_default,
+      "get_current_null_pose", rclcpp::QoS(rclcpp::ServicesQoS()),
       callback_group_);
 
   this->base_twerk_action_server_ =

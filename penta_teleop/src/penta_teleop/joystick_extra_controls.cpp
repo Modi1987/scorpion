@@ -22,13 +22,13 @@ JoystickExtraControls::JoystickExtraControls()
 
   // Create service clients
   get_current_base_pose_client_ = node_->create_client<GetCurrentBasePose>(
-      "get_current_null_pose", rmw_qos_profile_services_default,
+      "get_current_null_pose", rclcpp::QoS(rclcpp::ServicesQoS()),
       callback_group_);
   set_base_pose_client_ = node_->create_client<BasePoseSetpoint>(
-      "cmd_null_setpoint", rmw_qos_profile_services_default, callback_group_);
+      "cmd_null_setpoint", rclcpp::QoS(rclcpp::ServicesQoS()), callback_group_);
   // Service cleint to change walking pattern
   set_gait_pattern_client_ = node_->create_client<SetGaitPattern>(
-      "gait_generator/set_gait_pattern", rmw_qos_profile_services_default,
+      "gait_generator/set_gait_pattern", rclcpp::QoS(rclcpp::ServicesQoS()),
       callback_group_);
 }
 

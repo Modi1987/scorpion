@@ -51,8 +51,7 @@ void BaseTwerkCmdPuplisher::create_setpoint_service() {
   };
 
   setpoint_service_ = node_->create_service<BasePoseSetpoint>(
-      "cmd_null_setpoint", lambda, rmw_qos_profile_services_default,
-      callback_group_);
+      "cmd_null_setpoint", lambda);
 }
 
 void BaseTwerkCmdPuplisher::create_get_current_base_pose_service() {
@@ -67,8 +66,7 @@ void BaseTwerkCmdPuplisher::create_get_current_base_pose_service() {
   };
 
   get_current_base_pose_ = node_->create_service<GetCurrentBasePose>(
-      "get_current_null_pose", lambda, rmw_qos_profile_services_default,
-      callback_group_);
+      "get_current_null_pose", lambda);
 }
 
 void BaseTwerkCmdPuplisher::timer_callback() {
