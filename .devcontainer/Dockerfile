@@ -51,7 +51,8 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-tf2-geometry-msgs \
     ros-${ROS_DISTRO}-plotjuggler \
     ros-${ROS_DISTRO}-xacro \
-    ros-${ROS_DISTRO}-rmw-cyclonedds-cpp
+    ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
+    ros-${ROS_DISTRO}--plotjuggler-ros
 
 # gazebo ros2 control packages
 RUN apt-get install -y \
