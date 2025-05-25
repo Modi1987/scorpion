@@ -53,6 +53,10 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-xacro \
     ros-${ROS_DISTRO}-rmw-cyclonedds-cpp
 
+# gazebo ros2 control packages
+RUN apt-get install -y \
+    ros-${ROS_DISTRO}-gz-ros2-control
+
 # Set up the workspace directory
 WORKDIR $COLCON_WORKSPACE/src
 
