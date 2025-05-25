@@ -100,6 +100,12 @@
                 <min_depth>0.001</min_depth>
                 <max_vel>0.1</max_vel>
               </ode>
+              <bullet>
+                <soft_cfm>0.0</soft_cfm>
+                <soft_erp>0.2</soft_erp>
+                <bounce>0.0</bounce>
+                <bounce_threshold>1.0</bounce_threshold>
+              </bullet>
             </contact>
         </surface>
       </collision>

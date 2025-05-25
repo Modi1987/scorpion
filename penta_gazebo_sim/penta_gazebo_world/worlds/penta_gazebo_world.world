@@ -12,7 +12,7 @@
     </include>
 
     <!-- Physics settings -->
-    <physics name="default_physics" type="ode">
+    <!-- physics name="default_physics" type="ode">
       <max_step_size>0.001</max_step_size>
       <real_time_update_rate>1000</real_time_update_rate>
       <gravity>0 0 -9.81</gravity>
@@ -30,9 +30,9 @@
           <contact_surface_layer>0.001</contact_surface_layer>
         </constraints>
       </ode>
-    </physics>
+    </physics -->
     
-    <!-- physics name="bullet_physics" type="bullet">
+    <physics name="bullet_physics" type="bullet">
       <max_step_size>0.001</max_step_size>
       <real_time_update_rate>1000</real_time_update_rate>
       <gravity>0 0 -9.81</gravity>
@@ -43,7 +43,7 @@
         <split_impulse>true</split_impulse>
         <split_impulse_penetration_threshold>-0.01</split_impulse_penetration_threshold>
       </bullet>
-    </physics -->
+    </physics>
 
   </world>
 </sdf>
