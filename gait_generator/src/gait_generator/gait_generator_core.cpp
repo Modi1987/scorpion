@@ -89,8 +89,7 @@ void GaitGenerator::create_set_gait_pattern_service() {
   service_callback_group_ = node_->create_callback_group(
       rclcpp::CallbackGroupType::MutuallyExclusive);
   set_gait_pattern_server_ = node_->create_service<SetGaitPattern>(
-      "gait_generator/set_gait_pattern", lambda,
-      rmw_qos_profile_services_default, service_callback_group_);
+      "gait_generator/set_gait_pattern", lambda);
 }
 
 void GaitGenerator::cmd_vel_sub_callback(

@@ -24,7 +24,7 @@ def generate_launch_description():
         "config",
         "general_config.yaml",
     )
-    ld = LaunchDescription()
+    
     ld.add_action(
         Node(
             package="gait_generator",
