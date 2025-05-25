@@ -149,7 +149,7 @@
     <!-- ros2_control interfaces for each joint -->
     <ros2_control name="${prefix}_ros2_control" type="system">
       <hardware>
-        <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
       </hardware>
 
       <joint name="${prefix}/joint0">
