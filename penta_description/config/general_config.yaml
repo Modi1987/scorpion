@@ -19,8 +19,8 @@
       0.06999234922592555, -0.21541430094085232, 0.0
     ]
     init_body_basefootprint_transform: [
-      # 0.0, 0.0, 0.158, 0.0, 0.0, 0.0, 1.0
-      0.0, 0.0, 0.0158, 0.0, 0.0, 0.0, 1.0
+      0.0, 0.0, 0.158, 0.0, 0.0, 0.0, 1.0
+      # 0.0, 0.0, 0.0158, 0.0, 0.0, 0.0, 1.0
     ]
     joint_angles_at_initial_pose_degree: [ # this is to be used by the i2c_actuators_params
     # when used on real hardware, make sure thet 
