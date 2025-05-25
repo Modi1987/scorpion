@@ -19,9 +19,13 @@
       0.06999234922592555, -0.21541430094085232, 0.0
     ]
     init_body_basefootprint_transform: [
-      0.0, 0.0, 0.158, 0.0, 0.0, 0.0, 1.0
+      # 0.0, 0.0, 0.158, 0.0, 0.0, 0.0, 1.0
+      0.0, 0.0, 0.0158, 0.0, 0.0, 0.0, 1.0
     ]
-    joint_angles_at_initial_pose_degree: [
+    joint_angles_at_initial_pose_degree: [ # this is to be used by the i2c_actuators_params
+    # when used on real hardware, make sure thet 
+    # init_body_basefootprint_transform is set to the correct value
+      # 0.0, 0.0, 0.158, 0.0, 0.0, 0.0, 1.0
       0.0, 0.0, 90.0,
       0.0, 0.0, 90.0,
       0.0, 0.0, 90.0,
@@ -41,6 +45,7 @@
     joints_aggregator:
       joints_update_interval_millis: 10
       publish_joints_only_on_value_change: true
+      number_of_messages_forcely_published_on_startup: 1000 # 0 means no messages will be published on startup
     base_twerk:
       base_frame_transform_update_interval_millis: 20
       action_server_service_call_interval_millis: 100
