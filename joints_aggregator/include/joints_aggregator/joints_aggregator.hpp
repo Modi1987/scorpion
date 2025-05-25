@@ -34,6 +34,7 @@ private:
   int limbs_num_;
   std::vector<long int> joints_per_limb_;
   int update_interval_millis_;
+  int number_of_messages_forcely_published_on_startup_ {0};
   int publish_on_startup_counter_ {0};
   bool publish_joints_only_on_value_change_{false};
 

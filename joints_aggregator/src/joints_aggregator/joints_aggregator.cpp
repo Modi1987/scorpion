@@ -36,7 +36,8 @@ JointsAggregator::JointsAggregator()
   this->previous_q_ = std::vector<double>(joints_count, 0.);
 
   joint_state_publisher_ =
-      node_->create_publisher<sensor_msgs::msg::JointState>("joint_setpoints", 10);
+      node_->create_publisher<sensor_msgs::msg::JointState>("joint_setpoints",
+                                                            10);
 
   for (int i = 0; i < limbs_num_; i++) {
     std::string topic_string = "limb" + std::to_string(i) + "/joint_setpoints";
@@ -65,8 +66,8 @@ JointsAggregator::JointsAggregator()
 
         // publish logic
         auto force_publish_on_startup = [this]() -> bool {
-          constexpr long times_to_publish_on_startup = 1000;
-          if (publish_on_startup_counter_ < times_to_publish_on_startup) {
+          if (publish_on_startup_counter_ <
+              number_of_messages_forcely_published_on_startup_) {
             publish_on_startup_counter_++;
             return true;
           }
@@ -108,6 +109,10 @@ void JointsAggregator::declare_parameters() {
   // publish only on value change
   node_->declare_parameter<bool>(
       "joints_aggregator.publish_joints_only_on_value_change");
+  // number of messages forcely published on startup
+  node_->declare_parameter<int>(
+      "joints_aggregator.number_of_messages_forcely_published_on_startup",
+      0);
 }
 
 auto JointsAggregator::get_parameters() -> bool {
@@ -175,14 +180,30 @@ auto JointsAggregator::get_parameters() -> bool {
           publish_joints_only_on_value_change_)) {
     RCLCPP_INFO_STREAM(
         node_->get_logger(),
-        "loaded joints_aggregator.publish_joints_only_on_value_change) is: "
+        "loaded joints_aggregator.publish_joints_only_on_value_change: "
             << publish_joints_only_on_value_change_);
   } else {
     RCLCPP_ERROR(
         node_->get_logger(),
         "ERROR, can not load "
         "joints_aggregator.publish_joints_only_on_value_change parameter");
-    rclcpp::shutdown();
+    return false;
+  }
+  // load number_of_messages_forcely_published_on_startup_
+  if (node_->get_parameter(
+          "joints_aggregator.number_of_messages_forcely_published_on_startup",
+          number_of_messages_forcely_published_on_startup_)) {
+    RCLCPP_INFO_STREAM(
+        node_->get_logger(),
+        "loaded "
+        "joints_aggregator.number_of_messages_forcely_published_on_startup: "
+            << number_of_messages_forcely_published_on_startup_);
+  } else {
+    RCLCPP_ERROR(
+        node_->get_logger(),
+        "ERROR, can not load "
+        "joints_aggregator.number_of_messages_forcely_published_on_startup "
+        "parameter");
     return false;
   }
 
