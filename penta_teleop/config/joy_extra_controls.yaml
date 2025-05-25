@@ -6,3 +6,9 @@
       z_base_max_value: 0.15
     gait_patterns_ctl:
       button_index: 2
+    shake_it:
+      up_and_down:
+        trigger_button_index: 1
+        magnitude: 0.02
+        w: 2.0
+        dance_time_millis: 10000

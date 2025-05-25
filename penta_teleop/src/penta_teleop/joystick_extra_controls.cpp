@@ -30,6 +30,11 @@ JoystickExtraControls::JoystickExtraControls()
   set_gait_pattern_client_ = node_->create_client<SetGaitPattern>(
       "gait_generator/set_gait_pattern", rmw_qos_profile_services_default,
       callback_group_);
+  
+  // Action client to call base twerk action
+  base_twerk_action_client_ =
+      rclcpp_action::create_client<BaseTwerkAction>(node_, "base_twerk_action",
+                                                    callback_group_);
 }
 
 void JoystickExtraControls::joy_sub_callback(
@@ -39,6 +44,28 @@ void JoystickExtraControls::joy_sub_callback(
   dpad_up_down(msg);
   // change walking pattern
   set_gait_pattern(msg);
+  // check up and down dance button
+  up_and_down_dance(msg);
+}
+
+void JoystickExtraControls::up_and_down_dance(
+  const sensor_msgs::msg::Joy::SharedPtr msg) {
+
+  static int last_button_state = 0;
+  auto index = up_and_down_shake_params_.trigger_button_index;
+  
+  if (msg->buttons[index] - last_button_state  == 1) {
+
+    if (!is_null_space_motion_possible_) {
+      RCLCPP_WARN(node_->get_logger(),
+                  "Base motion is not available, skipping base pose change.");
+      return;
+    }
+    this->send_base_twerk_goal();
+    return;
+  }
+
+  last_button_state = msg->buttons[index];
 }
 
 void JoystickExtraControls::set_gait_pattern(
@@ -92,6 +119,13 @@ void JoystickExtraControls::set_gait_pattern(
 void JoystickExtraControls::dpad_up_down(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
   if (msg->axes[this->d_pad_up_down_axis_index_] != 0) {
+    
+    if (!is_null_space_motion_possible_) {
+      RCLCPP_WARN(node_->get_logger(),
+                  "Base motion is not available, skipping base pose change.");
+      return;
+    }
+
     double delta_z = 0.001;
     double z_disp_base_command = msg->axes[7] * delta_z;
 
@@ -172,6 +206,52 @@ void JoystickExtraControls::handle_set_base_pose_response(
   } else {
     RCLCPP_INFO(node_->get_logger(), "Base pose set successfully.");
   }
+}
+
+void JoystickExtraControls::send_base_twerk_goal()
+{
+  
+  if (!this->base_twerk_action_client_->wait_for_action_server(std::chrono::seconds(5))) {
+    RCLCPP_ERROR(node_->get_logger(), "Action server not available after waiting");
+    return;
+  }
+
+  auto goal_msg = BaseTwerkAction::Goal();
+
+  goal_msg.r[2] = up_and_down_shake_params_.magnitude; // magnitude in meters
+  goal_msg.w = up_and_down_shake_params_.w; // rad/s
+  goal_msg.dance_time_millis = 10000; // milliseconds
+
+  RCLCPP_INFO(node_->get_logger(), "Sending goal");
+
+  auto send_goal_options = rclcpp_action::Client<BaseTwerkAction>::SendGoalOptions();
+  send_goal_options.goal_response_callback =
+    [this](const rclcpp_action::ClientGoalHandle<BaseTwerkAction>::SharedPtr goal_handle) {
+      if (!goal_handle) {
+        RCLCPP_ERROR(node_->get_logger(), "Goal was rejected by server");
+      } else {
+        RCLCPP_INFO(node_->get_logger(), "Goal accepted by server, waiting for result");
+        is_null_space_motion_possible_ = false;
+      }
+    };
+
+  send_goal_options.feedback_callback =
+    [this](const rclcpp_action::ClientGoalHandle<BaseTwerkAction>::SharedPtr,
+            const std::shared_ptr<const BaseTwerkAction::Feedback> /*feedback*/) {
+      RCLCPP_INFO(node_->get_logger(), "Received feedback");
+    };
+    
+  send_goal_options.result_callback =
+    [this](const rclcpp_action::ClientGoalHandle<BaseTwerkAction>::WrappedResult & result) {
+      is_null_space_motion_possible_ = true;
+      if (result.code == rclcpp_action::ResultCode::SUCCEEDED) {
+        RCLCPP_INFO(node_->get_logger(), "Goal succeeded");
+      } else {
+        RCLCPP_ERROR(node_->get_logger(), "Goal failed");
+      }
+    };
+
+  this->base_twerk_action_client_->async_send_goal(goal_msg, send_goal_options);
 }
 
 } // namespace penta_pod::teleop::joystick_extra_controls

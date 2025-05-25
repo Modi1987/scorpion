@@ -3,6 +3,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include <rclcpp/executors.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
 
 // include messages
 #include "base_twerk_msgs/srv/base_pose_setpoint.hpp"
@@ -10,6 +11,7 @@
 #include "gait_generator_msgs/srv/set_gait_pattern.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "sensor_msgs/msg/joy.hpp"
+#include "base_twerk_msgs/action/base_twerk_action.hpp"
 
 namespace penta_pod::teleop::joystick_extra_controls {
 
@@ -17,6 +19,8 @@ using PoseStamped = geometry_msgs::msg::PoseStamped;
 using BasePoseSetpoint = base_twerk_msgs::srv::BasePoseSetpoint;
 using GetCurrentBasePose = base_twerk_msgs::srv::GetCurrentBasePose;
 using SetGaitPattern = gait_generator_msgs::srv::SetGaitPattern;
+using BaseTwerkAction = base_twerk_msgs::action::BaseTwerkAction;
+using GoalHandleBaseTwerkAction = rclcpp_action::ClientGoalHandle<BaseTwerkAction>;
 
 class JoystickExtraControls {
 private:
@@ -26,6 +30,8 @@ private:
   rclcpp::Client<GetCurrentBasePose>::SharedPtr get_current_base_pose_client_;
   rclcpp::Client<BasePoseSetpoint>::SharedPtr set_base_pose_client_;
   rclcpp::Client<SetGaitPattern>::SharedPtr set_gait_pattern_client_;
+
+  rclcpp_action::Client<BaseTwerkAction>::SharedPtr base_twerk_action_client_;
 
   rclcpp::CallbackGroup::SharedPtr callback_group_;
 
@@ -41,6 +47,8 @@ private:
   void handle_set_base_pose_response(
       rclcpp::Client<BasePoseSetpoint>::SharedFuture response);
 
+  void send_base_twerk_goal();
+
   void declare_parameters();
   bool get_parameters();
 
@@ -49,6 +57,17 @@ private:
   int num_of_gait_patterns_{3};
   double z_base_max_value_{0.01};
   double z_base_min_value_{0.15};
+
+  bool is_null_space_motion_possible_{true};
+
+  void up_and_down_dance(const sensor_msgs::msg::Joy::SharedPtr msg);
+
+  struct up_and_down_shake_params {
+    int trigger_button_index{0};
+    double magnitude{0.01}; // meters
+    double w{4.0}; // rad/s
+    int dance_time_millis{10000}; // milliseconds
+  } up_and_down_shake_params_;
 
 public:
   explicit JoystickExtraControls();

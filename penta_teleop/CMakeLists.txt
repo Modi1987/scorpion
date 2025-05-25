@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(base_twerk_msgs REQUIRED)
 find_package(gait_generator_msgs REQUIRED)
+find_package(rclcpp_action REQUIRED)
 
 # Declare library
 add_library(${PROJECT_NAME}
@@ -28,6 +29,7 @@ ament_target_dependencies(${PROJECT_NAME}
         sensor_msgs
         base_twerk_msgs
         gait_generator_msgs
+        rclcpp_action
         )
 
 add_executable(joystick_extra_controls_node src/joystick_extra_controls_node.cpp)
