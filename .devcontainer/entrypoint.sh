@@ -11,7 +11,7 @@ cd /root/ros_ws
 
 # Install dependencies and build the workspace
 rosdep install --from-paths src --ignore-src -r -y
-colcon build
+# colcon build
 
 # Keep the container running
 tail -f /dev/null

@@ -1,5 +1,5 @@
 services:
-  scorpion-ros2:
+  penta-jazzy-ros2:
     build:
       context: ../
       dockerfile: ./.devcontainer/Dockerfile
@@ -13,7 +13,10 @@ services:
       - ROS_DOMAIN_ID=91
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
     privileged: true
+    runtime: nvidia
     devices:
       - /dev/bus/usb:/dev/bus/usb
       - /dev/i2c-0:/dev/i2c-0
@@ -21,7 +24,7 @@ services:
     tty: true
     command: [ "/bin/bash", "-c", "/root/ros_ws/src/.devcontainer/entrypoint.sh" ]
 
-  scorpion-ros2-test:
+  penta-jazzy-ros2-test:
     build:
       context: ../
       dockerfile: ./.devcontainer/Dockerfile

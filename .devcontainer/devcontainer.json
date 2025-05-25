@@ -1,7 +1,7 @@
 {
 	"name": "scorpion_devcontainer",
 	"dockerComposeFile": "./docker-compose.yaml",
-	"service": "scorpion-ros2",    // Specify the primary service name here
+	"service": "penta-jazzy-ros2", // Specify the primary service name here
 	"workspaceFolder": "/root/ros_ws/src",
 	"containerEnv": {
 		"DISPLAY": "${localEnv:DISPLAY}",
