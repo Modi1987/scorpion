@@ -41,7 +41,7 @@ def generate_launch_description():
     ld.add_action(penta_rviz_sim_full)
 
     # Paths
-    gazebo_ros_pkg = get_package_share_directory("gazebo_ros")
+    ros_gz_sim_pkg = get_package_share_directory("ros_gz_sim")
 
     # Gazebo world path
     world_pkg = get_package_share_directory("penta_gazebo_world")
@@ -49,39 +49,23 @@ def generate_launch_description():
         world_pkg, "worlds", "penta_gazebo_world.world"
     )
     print(f"Gazebo world path: {gazebo_world_path}")
-    
+
     # Gazebo
-    gazebo_ros = IncludeLaunchDescription(
+    ros_gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_pkg, "launch", "gazebo.launch.py")
+            os.path.join(ros_gz_sim_pkg, "launch", "gz_sim.launch.py")
         ),
-        launch_arguments={
-            'world': gazebo_world_path
-        }.items()
+        launch_arguments={ 'gz_args': ['-r -v4 ', gazebo_world_path], 'on_exit_shutdown': 'true' }.items()
     )
-    ld.add_action(gazebo_ros)
+    ld.add_action(ros_gz_sim)
 
     # Spawn robot into Gazebo
-    print("ToDo: when using several robots, add name_space to the robot description")
     spawn_robot = Node(
-        package="gazebo_ros",
-        executable="spawn_entity.py",
+        package="ros_gz_sim",
+        executable="create",
         name="spawn_robot",
         output="screen",
-        arguments=[
-            "-entity",
-            "penta_pod",
-            "-topic",
-            "/robot_description",
-            "-x",
-            "0.0",
-            "-y",
-            "0.0",
-            "-z",
-            "0.5",
-            "-Y",
-            "0.0",
-        ],
+        arguments=["-entity", "penta_pod", "-topic", "/robot_description"],
     )
     ld.add_action(spawn_robot)
 
