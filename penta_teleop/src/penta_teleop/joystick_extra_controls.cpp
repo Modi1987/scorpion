@@ -44,28 +44,58 @@ void JoystickExtraControls::joy_sub_callback(
   dpad_up_down(msg);
   // change walking pattern
   set_gait_pattern(msg);
-  // check up and down dance button
-  up_and_down_dance(msg);
+  // change "twerk it!" mode
+  check_twerk_it_mode_switch(msg);
+  // check "twerk it!" button
+  check_twerk_pressed(msg);
 }
 
-void JoystickExtraControls::up_and_down_dance(
+void JoystickExtraControls::check_twerk_it_mode_switch(
+  const sensor_msgs::msg::Joy::SharedPtr msg) {
+  static int last_button_state = 0;
+  auto index = twerk_it_params_.get_twerk_it_switch_mode_button_index();
+  auto received_button_value = msg->buttons[index];
+
+  if (received_button_value - last_button_state == 1) {
+    // Button was pressed
+    RCLCPP_INFO(node_->get_logger(),
+                "Button to switch shaking mode pressed, changing mode");
+    twerk_it_params_.switch_twerk_it_mode();
+
+    RCLCPP_INFO(node_->get_logger(),
+                "Applied twerk mode: %s, magnitude: %f",
+                twerk_it_params_.get_current_twerk_it_mode_name().c_str(),
+                twerk_it_params_.get_current_twerk_it_magnitude());
+  }
+  last_button_state = received_button_value;
+}
+
+void JoystickExtraControls::check_twerk_pressed(
   const sensor_msgs::msg::Joy::SharedPtr msg) {
 
   static int last_button_state = 0;
-  auto index = up_and_down_shake_params_.trigger_button_index;
+  auto index = twerk_it_params_.get_twerk_it_trigger_button_index();
+  auto received_button_value = msg->buttons[index];
   
-  if (msg->buttons[index] - last_button_state  == 1) {
+  if (received_button_value - last_button_state  == 1) {
 
     if (!is_null_space_motion_possible_) {
       RCLCPP_WARN(node_->get_logger(),
                   "Base motion is not available, skipping base pose change.");
       return;
     }
-    this->send_base_twerk_goal();
+
+    auto twerk_axis_index = twerk_it_params_.get_current_twerk_it_axis();
+    auto magnitude = twerk_it_params_.get_current_twerk_it_magnitude();
+    auto twerk_time_millis =
+        twerk_it_params_.get_current_twerk_it_dance_time_millis();
+    
+    this->send_base_twerk_goal(twerk_axis_index, magnitude, twerk_time_millis);
+    
     return;
   }
 
-  last_button_state = msg->buttons[index];
+  last_button_state = received_button_value;
 }
 
 void JoystickExtraControls::set_gait_pattern(
@@ -208,8 +238,7 @@ void JoystickExtraControls::handle_set_base_pose_response(
   }
 }
 
-void JoystickExtraControls::send_base_twerk_goal()
-{
+void JoystickExtraControls::send_base_twerk_goal(int twerk_axis_index, double twerk_magnitude, int twerk_time_millis) {
   
   if (!this->base_twerk_action_client_->wait_for_action_server(std::chrono::seconds(5))) {
     RCLCPP_ERROR(node_->get_logger(), "Action server not available after waiting");
@@ -218,9 +247,9 @@ void JoystickExtraControls::send_base_twerk_goal()
 
   auto goal_msg = BaseTwerkAction::Goal();
 
-  goal_msg.r[2] = up_and_down_shake_params_.magnitude; // magnitude in meters
-  goal_msg.w = up_and_down_shake_params_.w; // rad/s
-  goal_msg.dance_time_millis = 10000; // milliseconds
+  goal_msg.r[twerk_axis_index] = twerk_magnitude; // in meters or rads, depending on axis
+  goal_msg.w = twerk_it_params_.w; // rad/s
+  goal_msg.dance_time_millis = twerk_time_millis; // milliseconds
 
   RCLCPP_INFO(node_->get_logger(), "Sending goal");
 
