@@ -6,3 +6,20 @@
       z_base_max_value: 0.15
     gait_patterns_ctl:
       button_index: 2
+    twerk_it: # twerk action client goal parameters
+      switch_mode_button_index: 0
+      trigger_button_index: 1
+      w: 2.0
+      dance_time_millis: 10000
+      twerk_mode_names:
+        - "linear_up_and_down"
+        - "angular_roll"
+        - "linear_left_and_right"
+      twerk_mode_axes:
+        - 2 # for z
+        - 3 # for roll
+        - 1 # for y
+      twerk_mode_magnitudes:
+        - 0.02 # meter z
+        - 0.1 # rad roll
+        - 0.02 # meter y

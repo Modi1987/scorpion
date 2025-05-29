@@ -16,6 +16,11 @@ Connect the dongle to Raspberry PI, to control the robot as follows:
 
 4- `X button` to change walking pattern
 
+5- `A button` to change twerk mode
+
+6- `B button` to start executing the twerk motion
+
+
 Note, make sure to enable the motion using:
 
 1- `Right Trigger button (RT)` to enable the turbo mode
