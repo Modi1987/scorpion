@@ -44,6 +44,8 @@ private:
 
   auto execute(const std::shared_ptr<GoalHandle> goal_handle) -> void;
 
+  auto is_target_valid(const std::shared_ptr<GoalHandle> goal_handle) -> bool;
+
   auto declare_parameters() -> void;
   auto get_parameters() -> void;
 
@@ -52,11 +54,16 @@ private:
   auto calculate_twerk_pose_from_goal(
       rclcpp::Time start_time, PoseStamped start_pose,
       const std::shared_ptr<GoalHandle> goal_handle) -> PoseStamped;
-      
+
   auto quiry_current_base_pose() -> std::optional<GetCurrentBasePose::Response>;
 
-  double update_interval_millis_double_;
-  double max_permissible_displacement_meter_;
+  struct TwerkYamlConfigs {
+    double update_interval_millis_double_;
+    double max_permissible_displacement_meter_;
+    double min_permissible_displacement_meter_;
+    double max_permissible_rotation_rad_;
+    double min_permissible_rotation_rad_;
+  } twerk_yaml_configs_;
 
   struct ReceviedPoseStamped {
     rclcpp::Time timestamp;

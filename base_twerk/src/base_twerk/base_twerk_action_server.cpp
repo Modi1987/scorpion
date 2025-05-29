@@ -1,4 +1,5 @@
 #include "base_twerk/base_twerk_action_server.hpp"
+#include "base_twerk/base_twerk_helper_funs.hpp"
 #include "commons/quaternion_utils.hpp"
 
 namespace penta_pod::kin::base_twerk {
@@ -61,23 +62,15 @@ auto BaseTwerkActionServer::execute(
   const auto goal = goal_handle->get_goal();
   auto result = std::make_shared<BaseTwerkAction::Result>();
 
-  double mag_displacement =
-      std::sqrt(goal->r[0] * goal->r[0] + goal->r[1] * goal->r[1] +
-                goal->r[2] * goal->r[2]);
-  if (mag_displacement > max_permissible_displacement_meter_) {
-    auto message = "Action aborted for the specified displacement is: " +
-                   std::to_string(mag_displacement) +
-                   " [meter], which is bigger than the permissible value "
-                   "specified in yaml as " +
-                   std::to_string(max_permissible_displacement_meter_);
-    result->result_message = message;
-    goal_handle->abort(result);
-    RCLCPP_ERROR(node_->get_logger(), message.c_str());
+  // check if target is valid
+  if (!is_target_valid(goal_handle)) {
+    RCLCPP_ERROR(node_->get_logger(), "Invalid target, action aborted");
     return;
   }
 
   const auto millis_in_a_second = 1000.0;
-  rclcpp::Rate rate(millis_in_a_second / update_interval_millis_double_);
+  rclcpp::Rate rate(millis_in_a_second /
+                    twerk_yaml_configs_.update_interval_millis_double_);
 
   auto is_timed_out =
       [this](rclcpp::Time start_time,
@@ -113,7 +106,7 @@ auto BaseTwerkActionServer::execute(
   }
 
   auto dance_time_millis =
-      std::chrono::milliseconds(static_cast<int>(goal->dance_time_millis));
+      get_rounded_dance_time_from_goal_millis(goal->w, goal->dance_time_millis);
 
   // start control loop for base pose motion
   auto start_time = node_->now();
@@ -246,10 +239,83 @@ auto BaseTwerkActionServer::call_setpoint_client(
   return true;
 }
 
+auto BaseTwerkActionServer::is_target_valid(
+    const std::shared_ptr<GoalHandle> goal_handle) -> bool {
+  // Check goal handle validity
+  if (!goal_handle) {
+    RCLCPP_ERROR(node_->get_logger(), "Goal handle is null");
+    return false;
+  }
+
+  auto result = std::make_shared<BaseTwerkAction::Result>();
+
+  const auto goal = goal_handle->get_goal();
+
+  // Check input fields
+  if (goal->w == 0.0) {
+    auto message = "Action target goal for the specified frequency is: " +
+                   std::to_string(goal->w) +
+                   " [Hz], which is not valid. It should not be 0.";
+    result->result_message = message;
+    goal_handle->abort(result);
+    RCLCPP_ERROR(node_->get_logger(), message.c_str());
+    return false;
+  }
+
+  if (goal->dance_time_millis <= 0) {
+    auto message =
+        "Action target goal for the specified dance time is: " +
+        std::to_string(goal->dance_time_millis) +
+        " [milliseconds], which is not valid. It should be positive.";
+    result->result_message = message;
+    goal_handle->abort(result);
+    RCLCPP_ERROR(node_->get_logger(), message.c_str());
+    return false;
+  }
+
+  double mag_displacement =
+      std::sqrt(goal->r[0] * goal->r[0] + goal->r[1] * goal->r[1] +
+                goal->r[2] * goal->r[2]);
+  double comparision_value =
+      twerk_yaml_configs_.max_permissible_displacement_meter_;
+  if (mag_displacement > comparision_value) {
+    auto message = "The specified displacement magnitude is: " +
+                   std::to_string(mag_displacement) +
+                   " [meter], which is bigger than the permissible value "
+                   "specified in yaml as " +
+                   std::to_string(comparision_value);
+    result->result_message = message;
+    goal_handle->abort(result);
+    RCLCPP_ERROR(node_->get_logger(), message.c_str());
+    return false;
+  }
+
+  double mag_rotation =
+      std::sqrt(goal->r[3] * goal->r[3] + goal->r[4] * goal->r[4] +
+                goal->r[5] * goal->r[5]);
+  comparision_value = twerk_yaml_configs_.max_permissible_rotation_rad_;
+  if (mag_rotation > comparision_value) {
+    auto message =
+        "The specified rotation magnitude is: " + std::to_string(mag_rotation) +
+        " [rad], which is bigger than the permissible value "
+        "specified in yaml as " +
+        std::to_string(comparision_value);
+    result->result_message = message;
+    goal_handle->abort(result);
+    RCLCPP_ERROR(node_->get_logger(), message.c_str());
+    return false;
+  }
+
+  return true;
+}
+
 auto BaseTwerkActionServer::declare_parameters() -> void {
   node_->declare_parameter<int>(
       "base_twerk.action_server_service_call_interval_millis");
   node_->declare_parameter<double>("base_twerk.max_permissible_displacement");
+  node_->declare_parameter<double>("base_twerk.max_permissible_rotation");
+  node_->declare_parameter<double>("base_twerk.min_permissible_displacement");
+  node_->declare_parameter<double>("base_twerk.min_permissible_rotation");
 }
 
 auto BaseTwerkActionServer::get_parameters() -> void {
@@ -260,24 +326,45 @@ auto BaseTwerkActionServer::get_parameters() -> void {
       throw std::runtime_error(error_message);
     }
   };
-  int update_interval_millis_int_;
+  int update_interval_millis_int;
   load_param("base_twerk.action_server_service_call_interval_millis",
-             update_interval_millis_int_,
+             update_interval_millis_int,
              "No parameter "
              "base_twerk.action_server_service_call_interval_millis is found.");
   RCLCPP_INFO(node_->get_logger(),
               " base_twerk.action_server_service_call_interval_millis is %d "
               "[milliseconds]",
-              update_interval_millis_int_);
-  update_interval_millis_double_ =
-      static_cast<double>(update_interval_millis_int_);
+              update_interval_millis_int);
+  twerk_yaml_configs_.update_interval_millis_double_ =
+      static_cast<double>(update_interval_millis_int);
 
   load_param("base_twerk.max_permissible_displacement",
-             max_permissible_displacement_meter_,
+             twerk_yaml_configs_.max_permissible_displacement_meter_,
              "No parameter base_twerk.max_permissible_displacement is found.");
   RCLCPP_INFO(node_->get_logger(),
               " base_twerk.max_permissible_displacement is %f [m]",
-              max_permissible_displacement_meter_);
+              twerk_yaml_configs_.max_permissible_displacement_meter_);
+
+  load_param("base_twerk.max_permissible_rotation",
+             twerk_yaml_configs_.max_permissible_rotation_rad_,
+             "No parameter base_twerk.max_permissible_rotation is found.");
+  RCLCPP_INFO(node_->get_logger(),
+              " base_twerk.max_permissible_rotation is %f [rad]",
+              twerk_yaml_configs_.max_permissible_rotation_rad_);
+
+  load_param("base_twerk.min_permissible_displacement",
+             twerk_yaml_configs_.min_permissible_displacement_meter_,
+             "No parameter base_twerk.min_permissible_displacement is found.");
+  RCLCPP_INFO(node_->get_logger(),
+              " base_twerk.min_permissible_displacement is %f [m]",
+              twerk_yaml_configs_.min_permissible_displacement_meter_);
+
+  load_param("base_twerk.min_permissible_rotation",
+             twerk_yaml_configs_.min_permissible_rotation_rad_,
+             "No parameter base_twerk.min_permissible_rotation is found.");
+  RCLCPP_INFO(node_->get_logger(),
+              " base_twerk.min_permissible_rotation is %f [rad]",
+              twerk_yaml_configs_.min_permissible_rotation_rad_);
 }
 
 } // namespace penta_pod::kin::base_twerk
