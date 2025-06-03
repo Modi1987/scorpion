@@ -43,12 +43,12 @@
           0, 4, 3, 2, 1
         ]
     joints_aggregator:
-      joints_update_interval_millis: 10
+      joints_update_interval_millis: 33
       publish_joints_only_on_value_change: true
       number_of_messages_forcely_published_on_startup: 1000 # 0 means no messages will be published on startup
     base_twerk:
-      base_frame_transform_update_interval_millis: 20
-      action_server_service_call_interval_millis: 100
+      base_frame_transform_update_interval_millis: 33
+      action_server_service_call_interval_millis: 33
       max_permissible_displacement: 0.075 # meter
       max_permissible_rotation: 0.15 # rad
       min_permissible_displacement: 0.001 # meter
