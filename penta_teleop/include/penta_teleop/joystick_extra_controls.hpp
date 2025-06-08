@@ -51,7 +51,7 @@ private:
   /* get/set base pose */
   void handle_get_base_pose_response(
       rclcpp::Client<GetCurrentBasePose>::SharedFuture response,
-      double z_disp_base_command);
+      double z_disp_base_command, double pitch_disp_base_command);
   void handle_set_base_pose_response(
       rclcpp::Client<BasePoseSetpoint>::SharedFuture response);
 

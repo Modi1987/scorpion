@@ -3,6 +3,8 @@
 
 #include "geometry_msgs/msg/quaternion.hpp"
 
+namespace penta_pod::kin::commons::quaternion_utils {
+
 using geometry_msgs::msg::Quaternion;
 
 Quaternion rpy_to_quaternion(double yaw, double pitch, double roll) // yaw (Z), pitch (Y), roll (X)
@@ -34,5 +36,7 @@ Quaternion hamilton_product(Quaternion u, Quaternion v)
     return result;
 
 }
+
+} // namespace penta_pod::kin::commons::quaternion_utils
 
 #endif // COMMONS_QUAT_UTILS_HPP_

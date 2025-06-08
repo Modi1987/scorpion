@@ -1,4 +1,5 @@
 #include "penta_teleop/joystick_extra_controls.hpp"
+#include "commons/quaternion_utils.hpp"
 
 namespace penta_pod::teleop::joystick_extra_controls {
 
@@ -40,7 +41,7 @@ JoystickExtraControls::JoystickExtraControls()
 void JoystickExtraControls::joy_sub_callback(
     const sensor_msgs::msg::Joy::SharedPtr msg) {
 
-  // move base up and down
+  // move base up and down or yaw control
   dpad_up_down(msg);
   // change walking pattern
   set_gait_pattern(msg);
@@ -159,6 +160,16 @@ void JoystickExtraControls::dpad_up_down(
     double delta_z = 0.001;
     double z_disp_base_command = msg->axes[7] * delta_z;
 
+    double delta_pitch = 0.01;
+    double pitch_disp_base_command = msg->axes[7] * delta_pitch;
+
+    if (msg->buttons[5] == 1) {
+      // If button 5 is pressed, use yaw control instead of z control
+      z_disp_base_command = 0.0;
+    } else {
+      pitch_disp_base_command = 0.0;
+    }
+
     // Check if the service is available before calling
     if (!get_current_base_pose_client_->wait_for_service(
             std::chrono::seconds(100))) {
@@ -173,16 +184,17 @@ void JoystickExtraControls::dpad_up_down(
     // Call the service asynchronously with a callback
     auto future = get_current_base_pose_client_->async_send_request(
         request,
-        [this, z_disp_base_command](
+        [this, z_disp_base_command, pitch_disp_base_command](
             rclcpp::Client<GetCurrentBasePose>::SharedFuture response) {
-          this->handle_get_base_pose_response(response, z_disp_base_command);
+          this->handle_get_base_pose_response(response, z_disp_base_command,
+                                              pitch_disp_base_command);
         });
   }
 }
 
 void JoystickExtraControls::handle_get_base_pose_response(
     rclcpp::Client<GetCurrentBasePose>::SharedFuture response,
-    double z_disp_base_command) {
+    double z_disp_base_command, double pitch_disp_base_command) {
 
   auto result = response.get();
 
@@ -218,6 +230,11 @@ void JoystickExtraControls::handle_get_base_pose_response(
   setpoint_request->pose = result->pose;
   setpoint_request->pose.pose.position.z += z_disp_base_command;
 
+  using namespace penta_pod::kin::commons::quaternion_utils;
+  auto pitch_quaternion = rpy_to_quaternion(0.0, pitch_disp_base_command, 0.0); // yaw, pitch, roll
+  setpoint_request->pose.pose.orientation =
+      hamilton_product(setpoint_request->pose.pose.orientation, pitch_quaternion);
+  
   // Call the set_base_pose service asynchronously
   auto future = set_base_pose_client_->async_send_request(
       setpoint_request,
