@@ -1,0 +1,19 @@
+controller_manager:
+  ros__parameters:
+    use_sim_time: False
+    update_rate: 50  # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    
+    forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+forward_position_controller:
+  ros__parameters:
+    type: forward_command_controller/ForwardCommandController
+    joints:
+      - limb0/joint0
+      - limb0/joint1
+    interface_name: position
+

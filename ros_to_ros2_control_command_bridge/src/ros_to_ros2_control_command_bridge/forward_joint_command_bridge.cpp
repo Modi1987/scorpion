@@ -20,8 +20,11 @@ void GazeboForwardJointCommandControlBridge::jointStateCallback(const sensor_msg
 {
     // Process the joint state message and prepare commands
     std_msgs::msg::Float64MultiArray joint_commands;
-    joint_commands.data = msg->position;  // Example: forwarding position as command
 
+    std::vector<double> truncated_position = {msg->position[0], msg->position[1]};
+
+    joint_commands.data = truncated_position;
+    
     // Publish the joint commands
     joint_command_publisher_->publish(joint_commands);
 }

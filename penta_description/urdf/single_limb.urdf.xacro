@@ -2,7 +2,7 @@
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="add_leg" params="prefix shoulderxyz shoulderrpy">
+  <xacro:macro name="add_leg" params="prefix shoulderxyz shoulderrpy enable_gazebo:=false">
     <link name="${prefix}_shoulder_motor">
       <visual>
         <geometry>
@@ -146,6 +146,7 @@
       <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </joint>
 
+  <xacro:if value="$(arg enable_gazebo)">
     <!-- ros2_control interfaces for each joint -->
     <ros2_control name="${prefix}_ros2_control" type="system">
       <hardware>
@@ -202,6 +203,7 @@
         <mechanicalReduction>1</mechanicalReduction>
       </actuator>
     </transmission>
+  </xacro:if>
 
   </xacro:macro>
 

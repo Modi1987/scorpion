@@ -14,6 +14,7 @@ install(
   urdf
   launch
   meshes
+  ros2_control
   DESTINATION share/${PROJECT_NAME}
 )
 

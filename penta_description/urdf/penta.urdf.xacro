@@ -1,7 +1,14 @@
 <?xml version="1.0"?>
 
 <robot name="penta_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
-  
+
+  <xacro:arg name="prefix" default="" />
+  <xacro:arg name="enable_gazebo" default="true" />
+  <xacro:arg name="use_real_dynamixel_motor" default="false" />
+  <xacro:arg name="use_fake_hardware" default="false" />
+  <xacro:arg name="fake_sensor_commands" default="false" />
+  <xacro:arg name="port_name" default="/dev/ttyUSB0" />
+
   <xacro:property name="PI" value="3.141592" />
   <xacro:property name="PI2" value="${PI/2}" />
   <xacro:property name="base_visual_yaw" value="0.32" />
@@ -82,19 +89,35 @@
   </xacro:macro>
     
 
-<xacro:add_leg prefix="limb0" shoulderxyz="${0.085*cos(0.*3.141592/2.5)} ${0.085*sin(0.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(0.*3.141592/2.5)}"/>
-<xacro:add_leg prefix="limb1" shoulderxyz="${0.085*cos(1.*3.141592/2.5)} ${0.085*sin(1.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(1.*3.141592/2.5)}"/>
-<xacro:add_leg prefix="limb2" shoulderxyz="${0.085*cos(2.*3.141592/2.5)} ${0.085*sin(2.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(2.*3.141592/2.5)}"/>
-<xacro:add_leg prefix="limb3" shoulderxyz="${0.085*cos(3.*3.141592/2.5)} ${0.085*sin(3.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(3.*3.141592/2.5)}"/>
-<xacro:add_leg prefix="limb4" shoulderxyz="${0.085*cos(4.*3.141592/2.5)} ${0.085*sin(4.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(4.*3.141592/2.5)}"/>
+<xacro:add_leg prefix="limb0" shoulderxyz="${0.085*cos(0.*3.141592/2.5)} ${0.085*sin(0.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(0.*3.141592/2.5)}" enable_gazebo="$(arg enable_gazebo)"/>
+<xacro:add_leg prefix="limb1" shoulderxyz="${0.085*cos(1.*3.141592/2.5)} ${0.085*sin(1.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(1.*3.141592/2.5)}" enable_gazebo="$(arg enable_gazebo)"/>
+<xacro:add_leg prefix="limb2" shoulderxyz="${0.085*cos(2.*3.141592/2.5)} ${0.085*sin(2.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(2.*3.141592/2.5)}" enable_gazebo="$(arg enable_gazebo)"/>
+<xacro:add_leg prefix="limb3" shoulderxyz="${0.085*cos(3.*3.141592/2.5)} ${0.085*sin(3.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(3.*3.141592/2.5)}" enable_gazebo="$(arg enable_gazebo)"/>
+<xacro:add_leg prefix="limb4" shoulderxyz="${0.085*cos(4.*3.141592/2.5)} ${0.085*sin(4.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(4.*3.141592/2.5)}" enable_gazebo="$(arg enable_gazebo)"/>
 
 <xacro:add_base_plate name="upper_plate" stl_file_name="Chassi_top.stl" z="0.03"/>
 <xacro:add_base_plate name="lower_plate" stl_file_name="Chassi_bottom.stl" z="-0.03"/>
 
-<gazebo>
-  <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control" >
-    <parameters>$(find penta_description)/config/ros2_control_params.yaml</parameters>
-  </plugin>
-</gazebo>
+<xacro:if value="$(arg enable_gazebo)">
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control" >
+      <parameters>$(find penta_description)/config/ros2_control_params.yaml</parameters>
+    </plugin>
+  </gazebo>
+</xacro:if>
+<xacro:unless value="$(arg enable_gazebo)">
+  <xacro:if value="$(arg use_real_dynamixel_motor)">
+    <xacro:include filename="$(find penta_description)/ros2_control/penta_dynamixel_system.ros2_control.xacro" />
+
+    <xacro:add_penta_dynamixel_control_system
+      name="PentaDynamixelControlSystem" 
+      prefix="$(arg prefix)" 
+      enable_gazebo="$(arg enable_gazebo)"
+      use_real_dynamixel_motor="$(arg use_real_dynamixel_motor)"
+      use_fake_hardware="$(arg use_fake_hardware)"
+      fake_sensor_commands="$(arg fake_sensor_commands)"
+      port_name="$(arg port_name)"/>
+  </xacro:if>
+</xacro:unless>
 
 </robot>
