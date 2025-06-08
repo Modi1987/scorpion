@@ -17,6 +17,8 @@ void GaitGenerator::declare_parameters() {
   node_->declare_parameter<int>("gait_parameters.gait_patterns.num");
   node_->declare_parameter<std::vector<long int>>(
       "gait_parameters.gait_patterns.feet_order", std::vector<long int>{});
+  node_->declare_parameter<double>("gait_parameters.gait_radial_frequency");
+  node_->declare_parameter<double>("gait_parameters.step_height");
 }
 
 void GaitGenerator::load_parameters() {
@@ -121,19 +123,34 @@ void GaitGenerator::load_parameters() {
   body_basefootprint_ = transform;
 
   // Load gait parameters
-  load_param("gait_parameters.max_gait_linear_speed", max_gait_linear_speed_,
+  load_param("gait_parameters.max_gait_linear_speed",
+             gait_parameters_.max_gait_linear_speed,
              "Parameter gait_parameters.max_gait_linear_speed was not found.");
   RCLCPP_INFO(
       node_->get_logger(),
       "Loaded gait_parameters.max_gait_linear_speed value is: %f [m/sec]",
-      max_gait_linear_speed_);
+      gait_parameters_.max_gait_linear_speed);
 
-  load_param("gait_parameters.max_gait_turning_speed", max_gait_turning_speed_,
+  load_param("gait_parameters.max_gait_turning_speed",
+             gait_parameters_.max_gait_turning_speed,
              "Parameter gait_parameters.max_gait_turning_speed was not found.");
   RCLCPP_INFO(
       node_->get_logger(),
       "Loaded gait_parameters.max_gait_turning_speed value is: %f [rad/sec]",
-      max_gait_turning_speed_);
+      gait_parameters_.max_gait_turning_speed);
+
+  load_param("gait_parameters.gait_radial_frequency",
+             gait_parameters_.gait_radial_frequency,
+             "Parameter gait_parameters.gait_radial_frequency was not found.");
+  RCLCPP_INFO(node_->get_logger(),
+              "Loaded gait_parameters.gait_radial_frequency value is: %f [Hz]",
+              gait_parameters_.gait_radial_frequency);
+
+  load_param("gait_parameters.step_height", gait_parameters_.step_height,
+             "Parameter gait_parameters.step_height was not found.");
+  RCLCPP_INFO(node_->get_logger(),
+              "Loaded gait_parameters.step_height value is: %f [m]",
+              gait_parameters_.step_height);
 
   // load gait patterns
   load_param("gait_parameters.gait_patterns.num", gait_patterns_.gaits_num_,
