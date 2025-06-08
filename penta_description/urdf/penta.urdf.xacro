@@ -32,7 +32,7 @@
   <link name="base_link">
     <visual>
       <geometry>
-        <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Chassi_middle.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="file://$(find penta_description)/meshes/visual/penta_stl_v1/Chassi_middle.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0 0 ${base_visual_yaw}"/>
       <xacro:add_material_red/>
@@ -75,7 +75,7 @@
     <link name="${name}_link">
       <visual>
         <geometry>
-          <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/${stl_file_name}" scale="0.001 0.001 0.001"/>
+          <mesh filename="file://$(find penta_description)/meshes/visual/penta_stl_v1/${stl_file_name}" scale="0.001 0.001 0.001"/>
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 ${base_visual_yaw}"/>
         <xacro:add_material_red/>

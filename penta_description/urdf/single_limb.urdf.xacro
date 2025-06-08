@@ -21,7 +21,7 @@
     <link name="${prefix}_shoulder_link">
       <visual>
         <geometry>
-          <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Shoulder.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="file://$(find penta_description)/meshes/visual/penta_stl_v1/Shoulder.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="-${PI2} 0 0"/>
         <xacro:add_material_red/>
@@ -36,7 +36,7 @@
     <link name="${prefix}_upper_arm_link">
       <visual>
         <geometry>
-          <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Upper_arm.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="file://$(find penta_description)/meshes/visual/penta_stl_v1/Upper_arm.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
         <xacro:add_material_red/>
@@ -51,7 +51,7 @@
     <link name="${prefix}_lower_arm_link">
       <visual>
         <geometry>
-          <mesh filename="package://penta_description/meshes/visual/penta_stl_v1/Lower_arm.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="file://$(find penta_description)/meshes/visual/penta_stl_v1/Lower_arm.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="-${PI2} ${PI2} 0.41"/>
         <xacro:add_material_red/>
