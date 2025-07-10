@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Define a macro for a ros2_control joint -->
+  <xacro:macro name="joint_interface" params="prefix idx">
+    <joint name="${prefix}joint{idx}">
+        <command_interface name="position" />
+        <!--command_interface name="effort" /-->
+        <!--command_interface name="velocity" /-->
+        <state_interface name="position" />
+        <state_interface name="velocity" />
+        <state_interface name="effort" />
+      </joint>
+  </xacro:macro>
+
+  <xacro:macro name="add_pca9685_hw_interface" params="name prefix use_mock_hardware">
+
+    <ros2_control name="${name}_pca9685_hardware_interface" type="system">
+      <hardware>
+        <plugin>pca9685_ros2_control/Pca9685HardwareInterface</plugin>
+        <param name="device_name">/dev/i2c-1</param>
+        <param name="i2c_address">0x40</param>
+        <param name="use_mock_hardware">${use_mock_hardware}</param>
+        <param name="motors.number_of_channels">16</param>
+        <param name="motors.min_joint_angle_for_each_channel">[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]</param>
+        <param name="motors.max_joint_angle_for_each_channel">[180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0,
+                                         180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0]</param>
+        <param name="motors.min_pulse_width_for_each_channel_microsec">[500, 500, 500, 500, 500, 500, 500, 500,
+                                         500, 500, 500, 500, 500, 500, 500, 500]</param>
+        <param name="motors.max_pulse_width_for_each_channel_microsec">[2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500,
+                                         2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500]</param>
+      </hardware>
+
+      <!-- a for loop to instantiate joints 1 to 15 -->
+      <xacro:property name="joint_indices" value="${range(1, 16)}"/>
+      <xacro:for each="i" in="${joint_indices}">
+        <xacro:joint_interface prefix="${prefix}" idx="${i}"/>
+      </xacro:for>
+
+    </ros2_control>
+
+  </xacro:macro>
+
+</robot>

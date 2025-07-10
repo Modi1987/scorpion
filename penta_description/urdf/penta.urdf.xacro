@@ -97,4 +97,8 @@
   </plugin>
 </gazebo>
 
+<xacro:include filename="$(find penta_description)/ros2_control/pca9685.ros2_control.xacro">
+  <xacro:add_pca9685_hw_interface name="pca9685" prefix="penta_" use_mock_hardware="false"/>
+</xacro:include>
+
 </robot>
