@@ -57,7 +57,24 @@
       min_permissible_rotation: 0.001 # rad
       tracking_linear_velocity: 0.5 # [m/sec]
       tracking_angular_velocity: 1.0 # [rad/sec]
+    # following is used with python i2c_actuators.py
     i2c_actuators_params:
+      actuator_angles_at_initial_pose_degree: [
+        135.0, 146.0, 87.0,
+        135.0, 138.0, 87.0,
+        135.0, 138.0, 87.0,
+        135.0, 131.0, 91.0,
+        135.0, 131.0, 83.0,
+      ]
+      dir: [
+        1.0, -1.0, -1.0,
+        1.0, -1.0, -1.0,
+        1.0, -1.0, -1.0,
+        1.0, -1.0, -1.0,
+        1.0, -1.0, -1.0,
+      ]
+    # following parameters are used with pca9685_ros2_control
+    cpp_pca9685_i2c_actuators_params:
       actuator_angles_at_initial_pose_degree: [
         135.0, 146.0, 87.0,
         135.0, 138.0, 87.0,
