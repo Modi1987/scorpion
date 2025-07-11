@@ -2,8 +2,8 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Define a macro for a ros2_control joint -->
-  <xacro:macro name="joint_interface" params="prefix idx">
-    <joint name="${prefix}joint{idx}">
+  <xacro:macro name="joint_interface" params="limb_idx joint_idx">
+    <joint name="limb${limb_idx}/joint${joint_idx}">
         <command_interface name="position" />
         <!--command_interface name="effort" /-->
         <!--command_interface name="velocity" /-->
@@ -32,11 +32,25 @@
                                          2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500]</param>
       </hardware>
 
-      <!-- a for loop to instantiate joints 1 to 15 -->
-      <xacro:property name="joint_indices" value="${range(1, 16)}"/>
-      <xacro:for each="i" in="${joint_indices}">
-        <xacro:joint_interface prefix="${prefix}" idx="${i}"/>
-      </xacro:for>
+      <xacro:joint_interface limb_idx="0" joint_idx="0"/>
+      <xacro:joint_interface limb_idx="0" joint_idx="1"/>
+      <xacro:joint_interface limb_idx="0" joint_idx="2"/>
+
+      <xacro:joint_interface limb_idx="1" joint_idx="0"/>
+      <xacro:joint_interface limb_idx="1" joint_idx="1"/>
+      <xacro:joint_interface limb_idx="1" joint_idx="2"/>
+
+      <xacro:joint_interface limb_idx="2" joint_idx="0"/>
+      <xacro:joint_interface limb_idx="2" joint_idx="1"/>
+      <xacro:joint_interface limb_idx="2" joint_idx="2"/>
+
+      <xacro:joint_interface limb_idx="3" joint_idx="0"/>
+      <xacro:joint_interface limb_idx="3" joint_idx="1"/>
+      <xacro:joint_interface limb_idx="3" joint_idx="2"/>
+
+      <xacro:joint_interface limb_idx="4" joint_idx="0"/>
+      <xacro:joint_interface limb_idx="4" joint_idx="1"/>
+      <xacro:joint_interface limb_idx="4" joint_idx="2"/>
 
     </ros2_control>
 
