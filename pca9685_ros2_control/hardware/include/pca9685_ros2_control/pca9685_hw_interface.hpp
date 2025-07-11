@@ -18,12 +18,12 @@
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
-#include "pca_msgs/msg/pca_channel_params.hpp"
+#include "pca9685_interfaces/msg/pca_channel_params.hpp"
 #include "pca9685_ros2_control/pca9685_ros2_api.hpp"
 
 #include <iostream>
 
-using MotorParams = pca_msgs::msg::PcaChannelParams;
+using MotorParams = pca9685_interfaces::msg::PcaChannelParams;
 
 namespace pca9685_ros2_control
 {

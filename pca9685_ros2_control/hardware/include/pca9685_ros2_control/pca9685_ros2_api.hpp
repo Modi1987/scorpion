@@ -1,7 +1,7 @@
 #ifndef PCA9685_ROS2_API_HPP_
 #define PCA9685_ROS2_API_HPP_
 
-#include "pca_msgs/msg/pca_channel_params.hpp"
+#include "pca9685_interfaces/msg/pca_channel_params.hpp"
 #include <memory>
 #include <vector>
 #include <string>
@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <cstdint>
 
-using MotorParams = pca_msgs::msg::PcaChannelParams;
+using MotorParams = pca9685_interfaces::msg::PcaChannelParams;
 
 class MyPCA9685 {
 public:

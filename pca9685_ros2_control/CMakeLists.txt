@@ -14,7 +14,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
   rclcpp
   rclcpp_lifecycle
-  pca_msgs
+  pca9685_interfaces
 )
 
 # find dependencies
@@ -53,12 +53,6 @@ pluginlib_export_plugin_description_file(hardware_interface pca9685_hw_interface
 install(
   DIRECTORY hardware/include/
   DESTINATION include/${PROJECT_NAME}
-)
-
-
-install(
-  DIRECTORY bringup/launch bringup/config
-  DESTINATION share/${PROJECT_NAME}
 )
 
 install(TARGETS pca9685_ros2_control
