@@ -235,7 +235,7 @@ hardware_interface::return_type Pca9685HardwareInterface::write(
 {
   // write position commands to the motors
   for (int index = 0; index < number_of_motors_; ++index) {
-      float degree = joint_position_commands_[index] * (180.0 / M_PI); // Convert rads 2 degrees
+      float degree = joint_position_commands_[index];
       pca_api_->setMotorCommand(index, degree); 
   }            
   pca_api_->flushInternalCommands2Motors();
