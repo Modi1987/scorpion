@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 
 <robot name="penta_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="use_gazebo_simulation" default="False" />
+  <xacro:arg name="use_pca9685_ros2_control" default="False" />
   
   <xacro:property name="PI" value="3.141592" />
   <xacro:property name="PI2" value="${PI/2}" />
@@ -82,23 +85,27 @@
   </xacro:macro>
     
 
-<xacro:add_leg prefix="limb0" shoulderxyz="${0.085*cos(0.*3.141592/2.5)} ${0.085*sin(0.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(0.*3.141592/2.5)}"/>
-<xacro:add_leg prefix="limb1" shoulderxyz="${0.085*cos(1.*3.141592/2.5)} ${0.085*sin(1.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(1.*3.141592/2.5)}"/>
-<xacro:add_leg prefix="limb2" shoulderxyz="${0.085*cos(2.*3.141592/2.5)} ${0.085*sin(2.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(2.*3.141592/2.5)}"/>
-<xacro:add_leg prefix="limb3" shoulderxyz="${0.085*cos(3.*3.141592/2.5)} ${0.085*sin(3.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(3.*3.141592/2.5)}"/>
-<xacro:add_leg prefix="limb4" shoulderxyz="${0.085*cos(4.*3.141592/2.5)} ${0.085*sin(4.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(4.*3.141592/2.5)}"/>
+<xacro:add_leg prefix="limb0" shoulderxyz="${0.085*cos(0.*3.141592/2.5)} ${0.085*sin(0.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(0.*3.141592/2.5)}" use_gazebo_simulation="$(arg use_gazebo_simulation)"/>
+<xacro:add_leg prefix="limb1" shoulderxyz="${0.085*cos(1.*3.141592/2.5)} ${0.085*sin(1.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(1.*3.141592/2.5)}" use_gazebo_simulation="$(arg use_gazebo_simulation)"/>
+<xacro:add_leg prefix="limb2" shoulderxyz="${0.085*cos(2.*3.141592/2.5)} ${0.085*sin(2.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(2.*3.141592/2.5)}" use_gazebo_simulation="$(arg use_gazebo_simulation)"/>
+<xacro:add_leg prefix="limb3" shoulderxyz="${0.085*cos(3.*3.141592/2.5)} ${0.085*sin(3.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(3.*3.141592/2.5)}" use_gazebo_simulation="$(arg use_gazebo_simulation)"/>
+<xacro:add_leg prefix="limb4" shoulderxyz="${0.085*cos(4.*3.141592/2.5)} ${0.085*sin(4.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(4.*3.141592/2.5)}" use_gazebo_simulation="$(arg use_gazebo_simulation)"/>
 
 <xacro:add_base_plate name="upper_plate" stl_file_name="Chassi_top.stl" z="0.03"/>
 <xacro:add_base_plate name="lower_plate" stl_file_name="Chassi_bottom.stl" z="-0.03"/>
 
+<xacro:if value="$(arg use_gazebo_simulation)">
 <gazebo>
   <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control" >
     <parameters>$(find penta_description)/config/ros2_control_params.yaml</parameters>
   </plugin>
+  <xacro:include filename="$(find penta_description)/ros2_control/gazebo.ros2_control.xacro" />
 </gazebo>
+</xacro:if>
 
-<xacro:include filename="$(find penta_description)/ros2_control/pca9685.ros2_control.xacro">
+<xacro:if value="$(arg use_pca9685_ros2_control)">
+  <xacro:include filename="$(find penta_description)/ros2_control/pca9685.ros2_control.xacro" />
   <xacro:add_pca9685_hw_interface name="pca9685" prefix="penta_" use_mock_hardware="false"/>
-</xacro:include>
+</xacro:if>
 
 </robot>
