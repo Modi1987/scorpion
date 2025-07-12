@@ -12,7 +12,7 @@ class PentapodControlApp:
 
         self.root = root
         self.root.title("PCA9568 motor control GUI")
-        self.root.geometry("700x1000")
+        self.root.geometry("750x1000")
 
         self.slider_objects = []
         self.slider_value_labels = []
@@ -42,7 +42,7 @@ class PentapodControlApp:
                 minus_button = ttk.Button(frame, text="-", command=lambda idx=index: self.update_slider_values(self.slider_values[idx] - 0.5, idx))
                 minus_button.pack(side="left", padx=5)
 
-                slider = ttk.Scale(frame, from_=0, to=270, orient="horizontal", command=lambda value, idx=index: self.update_slider_values(value, idx))
+                slider = ttk.Scale(frame, from_=0, to=270, orient="horizontal", length=400, command=lambda value, idx=index: self.update_slider_values(value, idx))
                 slider.pack(side="left", padx=5)
 
                 plus_button = ttk.Button(frame, text="+", command=lambda idx=index: self.update_slider_values(self.slider_values[idx] + 0.5, idx))
@@ -53,9 +53,6 @@ class PentapodControlApp:
                 self.slider_value_labels.append(ttk.Label(frame, text=f"135"))
                 self.slider_value_labels[-1].pack(side="left", padx=5)
 
-        self.positions_label = ttk.Label(self.root, text="Slider Values: " + str(self.slider_values))
-        self.positions_label.pack(pady=10)
-
         self.update_button = ttk.Button(self.root, text="Update Values to Wardware", command=self.flush_values_to_ros)
         self.update_button.pack(pady=10)
 
@@ -65,8 +62,8 @@ class PentapodControlApp:
 
     def update_slider_values(self, value, index):
         self.slider_values[index] = float(value)
-        self.slider_value_labels[index].config(text=str(self.slider_values[index]))
-        self.positions_label.config(text="Slider Values: " + str(self.slider_values))
+        actuator_position_string_formatted = f"{self.slider_values[index]:.2f}"
+        self.slider_value_labels[index].config(text=actuator_position_string_formatted)
         if self.enable_publishing:
             self.flush_values_to_ros()
 
