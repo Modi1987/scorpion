@@ -3,6 +3,7 @@ import rclpy
 from std_msgs.msg import Float64MultiArray
 import tkinter as tk
 from tkinter import ttk
+import os
 
 class PentapodControlApp:
     def __init__(self, root, node):
@@ -81,7 +82,9 @@ class PentapodControlApp:
         print(f"Published to {self.topic_name}: {msg.data}")
     
     def save_values_to_file(self):
-        with open("limps_values.txt", "w") as file:
+        script_directory = os.path.dirname(os.path.realpath(__file__))
+        output_file_path = os.path.join(script_directory, "limps_values.txt")
+        with open(output_file_path, "w") as file:
             for value in self.slider_values:
                 file.write(f"{value:.2f}, ")
         print("Slider values saved to limps_values.txt")
