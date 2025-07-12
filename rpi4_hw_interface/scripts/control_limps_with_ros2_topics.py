@@ -39,13 +39,13 @@ class PentapodControlApp:
                 label = ttk.Label(frame, text=f"Motor {index + 1}")
                 label.pack(side="left", padx=5)
 
-                minus_button = ttk.Button(frame, text="-", command=lambda idx=index: self.update_slider_values(self.slider_values[idx] - 0.5, idx))
+                minus_button = ttk.Button(frame, text="-", command=lambda idx=index: self.update_positions_callback(self.slider_values[idx] - 0.5, idx))
                 minus_button.pack(side="left", padx=5)
 
-                slider = ttk.Scale(frame, from_=0, to=270, orient="horizontal", length=400, command=lambda value, idx=index: self.update_slider_values(value, idx))
+                slider = ttk.Scale(frame, from_=0, to=270, orient="horizontal", length=400, command=lambda value, idx=index: self.update_positions_callback(value, idx))
                 slider.pack(side="left", padx=5)
 
-                plus_button = ttk.Button(frame, text="+", command=lambda idx=index: self.update_slider_values(self.slider_values[idx] + 0.5, idx))
+                plus_button = ttk.Button(frame, text="+", command=lambda idx=index: self.update_positions_callback(self.slider_values[idx] + 0.5, idx))
                 plus_button.pack(side="left", padx=5)
 
                 self.slider_objects.append(slider)
@@ -56,11 +56,14 @@ class PentapodControlApp:
         self.update_button = ttk.Button(self.root, text="Update Values to Wardware", command=self.flush_values_to_ros)
         self.update_button.pack(pady=10)
 
+        self.save_button = ttk.Button(self.root, text="Save values to file", command=self.save_values_to_file)
+        self.save_button.pack(pady=10)
+
         for slider in self.slider_objects:
             slider.set(135)  # Set initial value to 135
         self.enable_publishing = True
 
-    def update_slider_values(self, value, index):
+    def update_positions_callback(self, value, index):
         self.slider_values[index] = float(value)
         actuator_position_string_formatted = f"{self.slider_values[index]:.2f}"
         self.slider_value_labels[index].config(text=actuator_position_string_formatted)
@@ -76,6 +79,12 @@ class PentapodControlApp:
         msg.data = [float(self.slider_values[i]) for i in range(n)]
         self.publisher.publish(msg)
         print(f"Published to {self.topic_name}: {msg.data}")
+    
+    def save_values_to_file(self):
+        with open("limps_values.txt", "w") as file:
+            for value in self.slider_values:
+                file.write(f"{value:.2f}, ")
+        print("Slider values saved to limps_values.txt")
 
 if __name__ == "__main__":
     rclpy.init()
