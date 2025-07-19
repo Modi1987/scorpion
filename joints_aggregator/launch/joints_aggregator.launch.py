@@ -30,7 +30,10 @@ def generate_launch_description():
                 executable="joints_aggregator_node",
                 output="screen",
                 namespace=LaunchConfiguration("name_space"),
-                parameters=[config],
+                parameters=[
+                    {"name_space": LaunchConfiguration("name_space")},
+                    config
+                ],
                 remappings=[
                     ("joint_setpoints", "joint_setpoints"),
                 ],
