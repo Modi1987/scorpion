@@ -226,16 +226,9 @@ hardware_interface::return_type Pca9685HardwareInterface::read(
   // forward positions
   for (int index = 0; index < number_of_motors_; ++index) {
       // read position commands from the motors
-      joint_positions_[index] = joint_position_commands_[index];
-  }
-  // defferintiate velocities
-  if (previous_joint_position_commands_.empty()) {
-    previous_joint_position_commands_ = joint_position_commands_;
-  } else {
-    for (int index = 0; index < number_of_motors_; ++index) {
-      joint_velocities_[index] = (joint_position_commands_[index] - previous_joint_position_commands_[index]) / period.seconds();
-      previous_joint_position_commands_[index] = joint_position_commands_[index];
-    }
+      joint_positions_[index] = s_curve_pos_[index];
+      joint_velocities_[index] = s_curve_vel_[index];
+      joint_efforts_[index] = s_curve_acc_[index];
   }
   // efforst stays zero
   return hardware_interface::return_type::OK;
