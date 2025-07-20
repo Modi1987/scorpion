@@ -25,13 +25,14 @@ def generate_launch_description():
     setpoint_to_frward_joint_position = Node(
         package="ros_to_ros2_control_command_bridge",
         executable="forward_joint_command_bridge_node",
+        namespace=launch.substitutions.LaunchConfiguration("name_space"),
         output="both",
         remappings={
             (
                 "actuator_setpoints",
-                "/forward_position_controller/commands",
+                "forward_position_controller/commands",
             ),  # this is for the output topic
-            ("joint_setpoints", "/joint_setpoints"),
+            ("joint_setpoints", "joint_setpoints"),
         },  # this is for the input topic
         parameters=[
             {"name_space": launch.substitutions.LaunchConfiguration("name_space")},
