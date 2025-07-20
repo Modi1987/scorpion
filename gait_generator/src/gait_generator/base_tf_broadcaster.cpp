@@ -7,6 +7,10 @@ BaseTfBroadcaster::BaseTfBroadcaster()
   RCLCPP_INFO(node_->get_logger(),
               "Starting base_tf_broadcaster, subscriping to null_space_pose "
               "topic and broadcasting tf");
+  // declare and get parameters
+  declare_parameters();
+  get_parameters();
+  // create subscriber to null_space_pose topic
   base_pose_subscriber_ = node_->create_subscription<PoseStamped>(
       "null_space_pose", 10, [this](const PoseStamped::SharedPtr msg) {
         this->base_pose_sub_callback(msg);
