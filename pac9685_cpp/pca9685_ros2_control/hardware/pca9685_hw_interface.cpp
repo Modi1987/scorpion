@@ -51,11 +51,13 @@ hardware_interface::CallbackReturn Pca9685HardwareInterface::on_init(
   auto min_angle = parse_list<long>(min_angle_string);
   std::string max_angle_string  = info_.hardware_parameters.at("motors.max_joint_angle_for_each_channel");
   auto max_angle = parse_list<long>(max_angle_string);
+  auto init_angles = parse_list<long>(info_.hardware_parameters.at("motors.init_angles"));
 
   if (min_pulse.size() != static_cast<size_t>(number_of_motors_) ||
       max_pulse.size() != static_cast<size_t>(number_of_motors_) ||
       min_angle.size() != static_cast<size_t>(number_of_motors_) ||
-      max_angle.size() != static_cast<size_t>(number_of_motors_))
+      max_angle.size() != static_cast<size_t>(number_of_motors_) ||
+      init_angles.size() != static_cast<size_t>(number_of_motors_))
   {
     RCLCPP_FATAL(
       get_logger(), "Number of motors (%d) does not match size of pulse or angle parameters.",
@@ -78,8 +80,17 @@ hardware_interface::CallbackReturn Pca9685HardwareInterface::on_init(
   // Initialize vectors for positions, velocities, efforts and commands
   joint_position_commands_ = std::vector<double>(number_of_motors_, 0.);
   joint_positions_ = std::vector<double>(number_of_motors_, 0.);
+  s_curve_pos_ = std::vector<double>(number_of_motors_, 0.0);
+  s_curve_vel_ = std::vector<double>(number_of_motors_, 0.0);
+  s_curve_acc_ = std::vector<double>(number_of_motors_, 0.0);
   joint_velocities_ = std::vector<double>(number_of_motors_, 0.);
   joint_efforts_ = std::vector<double>(number_of_motors_, 0.);
+
+  for (int i = 0; i < number_of_motors_; ++i) {
+    joint_position_commands_[i] = init_angles[i];
+    joint_positions_[i] = init_angles[i];
+    s_curve_pos_[i] = init_angles[i];
+  }
 
   for (const hardware_interface::ComponentInfo & joint : info_.joints)
   {
@@ -231,13 +242,45 @@ hardware_interface::return_type Pca9685HardwareInterface::read(
 }
 
 hardware_interface::return_type Pca9685HardwareInterface::write(
-  const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
+  const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
 {
-  // write position commands to the motors
-  for (int index = 0; index < number_of_motors_; ++index) {
-      float degree = joint_position_commands_[index];
-      pca_api_->setMotorCommand(index, degree); 
-  }            
+  double dt = period.seconds();
+  double max_acc = 30.0; // deg/s^2
+  double max_jerk = 300.0; // deg/s^3
+
+  for (int i = 0; i < number_of_motors_; ++i) {
+      double target = joint_position_commands_[i];
+      double pos = s_curve_pos_[i];
+      double vel = s_curve_vel_[i];
+      double acc = s_curve_acc_[i];
+
+      // Compute position error
+      double error = target - pos;
+
+      // If close to target, stop
+      if (std::abs(error) < 1e-2 && std::abs(vel) < 1e-2) {
+          pos = target;
+          vel = 0.0;
+          acc = 0.0;
+      } else {
+          // Jerk-limited acceleration towards target
+          double desired_acc = std::clamp(error * 10.0, -max_acc, max_acc);
+          double jerk = std::clamp(desired_acc - acc, -max_jerk * dt, max_jerk * dt);
+          acc += jerk;
+          vel += acc * dt;
+          pos += vel * dt;
+
+          // Clamp velocity if overshooting
+          if ((error > 0 && vel < 0) || (error < 0 && vel > 0)) vel = 0;
+      }
+
+      s_curve_pos_[i] = pos;
+      s_curve_vel_[i] = vel;
+      s_curve_acc_[i] = acc;
+
+      pca_api_->setMotorCommand(i, pos);
+  }
+
   pca_api_->flushInternalCommands2Motors();
   
   return hardware_interface::return_type::OK;

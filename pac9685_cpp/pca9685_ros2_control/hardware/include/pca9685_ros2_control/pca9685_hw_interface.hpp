@@ -71,6 +71,7 @@ private:
 
   // Store command and joints feedback
   std::vector<double> joint_position_commands_;
+  std::vector<double> s_curve_pos_, s_curve_vel_, s_curve_acc_;
   std::vector<double> joint_positions_;
   std::vector<double> joint_velocities_;
   std::vector<double> joint_efforts_;
