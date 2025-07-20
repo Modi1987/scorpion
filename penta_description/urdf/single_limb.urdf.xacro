@@ -112,7 +112,7 @@
     </link>
 
     <joint name="${name_space}${prefix}/joint_shoulder_motor" type="fixed">
-      <parent link="base_link"/>
+      <parent link="${name_space}base_link"/>
       <child link="${name_space}${prefix}_shoulder_motor"/>
       <origin xyz="${shoulderxyz}" rpy="${shoulderrpy}"/>
     </joint>
