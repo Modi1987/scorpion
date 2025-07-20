@@ -99,6 +99,7 @@ def generate_launch_description():
     forward_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
+        namespace=LaunchConfiguration("name_space"),
         arguments=[
             "forward_position_controller",
             "--controller-manager",
