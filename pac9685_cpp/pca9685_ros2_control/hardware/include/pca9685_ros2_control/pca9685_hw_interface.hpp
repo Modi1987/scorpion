@@ -70,10 +70,10 @@ private:
   rclcpp::Clock::SharedPtr clock_;
 
   // Store command and joints feedback
-  std::vector<double> joint_position_commands_rad_;
-  std::vector<double> joint_positions_rad_;
-  std::vector<double> joint_velocities_rad_per_sec_;
-  std::vector<double> joint_efforts_;
+  std::vector<double> actuator_position_commands_rad_;
+  std::vector<double> actuator_positions_feedback_rad_;
+  std::vector<double> actuator_velocities_rad_per_sec_;
+  std::vector<double> actuator_efforts_;
 
   // Motors parameters
   std::string i2c_device_name_;
