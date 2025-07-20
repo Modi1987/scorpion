@@ -51,11 +51,13 @@ hardware_interface::CallbackReturn Pca9685HardwareInterface::on_init(
   auto min_angle = parse_list<long>(min_angle_string);
   std::string max_angle_string  = info_.hardware_parameters.at("motors.max_joint_angle_for_each_channel");
   auto max_angle = parse_list<long>(max_angle_string);
+  auto init_angles = parse_list<long>(info_.hardware_parameters.at("motors.init_angles"));
 
   if (min_pulse.size() != static_cast<size_t>(number_of_motors_) ||
       max_pulse.size() != static_cast<size_t>(number_of_motors_) ||
       min_angle.size() != static_cast<size_t>(number_of_motors_) ||
-      max_angle.size() != static_cast<size_t>(number_of_motors_))
+      max_angle.size() != static_cast<size_t>(number_of_motors_) ||
+      init_angles.size() != static_cast<size_t>(number_of_motors_))
   {
     RCLCPP_FATAL(
       get_logger(), "Number of motors (%d) does not match size of pulse or angle parameters.",
@@ -76,9 +78,21 @@ hardware_interface::CallbackReturn Pca9685HardwareInterface::on_init(
   }
 
   // Initialize vectors for positions, velocities, efforts and commands
-  joint_position_commands_ = std::vector<double>(number_of_motors_, 0.);
-  joint_positions_ = std::vector<double>(number_of_motors_, 0.);
-  joint_velocities_ = std::vector<double>(number_of_motors_, 0.);
+  joint_position_commands_rad_ = std::vector<double>(number_of_motors_, 0.);
+  joint_positions_rad_ = std::vector<double>(number_of_motors_, 0.);
+  for (int i = 0; i < number_of_motors_; ++i) {
+    if (init_angles[i] < min_angle[i] || init_angles[i] > max_angle[i]) {
+      RCLCPP_FATAL(
+        get_logger(), "Initial angle %ld for motor %d exceeds limits [%ld, %ld].",
+        init_angles[i], i, min_angle[i], max_angle[i]);
+      return hardware_interface::CallbackReturn::ERROR;
+    } else {
+      auto angle_rad = init_angles[i] * (M_PI / 180.0); // Convert degrees to radians
+      joint_position_commands_rad_[i] = angle_rad; // Store in radians
+      joint_positions_rad_[i] = angle_rad; // Initialize positions with initial angles
+    }
+  }
+  joint_velocities_rad_per_sec_ = std::vector<double>(number_of_motors_, 0.);
   joint_efforts_ = std::vector<double>(number_of_motors_, 0.);
 
   for (const hardware_interface::ComponentInfo & joint : info_.joints)
@@ -138,10 +152,10 @@ std::vector<hardware_interface::StateInterface> Pca9685HardwareInterface::export
   {
     state_interfaces.emplace_back(
       hardware_interface::StateInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joint_positions_[i]));
+        info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joint_positions_rad_[i]));
     state_interfaces.emplace_back(
       hardware_interface::StateInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &joint_velocities_[i]));
+        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &joint_velocities_rad_per_sec_[i]));
     state_interfaces.emplace_back(
       hardware_interface::StateInterface(
         info_.joints[i].name, hardware_interface::HW_IF_EFFORT, &joint_efforts_[i]));
@@ -157,7 +171,7 @@ std::vector<hardware_interface::CommandInterface> Pca9685HardwareInterface::expo
   {
     command_interfaces.emplace_back(
       hardware_interface::CommandInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joint_position_commands_[i]));
+        info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joint_position_commands_rad_[i]));
   }
 
   return command_interfaces;
@@ -211,19 +225,19 @@ hardware_interface::CallbackReturn Pca9685HardwareInterface::on_deactivate(
 hardware_interface::return_type Pca9685HardwareInterface::read(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
 {
-  static std::vector<double> previous_joint_position_commands_;
+  static std::vector<double> previous_joint_position_commands_rad_;
   // forward positions
   for (int index = 0; index < number_of_motors_; ++index) {
       // read position commands from the motors
-      joint_positions_[index] = joint_position_commands_[index];
+      joint_positions_rad_[index] = joint_position_commands_rad_[index];
   }
   // defferintiate velocities
-  if (previous_joint_position_commands_.empty()) {
-    previous_joint_position_commands_ = joint_position_commands_;
+  if (previous_joint_position_commands_rad_.empty()) {
+    previous_joint_position_commands_rad_ = joint_position_commands_rad_;
   } else {
     for (int index = 0; index < number_of_motors_; ++index) {
-      joint_velocities_[index] = (joint_position_commands_[index] - previous_joint_position_commands_[index]) / period.seconds();
-      previous_joint_position_commands_[index] = joint_position_commands_[index];
+      joint_velocities_rad_per_sec_[index] = (joint_position_commands_rad_[index] - previous_joint_position_commands_rad_[index]) / period.seconds();
+      previous_joint_position_commands_rad_[index] = joint_position_commands_rad_[index];
     }
   }
   // efforst stays zero
@@ -235,7 +249,7 @@ hardware_interface::return_type Pca9685HardwareInterface::write(
 {
   // write position commands to the motors
   for (int index = 0; index < number_of_motors_; ++index) {
-      float degree = joint_position_commands_[index];
+      float degree = joint_position_commands_rad_[index] * (180.0 / M_PI); // Convert radians to degrees
       pca_api_->setMotorCommand(index, degree); 
   }            
   pca_api_->flushInternalCommands2Motors();

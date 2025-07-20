@@ -28,7 +28,7 @@ def generate_launch_description():
         output="both",
         remappings={
             (
-                "forward_position_controller/commands",
+                "actuator_setpoints",
                 "/forward_position_controller/commands",
             ),  # this is for the output topic
             ("joint_setpoints", "/joint_setpoints"),

@@ -9,7 +9,7 @@ GazeboForwardJointCommandControlBridge::GazeboForwardJointCommandControlBridge()
     declareParameters();
     loadParameters();
     // Create the publisher and subscription
-    joint_command_publisher_ = node_->create_publisher<std_msgs::msg::Float64MultiArray>("forward_position_controller/commands", 10);
+    joint_command_publisher_ = node_->create_publisher<std_msgs::msg::Float64MultiArray>("actuator_setpoints", 10);
     joint_state_subscription_ = node_->create_subscription<sensor_msgs::msg::JointState>(
         "joint_setpoints", 10, [this](const sensor_msgs::msg::JointState::SharedPtr msg) {
             this->jointStateCallback(msg);
@@ -30,8 +30,9 @@ void GazeboForwardJointCommandControlBridge::jointStateCallback(const sensor_msg
     for (size_t i = 0; i < n; ++i) {
         auto q_i_degree = msg->position[i] * 180 / M_PI;
         auto dq_i_degree = q_i_degree - joint_angles_at_initial_pose_degree_[i];
-        auto servo_setpoint = actuator_angles_at_initial_pose_degree_[i] + dir_[i] * dq_i_degree;
-        joint_commands.data[i] = servo_setpoint;
+        auto servo_setpoint_degree = actuator_angles_at_initial_pose_degree_[i] + dir_[i] * dq_i_degree;
+        auto servo_setpoint_rad = servo_setpoint_degree * (M_PI / 180.0); // Convert degrees to radians
+        joint_commands.data[i] = servo_setpoint_rad;
     }
     // Publish the joint commands
     joint_command_publisher_->publish(joint_commands);
