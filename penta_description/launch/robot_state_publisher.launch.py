@@ -11,6 +11,11 @@ def generate_launch_description():
         default_value="",
         description="Robot name space",
     )
+    use_gazebo_simulation_arg = DeclareLaunchArgument(
+        "use_gazebo_simulation",
+        default_value="False",
+        description="Change to true to use Gazebo",
+    )
     remapping_arg = DeclareLaunchArgument(
         'joint_states_remappings',
         default_value='/joint_states',
@@ -24,11 +29,15 @@ def generate_launch_description():
             'urdf',
             'penta.urdf.xacro'
         ]),
-        ' name_space:=', LaunchConfiguration('name_space')
+        ' name_space:=',
+        LaunchConfiguration('name_space'),
+        ' use_gazebo_simulation:=',
+        LaunchConfiguration('use_gazebo_simulation'),
     ])
 
     return LaunchDescription([
         name_space_arg,
+        use_gazebo_simulation_arg,
         remapping_arg,
         Node(
             package='robot_state_publisher',
