@@ -14,6 +14,7 @@ find_package(sensor_msgs REQUIRED)
 # Declare library
 add_library(${PROJECT_NAME}
         src/${PROJECT_NAME}/forward_joint_command_bridge.cpp
+        src/${PROJECT_NAME}/gazebo_forward_joint_command_bridge.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
@@ -32,6 +33,11 @@ target_link_libraries(forward_joint_command_bridge_node
         ${PROJECT_NAME}
         )
 
+add_executable(gazebo_forward_joint_command_bridge_node src/gazebo_forward_joint_command_bridge_node.cpp)
+target_link_libraries(gazebo_forward_joint_command_bridge_node
+        ${PROJECT_NAME}
+        )
+
 #############
 # ## Install ##
 #############
@@ -42,6 +48,7 @@ install(
 
 install(TARGETS 
         forward_joint_command_bridge_node
+        gazebo_forward_joint_command_bridge_node
         DESTINATION lib/${PROJECT_NAME}
         )
 
