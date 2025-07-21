@@ -7,12 +7,12 @@
 
 namespace ros2_to_ros2_control_bridge
 {
-  class GazeboForwardJointCommandControlBridge
+  class ForwardJointCommandControlBridge
   {
       
   public:
-    GazeboForwardJointCommandControlBridge();
-    ~GazeboForwardJointCommandControlBridge();
+    ForwardJointCommandControlBridge();
+    ~ForwardJointCommandControlBridge();
     
     void jointStateCallback(const sensor_msgs::msg::JointState::SharedPtr msg);
     void publishJointCommands();
