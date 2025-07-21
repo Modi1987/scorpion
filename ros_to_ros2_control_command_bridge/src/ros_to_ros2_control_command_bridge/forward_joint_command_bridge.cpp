@@ -2,10 +2,10 @@
 
 namespace ros2_to_ros2_control_bridge
 {
-GazeboForwardJointCommandControlBridge::GazeboForwardJointCommandControlBridge() : 
-    node_(rclcpp::Node::make_shared("gazebo_forward_joint_command_control_bridge")) {
+ForwardJointCommandControlBridge::ForwardJointCommandControlBridge() : 
+    node_(rclcpp::Node::make_shared("forward_joint_command_control_bridge")) {
     // Initialize the node and declare parameters
-    RCLCPP_INFO(node_->get_logger(), "GazeboForwardJointCommandControlBridge initialized.");
+    RCLCPP_INFO(node_->get_logger(), "ForwardJointCommandControlBridge initialized.");
     declareParameters();
     loadParameters();
     // Create the publisher and subscription
@@ -16,12 +16,12 @@ GazeboForwardJointCommandControlBridge::GazeboForwardJointCommandControlBridge()
         });
 }
 
-GazeboForwardJointCommandControlBridge::~GazeboForwardJointCommandControlBridge()
+ForwardJointCommandControlBridge::~ForwardJointCommandControlBridge()
 {
     // Destructor logic if needed
 }
 
-void GazeboForwardJointCommandControlBridge::jointStateCallback(const sensor_msgs::msg::JointState::SharedPtr msg)
+void ForwardJointCommandControlBridge::jointStateCallback(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
     // Process the joint state message and prepare commands
     std_msgs::msg::Float64MultiArray joint_commands;
@@ -38,7 +38,7 @@ void GazeboForwardJointCommandControlBridge::jointStateCallback(const sensor_msg
     joint_command_publisher_->publish(joint_commands);
 }
 
-void GazeboForwardJointCommandControlBridge::declareParameters()
+void ForwardJointCommandControlBridge::declareParameters()
 {
     node_->declare_parameter<std::vector<double>>("joint_angles_at_initial_pose_degree",
         std::vector<double>{}
@@ -52,7 +52,7 @@ void GazeboForwardJointCommandControlBridge::declareParameters()
     );
 }
 
-void GazeboForwardJointCommandControlBridge::loadParameters()
+void ForwardJointCommandControlBridge::loadParameters()
 {
     auto load_vector_parameter = [this](const std::string &param_name, std::vector<double> &param_vector) {
         if (!node_->get_parameter(param_name, param_vector)) {
