@@ -90,6 +90,8 @@ private:
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr
       cmd_null_pos_subscription_; // null space motion transform (body to
                                   // basefootprint)
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr 
+      feedback_cmd_vel_publisher_;
   rclcpp::TimerBase::SharedPtr timer_;
   geometry_msgs::msg::Twist cmd_vel_{};
 
