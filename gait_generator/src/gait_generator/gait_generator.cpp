@@ -50,6 +50,9 @@ GaitGenerator::GaitGenerator()
   timer_ = node_->create_wall_timer(
       std::chrono::milliseconds(static_cast<int>(delta_t_milli)),
       [this, delta_t_milli]() { timer_callback(delta_t_milli); });
+
+  feedback_cmd_vel_publisher_ = node_->create_publisher<geometry_msgs::msg::Twist>(
+      "feedback_cmd_vel", 10);
 }
 
 void GaitGenerator::cmd_vel_sub_callback(
@@ -170,6 +173,7 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
 void GaitGenerator::timer_callback(double delta_t_milli) {
   update_phase(delta_t_milli);
   update_feet_positions(delta_t_milli);
+  feedback_cmd_vel_publisher_->publish(cmd_vel_);
 }
 
 void GaitGenerator::declare_parameters() {
