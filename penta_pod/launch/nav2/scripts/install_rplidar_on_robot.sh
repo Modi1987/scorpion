@@ -17,4 +17,5 @@ vcs import ${WORKSPACE_ROOT}/src < ./penta_nav_repos.yaml
 
 # Build the workspace
 cd $WORKSPACE_ROOT
-colcon build
+colcon build --packages-select rplidar_ros
+colcon build --packages-up-to penta_pod --parallel-workers 1
