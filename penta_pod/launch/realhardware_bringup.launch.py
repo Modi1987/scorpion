@@ -15,10 +15,10 @@ def generate_launch_description():
         description="Robot name space",
     )
 
-    # Declare the 'mode' argument with a default value of 'real'
+    # Declare the 'mode' argument with a default value of 'real' otherwise 'virtual'
     mode_arg = DeclareLaunchArgument(
         'mode',
-        default_value='real',
+        default_value='real', # 'virtual'
         description='Mode to run the actuators (real or sim)'
     )
 
@@ -43,9 +43,20 @@ def generate_launch_description():
             }.items()  # Pass the argyments
     )
 
+    # Include the penta_rplidar launch file
+    penta_rplidar_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(FindPackageShare('penta_pod').find('penta_pod'), 'launch', 'nav2', 'penta_pod_rplidar.launch.py')
+        ),
+        launch_arguments={
+            'name_space': LaunchConfiguration('name_space'),
+        }.items()
+    )
+
     return LaunchDescription([
         name_space_arg,
         mode_arg,
         penta_core_launch,
         penta_i2c_actuators_launch,
+        penta_rplidar_launch,
     ])
