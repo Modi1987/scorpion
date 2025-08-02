@@ -1,12 +1,12 @@
 Panels:
   - Class: rviz_common/Displays
-    Help Height: 70
+    Help Height: 71
     Name: Displays
     Property Tree Widget:
       Expanded:
         - /Global Options1
       Splitter Ratio: 0.5
-    Tree Height: 296
+    Tree Height: 295
   - Class: rviz_common/Views
     Expanded:
       - /Current View1
@@ -56,6 +56,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
         base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        head_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -165,6 +170,26 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        limb4_lower_arm_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        limb4_shoulder_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        limb4_shoulder_motor:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        limb4_upper_arm_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Mass Properties:
         Inertia: false
         Mass: false
@@ -175,6 +200,7 @@ Visualization Manager:
       Visual Enabled: true
     - Class: rviz_default_plugins/TF
       Enabled: false
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: true
@@ -184,6 +210,7 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
+        {}
         {}
       Update Interval: 0
       Value: false
