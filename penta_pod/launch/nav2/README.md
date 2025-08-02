@@ -1,9 +1,35 @@
 # About
 
-This is nav2 launcher file for the penta_pod robot,
+Setting up autonomous navigation for the penta_pod robot,
 
-To work, you ineed to install rplidar on the robot and connect it to USB port of the raspberry pi
 
+Hardware requirement:
+
+- pentapod robot connected to wifi
+
+- external pc connected to same netwrok as robot
+
+- rplidar A1, mounted on the robot and connected to raspberry pi of the pentapod robot
+
+
+Software requirement, you have to perforn sinple installation steps both on the robot and the PC as in the following:
+
+
+# Software installion on the robot
+
+To install navigation stack NAV2 on PC, from inside the folder [scripts](./polypod/penta_pod/launch/nav2/scripts/) run the installation script:
+
+```
+./install_rplidar_on_robot.sh
+```
+
+# Software installion on PC
+
+To install navigation stack NAV2 on PC, from inside the folder [scripts](./polypod/penta_pod/launch/nav2/scripts/) run the installation script:
+
+```
+./install_nav2_on_pc.sh
+```
 
 # What to launch on the robot
 
@@ -14,41 +40,23 @@ ros2 launch penta_pod realhardware_bringup.launch.py
 ```
 
 
-Turn on rplidar on the robot:
-
-```
-ros2 launch rplidar_ros rplidar.launch.py
-```
-
-To install rplidar on the robot raspberry pi:
-
-```
-cd ~/your_workspace/src
-
-git clone https://github.com/babakhani/rplidar_ros2.git
-
-cd ~/your_workspace
-
-colcon build
-```
-
 # What to launch on an external PC
 
 
-On an external computer running NAV2 run the following:
+To run the navigation and visualize with Rviz, On an external computer running NAV2 run the following:
 
 ```
 ros2 launch penta_pod nav2_bringup.launch.py
 ```
 
 
-# Notes
+# Extra considerations
 
 Make sure of the following
 
 - your PC and the robot are connected on same wifi
 
-- you are using cyclone dds on the robot and on the external pc
+- you are using cyclone dds both on the robot and on the external pc
 
 - you have the same `ROS_DOAMIN_ID` on both the PC and the raspberry-pi, to do so do the following both on raspberry-pi and on your PC
 
