@@ -17,7 +17,7 @@ Software requirement, you have to perforn sinple installation steps both on the 
 
 # Software installion on the robot
 
-To install navigation stack NAV2 on PC, from inside the folder [scripts](./polypod/penta_pod/launch/nav2/scripts/) run the installation script:
+To install navigation stack NAV2 on PC, from inside the folder [scripts](./scripts/) run the installation script:
 
 ```
 ./install_rplidar_on_robot.sh
@@ -25,7 +25,7 @@ To install navigation stack NAV2 on PC, from inside the folder [scripts](./polyp
 
 # Software installion on PC
 
-To install navigation stack NAV2 on PC, from inside the folder [scripts](./polypod/penta_pod/launch/nav2/scripts/) run the installation script:
+To install navigation stack NAV2 on PC, from inside the folder [scripts](./scripts/) run the installation script:
 
 ```
 ./install_nav2_on_pc.sh
