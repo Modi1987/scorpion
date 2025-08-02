@@ -2,28 +2,25 @@
 
 Setting up autonomous navigation for the penta_pod robot,
 
-
 Hardware requirement:
 
 - pentapod robot connected to wifi
 
-- external pc connected to same netwrok as robot
+- external pc connected to same network as robot
 
 - rplidar A1, mounted on the robot and connected to raspberry pi of the pentapod robot
 
+Software requirement, you have to perform simple installation steps both on the robot and the PC as in the following:
 
-Software requirement, you have to perforn sinple installation steps both on the robot and the PC as in the following:
+# Software installation on the robot
 
-
-# Software installion on the robot
-
-To install navigation stack NAV2 on PC, from inside the folder [scripts](./scripts/) run the installation script:
+To install software on the robot raspberry-pi, from inside the folder [scripts](./scripts/) run the installation script:
 
 ```
 ./install_rplidar_on_robot.sh
 ```
 
-# Software installion on PC
+# Software installation on PC
 
 To install navigation stack NAV2 on PC, from inside the folder [scripts](./scripts/) run the installation script:
 
@@ -58,7 +55,7 @@ Make sure of the following
 
 - you are using cyclone dds both on the robot and on the external pc
 
-- you have the same `ROS_DOAMIN_ID` on both the PC and the raspberry-pi, to do so do the following both on raspberry-pi and on your PC
+- you have the same `ROS_DOMAIN_ID` on both the PC and the raspberry-pi, to do so do the following both on raspberry-pi and on your PC
 
 ```
 nano ~/.bashrc
@@ -67,6 +64,6 @@ nano ~/.bashrc
 then add the following at the end of the file
 
 ```
-export ROS_DOAMIN_ID=38
+export ROS_DOMAIN_ID=38
 ```
 
