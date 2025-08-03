@@ -9,6 +9,7 @@ services:
       - ../:/root/ros_ws/src
       - /dev:/dev
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./entrypoint.sh:/root/ros_ws/src/.devcontainer/entrypoint.sh
     environment:
       - ROS_DOMAIN_ID=91
       - DISPLAY=${DISPLAY}
@@ -35,4 +36,4 @@ services:
     environment:
       - ROS_DOMAIN_ID=91
     network_mode: "host"
-    command: [ "/bin/bash", "-c", "source /opt/ros/humble/setup.bash && cd /root/ros_ws && colcon test" ]
+    command: [ "/bin/bash", "-c", "source /opt/ros/jazzy/setup.bash && cd /root/ros_ws && colcon test" ]

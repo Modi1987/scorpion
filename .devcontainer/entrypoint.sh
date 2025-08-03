@@ -9,6 +9,9 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 # Navigate to the workspace directory
 cd /root/ros_ws
 
+# VSC import
+vcs import src < /root/ros_ws/src/.devcontainer/vcs_repos.yaml
+
 # Install dependencies and build the workspace
 rosdep install --from-paths src --ignore-src -r -y
 # colcon build

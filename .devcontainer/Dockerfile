@@ -40,6 +40,7 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-joint-state-broadcaster \
     ros-${ROS_DISTRO}-ros2-control-cmake \
     ros-${ROS_DISTRO}-forward-command-controller \
+    ros-${ROS_DISTRO}-gz-ros2-control \
     ros-${ROS_DISTRO}-rqt \
     ros-${ROS_DISTRO}-rqt-common-plugins \
     ros-${ROS_DISTRO}-rqt-gui \
@@ -49,10 +50,10 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-rqt-tf-tree \
     ros-${ROS_DISTRO}-tf2-tools \
     ros-${ROS_DISTRO}-tf2-geometry-msgs \
-    ros-${ROS_DISTRO}-plotjuggler \
     ros-${ROS_DISTRO}-xacro \
     ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
-    ros-${ROS_DISTRO}--plotjuggler-ros
+    ros-${ROS_DISTRO}-plotjuggler \
+    ros-${ROS_DISTRO}-plotjuggler-ros
 
 # gazebo ros2 control packages
 RUN apt-get install -y \
