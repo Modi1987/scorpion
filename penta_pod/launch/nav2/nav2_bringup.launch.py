@@ -25,6 +25,12 @@ def generate_launch_description():
         default_value="False",
         description="Change to true to use Gazebo",
     )
+    # joints states remappings
+    joint_states_remappings_arg = DeclareLaunchArgument(
+        "joint_states_remappings",
+        default_value="joint_setpoints",
+        description="Remap joint states topic",
+    )
     # start utils nodes
     utils_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -93,13 +99,14 @@ def generate_launch_description():
         launch_arguments={
             'name_space': LaunchConfiguration('name_space'),
             'use_gazebo_simulation': LaunchConfiguration('use_gazebo_simulation'),
-            'joint_states_remappings': 'joint_setpoints',
+            'joint_states_remappings': LaunchConfiguration('joint_states_remappings'),
         }.items()
     )
 
     ld = LaunchDescription()
     ld.add_action(declare_name_space_argument)
     ld.add_action(use_gazebo_simulation_arg)
+    ld.add_action(joint_states_remappings_arg)
     ld.add_action(declare_use_sim_time_argument)
     ld.add_action(declare_slam_params_file_cmd)
     ld.add_action(utils_launch)
