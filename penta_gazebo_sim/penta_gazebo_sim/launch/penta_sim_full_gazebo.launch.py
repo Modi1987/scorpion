@@ -129,4 +129,37 @@ def generate_launch_description():
     )
     ld.add_action(set_point_to_forward_position_controller)
 
+    # Create a node for the ROS-Gazebo bridge to handle message passing
+    gz_bridge_params_path = os.path.join(
+        get_package_share_directory("penta_gazebo_sim"), "config", "ros_gz_bridge_laser_scan.yaml"
+    )
+    gz_bridge_node = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            '--ros-args', '-p',
+            f'config_file:={gz_bridge_params_path}'
+        ],
+        output='screen'
+    )
+    ld.add_action(gz_bridge_node)
+
+    # Add laser scan remapper node
+    laser_scan_remapper_node = Node(
+        package='laser_scan_remapper',
+        executable='laser_scan_remapper_node',
+        namespace=LaunchConfiguration('name_space'),
+        name='laser_scan_remapper_node',
+        output='screen',
+        parameters=[
+            {'name_space': LaunchConfiguration('name_space')}
+        ],
+        remappings=[
+            # remapping of input topic
+            ('gz/scan', 'gz/scan'),
+            # remapping of output topic
+            ('scan', 'scan')
+        ]
+    )
+    ld.add_action(laser_scan_remapper_node)
     return ld
