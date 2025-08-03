@@ -12,6 +12,7 @@
 
   <!-- gazebo ros2_control plugins -->
   <xacro:if value="$(arg use_gazebo_simulation)">
+  <!-- Joint State Publisher -->
   <gazebo>
       <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
           <topic>joint_states</topic>
