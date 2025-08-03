@@ -9,6 +9,7 @@
     <xacro:property name="base_visual_yaw" value="0.32" />
 
     <xacro:include filename="$(find penta_description)/urdf/single_limb.urdf.xacro" />
+    <xacro:include filename="$(find penta_description)/urdf/lidar.urdf.xacro" />
 
     <xacro:macro name="add_material_green">
         <material name="green">
@@ -19,6 +20,12 @@
     <xacro:macro name="add_material_red">
         <material name="red">
           <color rgba="1 0 0 1"/>
+        </material>
+    </xacro:macro>
+
+    <xacro:macro name="add_material_black">
+        <material name="black">
+          <color rgba="0 0 0 1"/>
         </material>
     </xacro:macro>
 
@@ -92,6 +99,7 @@
 
     <xacro:add_base_plate name="upper_plate" stl_file_name="Chassi_top.stl" z="0.03"/>
     <xacro:add_base_plate name="lower_plate" stl_file_name="Chassi_bottom.stl" z="-0.03"/>
+    <xacro:add_lidar name_space="${name_space}" xyz="0 0 0.06" rpy="0 0 0" use_gazebo_simulation="${use_gazebo_simulation}"/>
 
   </xacro:macro>
 
