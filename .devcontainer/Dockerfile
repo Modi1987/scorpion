@@ -55,6 +55,13 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-plotjuggler \
     ros-${ROS_DISTRO}-plotjuggler-ros
 
+# Install navigation2 packages
+RUN apt-get update && apt-get install -y \
+    ros-${ROS_DISTRO}-navigation2 \
+    ros-${ROS_DISTRO}-nav2-bringup \
+    ros-${ROS_DISTRO}-nav2-common \
+    ros-${ROS_DISTRO}-nav2-costmap-2d
+
 # gazebo ros2 control packages
 RUN apt-get install -y \
     ros-${ROS_DISTRO}-gz-ros2-control
