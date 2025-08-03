@@ -11,6 +11,7 @@
   <xacro:add_penta_bot name_space="$(arg name_space)" use_gazebo_simulation="$(arg use_gazebo_simulation)" use_pca9685_ros2_control="$(arg use_pca9685_ros2_control)"/>
 
   <!-- gazebo ros2_control plugins -->
+  <xacro:if value="$(arg use_gazebo_simulation)">
   <gazebo>
       <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
           <topic>joint_states</topic>
@@ -20,5 +21,6 @@
           <parameters>$(find penta_description)/config/ros2_control_params.yaml</parameters>
       </plugin>
   </gazebo>
+  </xacro:if>
 
 </robot>
