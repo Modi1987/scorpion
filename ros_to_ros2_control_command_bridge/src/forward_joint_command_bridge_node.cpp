@@ -3,7 +3,7 @@
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-    auto bridge = std::make_shared<ros2_to_ros2_control_bridge::GazeboForwardJointCommandControlBridge>();
+    auto bridge = std::make_shared<ros2_to_ros2_control_bridge::ForwardJointCommandControlBridge>();
     bridge->spin();
     rclcpp::shutdown();
     return 0;

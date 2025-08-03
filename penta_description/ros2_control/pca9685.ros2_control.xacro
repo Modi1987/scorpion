@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Define a macro for a ros2_control joint -->
+  <xacro:macro name="joint_interface" params="limb_idx joint_idx">
+    <joint name="limb${limb_idx}/joint${joint_idx}">
+        <command_interface name="position" />
+        <!--command_interface name="effort" /-->
+        <!--command_interface name="velocity" /-->
+        <state_interface name="position" />
+        <state_interface name="velocity" />
+        <state_interface name="effort" />
+      </joint>
+  </xacro:macro>
+
+  <xacro:macro name="add_pca9685_hw_interface" params="name prefix use_mock_hardware">
+
+    <ros2_control name="${name}_pca9685_hardware_interface" type="system">
+      <hardware>
+        <plugin>pca9685_ros2_control/Pca9685HardwareInterface</plugin>
+        <param name="device_name">/dev/i2c-1</param>
+        <param name="i2c_address">0x40</param>
+        <param name="use_mock_hardware">${use_mock_hardware}</param>
+        <param name="motors.number_of_channels">16</param>
+        <param name="motors.min_joint_angle_for_each_channel">[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]</param>
+        <param name="motors.max_joint_angle_for_each_channel">[180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0,
+                                         180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0]</param>
+        <param name="motors.min_pulse_width_for_each_channel_microsec">[500, 500, 500, 500, 500, 500, 500, 500,
+                                         500, 500, 500, 500, 500, 500, 500, 500]</param>
+        <param name="motors.max_pulse_width_for_each_channel_microsec">[2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500,
+                                         2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500]</param>
+        <param name="motors.init_angles">[135.0, 146.0, 87.0, 135.0, 138.0, 87.0, 135.0, 138.0, 
+                                         87.0, 135.0, 131.0, 91.0, 135.0, 131.0, 83.0, 90.0]</param>
+      </hardware>
+
+      <xacro:joint_interface limb_idx="0" joint_idx="0"/>
+      <xacro:joint_interface limb_idx="0" joint_idx="1"/>
+      <xacro:joint_interface limb_idx="0" joint_idx="2"/>
+
+      <xacro:joint_interface limb_idx="1" joint_idx="0"/>
+      <xacro:joint_interface limb_idx="1" joint_idx="1"/>
+      <xacro:joint_interface limb_idx="1" joint_idx="2"/>
+
+      <xacro:joint_interface limb_idx="2" joint_idx="0"/>
+      <xacro:joint_interface limb_idx="2" joint_idx="1"/>
+      <xacro:joint_interface limb_idx="2" joint_idx="2"/>
+
+      <xacro:joint_interface limb_idx="3" joint_idx="0"/>
+      <xacro:joint_interface limb_idx="3" joint_idx="1"/>
+      <xacro:joint_interface limb_idx="3" joint_idx="2"/>
+
+      <xacro:joint_interface limb_idx="4" joint_idx="0"/>
+      <xacro:joint_interface limb_idx="4" joint_idx="1"/>
+      <xacro:joint_interface limb_idx="4" joint_idx="2"/>
+
+    </ros2_control>
+
+  </xacro:macro>
+
+</robot>

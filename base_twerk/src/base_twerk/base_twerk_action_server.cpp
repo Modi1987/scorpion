@@ -216,7 +216,7 @@ auto BaseTwerkActionServer::calculate_twerk_pose_from_goal(
   auto roll = rpy[0];
   auto pitch = rpy[1];
   auto yaw = rpy[2];
-  pose.pose.orientation = rpy_to_quaternion(yaw, pitch, roll);
+  pose.pose.orientation = penta_pod::kin::commons::quaternion_utils::rpy_to_quaternion(yaw, pitch, roll);
   return pose;
 }
 

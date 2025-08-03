@@ -20,11 +20,13 @@ Connect the dongle to Raspberry PI, to control the robot as follows:
 
 6- `B button` to start executing the twerk motion
 
+7- `D-pad + Right Trigger button (RT)` allow the robot to pitch
+
 
 Note, make sure to enable the motion using:
 
-1- `Right Trigger button (RT)` to enable the turbo mode
+1- `Right Trigger button (RT)` to enable walking in turbo mode
 
-2- `Left Trigger button (LT)` to enable slow motion mode
+2- `Left Trigger button (LT)` to enable waling in slow mode
 
 3- Walking pattern changes only when the robot is in stand-still

@@ -33,6 +33,8 @@
       0.0, 0.0, 90.0,
     ]
     gait_parameters:
+      gait_radial_frequency: 2.5 # rad per sec
+      step_height: 0.05 # meter
       max_gait_linear_speed: 0.035 # meter per sec
       max_gait_turning_speed: 0.25 # rad per sec
       gait_patterns:
@@ -47,15 +49,32 @@
       publish_joints_only_on_value_change: true
       number_of_messages_forcely_published_on_startup: 1000 # 0 means no messages will be published on startup
     base_twerk:
-      base_frame_transform_update_interval_millis: 20
-      action_server_service_call_interval_millis: 100
+      base_frame_transform_update_interval_millis: 33
+      action_server_service_call_interval_millis: 33
       max_permissible_displacement: 0.075 # meter
       max_permissible_rotation: 0.15 # rad
       min_permissible_displacement: 0.001 # meter
       min_permissible_rotation: 0.001 # rad
       tracking_linear_velocity: 0.5 # [m/sec]
       tracking_angular_velocity: 1.0 # [rad/sec]
+    # following is used with python i2c_actuators.py
     i2c_actuators_params:
+      actuator_angles_at_initial_pose_degree: [
+        135.0, 146.0, 87.0,
+        135.0, 138.0, 87.0,
+        135.0, 138.0, 87.0,
+        135.0, 131.0, 91.0,
+        135.0, 131.0, 83.0,
+      ]
+      dir: [
+        1.0, -1.0, -1.0,
+        1.0, -1.0, -1.0,
+        1.0, -1.0, -1.0,
+        1.0, -1.0, -1.0,
+        1.0, -1.0, -1.0,
+      ]
+    # following parameters are used with pca9685_ros2_control
+    cpp_pca9685_i2c_actuators_params:
       actuator_angles_at_initial_pose_degree: [
         135.0, 146.0, 87.0,
         135.0, 138.0, 87.0,

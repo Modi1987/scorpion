@@ -15,34 +15,17 @@ def generate_launch_description():
         description="Robot name space",
     )
 
-    # Declare the 'mode' argument with a default value of 'real'
+    # Declare the 'mode' argument with a default value of 'real' otherwise 'virtual'
     mode_arg = DeclareLaunchArgument(
         'mode',
-        default_value='real',
+        default_value='real', # 'virtual'
         description='Mode to run the actuators (real or sim)'
     )
 
-    # Include the penta_pod launch file
-    penta_pod_launch = IncludeLaunchDescription(
+    # Include the penta_core launch file
+    penta_core_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('penta_pod').find('penta_pod'), 'launch', 'penta_pod.launch.py')
-        ),
-        launch_arguments={
-            'name_space': LaunchConfiguration('name_space'),
-        }.items()
-    )
-    
-    # Include the gait_generator launch file
-    gait_generator_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('gait_generator').find('gait_generator'), 'launch', 'gait_generator.launch.py')
-        )
-    )
-
-    # Include the joints_aggregator launch file
-    joints_aggregator_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('joints_aggregator').find('joints_aggregator'), 'launch', 'joints_aggregator.launch.py')
+            os.path.join(FindPackageShare('penta_pod').find('penta_pod'), 'launch', 'penta_core.launch.py')
         ),
         launch_arguments={
             'name_space': LaunchConfiguration('name_space'),
@@ -60,20 +43,10 @@ def generate_launch_description():
             }.items()  # Pass the argyments
     )
 
-    # Include the null space cmd publisher launch file
-    null_space_publisher = IncludeLaunchDescription(
+    # Include the penta_rplidar launch file
+    penta_rplidar_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('base_twerk').find('base_twerk'), 'launch', 'null_pose_publisher.launch.py')
-        ),
-        launch_arguments={
-            'name_space': LaunchConfiguration('name_space'),
-        }.items()
-    )
-
-    # Include the twerk action server launch file
-    twerk_action_server = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('base_twerk').find('base_twerk'), 'launch', 'base_twerk_action_server.launch.py')
+            os.path.join(FindPackageShare('penta_pod').find('penta_pod'), 'launch', 'nav2', 'penta_pod_rplidar.launch.py')
         ),
         launch_arguments={
             'name_space': LaunchConfiguration('name_space'),
@@ -83,10 +56,7 @@ def generate_launch_description():
     return LaunchDescription([
         name_space_arg,
         mode_arg,
-        penta_pod_launch,
-        gait_generator_launch,
-        joints_aggregator_launch,
+        penta_core_launch,
         penta_i2c_actuators_launch,
-        null_space_publisher,
-        twerk_action_server
+        penta_rplidar_launch,
     ])

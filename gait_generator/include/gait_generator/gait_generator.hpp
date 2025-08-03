@@ -36,9 +36,16 @@ private:
   rclcpp::Node::SharedPtr node_;
   std::vector<double> q_state;
 
-  double current_phase_, max_gait_linear_speed_, max_gait_turning_speed_;
+  double current_phase_;
   bool is_walking_{false};
   int feet_num_;
+
+  struct GaitParameters {
+    double gait_radial_frequency;  // rad/s
+    double step_height;            // m
+    double max_gait_linear_speed;  // m/s
+    double max_gait_turning_speed; // rad/s
+  } gait_parameters_;
 
   struct GatiPatterns {
     int active_gait_index_ = 0;
@@ -83,6 +90,8 @@ private:
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr
       cmd_null_pos_subscription_; // null space motion transform (body to
                                   // basefootprint)
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr 
+      feedback_cmd_vel_publisher_;
   rclcpp::TimerBase::SharedPtr timer_;
   geometry_msgs::msg::Twist cmd_vel_{};
 

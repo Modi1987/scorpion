@@ -50,6 +50,9 @@ GaitGenerator::GaitGenerator()
   timer_ = node_->create_wall_timer(
       std::chrono::milliseconds(static_cast<int>(delta_t_milli)),
       [this, delta_t_milli]() { timer_callback(delta_t_milli); });
+  
+  feedback_cmd_vel_publisher_ = node_->create_publisher<geometry_msgs::msg::Twist>(
+      "feedback_cmd_vel", 10);
 
   create_set_gait_pattern_service();
 }
@@ -97,13 +100,16 @@ void GaitGenerator::cmd_vel_sub_callback(
 
   auto mag =
       std::sqrt(msg->linear.x * msg->linear.x + msg->linear.y * msg->linear.y);
-  if (mag > max_gait_linear_speed_) {
-    msg->linear.x = msg->linear.x * max_gait_linear_speed_ / mag;
-    msg->linear.y = msg->linear.y * max_gait_linear_speed_ / mag;
+  if (mag > gait_parameters_.max_gait_linear_speed) {
+    msg->linear.x =
+        msg->linear.x * gait_parameters_.max_gait_linear_speed / mag;
+    msg->linear.y =
+        msg->linear.y * gait_parameters_.max_gait_linear_speed / mag;
   }
   mag = std::abs(msg->angular.z);
-  if (mag > max_gait_turning_speed_) {
-    msg->angular.z = msg->angular.z * max_gait_turning_speed_ / mag;
+  if (mag > gait_parameters_.max_gait_turning_speed) {
+    msg->angular.z =
+        msg->angular.z * gait_parameters_.max_gait_turning_speed / mag;
   }
   cmd_vel_ = *msg;
   /*
@@ -124,7 +130,7 @@ void GaitGenerator::cmd_null_pos_sub_callback(
   body_basefootprint_.rotation.y = msg->pose.orientation.y;
   body_basefootprint_.rotation.z = msg->pose.orientation.z;
   body_basefootprint_.rotation.w = msg->pose.orientation.w;
-  
+
   // consider the rotation absolute (initial rotation must be the identity)
   // body_basefootprint_.rotation. = msg->rotation;
   // RCLCPP_INFO(node_->get_logger(),
@@ -138,7 +144,7 @@ void GaitGenerator::cmd_null_pos_sub_callback(
 void GaitGenerator::update_phase(double delta_t_milli) {
 
   auto delta_t_sec = delta_t_milli / 1000.;
-  double w = 2.5;
+  double w = gait_parameters_.gait_radial_frequency;
 
   // check if cmd_vel is zero and feet near the equilibrium
   double vel_mag = std::sqrt(cmd_vel_.linear.x * cmd_vel_.linear.x +
@@ -171,12 +177,12 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
   double dx = cmd_vel_.linear.x * delta_t_sec;
   double dy = cmd_vel_.linear.y * delta_t_sec;
   double d_theta = cmd_vel_.angular.z * delta_t_sec;
-  double b = 0.05;
+  double b = gait_parameters_.step_height;
   auto gait_pattern = gait_patterns_.get_active_pattern();
   for (int i = 0; i < feet_num_; i++) {
     auto foot_index = gait_pattern[i];
-    auto temp = foot_pos_z_generator(b, current_phase_,
-                                     phase_shift_vec_[i], feet_num_);
+    auto temp =
+        foot_pos_z_generator(b, current_phase_, phase_shift_vec_[i], feet_num_);
     if (temp == 0.) {
       double x = feet_pos_in_footprint_[foot_index].x;
       double y = feet_pos_in_footprint_[foot_index].y;
@@ -220,6 +226,7 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
 void GaitGenerator::timer_callback(double delta_t_milli) {
   update_phase(delta_t_milli);
   update_feet_positions(delta_t_milli);
+  feedback_cmd_vel_publisher_->publish(cmd_vel_);
 }
 
 } // namespace penta_pod::kin::gait_generator

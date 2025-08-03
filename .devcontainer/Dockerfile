@@ -64,4 +64,4 @@ WORKDIR $COLCON_WORKSPACE/src
 
 # Add sourcing ROS setup.bash to .bashrc
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash"     >> ~/.bashrc
-RUN echo "export ROS_DOMAIN_ID=91"                      >> ~/.bashrc
+

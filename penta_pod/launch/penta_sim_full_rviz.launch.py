@@ -15,15 +15,18 @@ def generate_launch_description():
     #     )
     # )
 
-    ld = LaunchDescription()
-
     """ Launch args """
     name_space_arg = DeclareLaunchArgument(
         "name_space",
         default_value="",
         description="Robot name space",
     )
-    ld.add_action(name_space_arg)
+
+    use_gazebo_simulation_arg = DeclareLaunchArgument(
+        "use_gazebo_simulation",
+        default_value="False",
+        description="Change to true to use Gazebo",
+    )
 
     """ Nodes """
     # Include RVIZ launch file
@@ -33,67 +36,26 @@ def generate_launch_description():
         ),
         launch_arguments={
             'name_space': LaunchConfiguration('name_space'),
+            'use_gazebo_simulation': LaunchConfiguration('use_gazebo_simulation'),
             'joint_states_remappings': 'joint_setpoints',
         }.items()
     )
 
-    # Include the penta_pod launch file (limbs)
-    penta_pod_launch = IncludeLaunchDescription(
+    # Include the penta_core launch file
+    penta_core_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('penta_pod').find('penta_pod'), 'launch', 'penta_pod.launch.py')
+            os.path.join(FindPackageShare('penta_pod').find('penta_pod'), 'launch', 'penta_core.launch.py')
         ),
         launch_arguments={
             'name_space': LaunchConfiguration('name_space'),
-        }.items()
-    )
-    
-    # Include the gait_generator launch file
-    gait_generator_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('gait_generator').find('gait_generator'), 'launch', 'gait_generator.launch.py')
-        ),
-        launch_arguments={
-            'name_space': LaunchConfiguration('name_space'),
-        }.items()
-    )
-
-    # Include the joints_aggregator launch file
-    joints_aggregator_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('joints_aggregator').find('joints_aggregator'), 'launch', 'joints_aggregator.launch.py')
-        ),
-        launch_arguments={
-            'name_space': LaunchConfiguration('name_space'),
-        }.items()
-    )
-
-    # Include the null space cmd publisher launch file
-    null_space_publisher = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('base_twerk').find('base_twerk'), 'launch', 'null_pose_publisher.launch.py')
-        ),
-        launch_arguments={
-            'name_space': LaunchConfiguration('name_space'),
-        }.items()
-    )
-
-    # Include the twerk action server launch file
-    twerk_action_server = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('base_twerk').find('base_twerk'), 'launch', 'base_twerk_action_server.launch.py')
-        ),
-        launch_arguments={
-            'name_space': LaunchConfiguration('name_space'),
+            'use_gazebo_simulation': LaunchConfiguration('use_gazebo_simulation')
         }.items()
     )
 
     return LaunchDescription([
         # scorption_cmd_vel_mux_launch,
         name_space_arg,
+        use_gazebo_simulation_arg,
         rviz_penta_pod_launch,
-        penta_pod_launch,
-        gait_generator_launch,
-        joints_aggregator_launch,
-        null_space_publisher,
-        twerk_action_server
+        penta_core_launch,
     ])

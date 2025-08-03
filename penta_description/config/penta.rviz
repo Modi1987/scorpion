@@ -5,8 +5,9 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /Map1
       Splitter Ratio: 0.5
-    Tree Height: 296
+    Tree Height: 617
   - Class: rviz_common/Views
     Expanded:
       - /Current View1
@@ -65,6 +66,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        limb0_foot:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         limb0_lower_arm_link:
           Alpha: 1
           Show Axes: false
@@ -81,6 +87,11 @@ Visualization Manager:
           Show Trail: false
           Value: true
         limb0_upper_arm_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        limb1_foot:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -105,6 +116,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        limb2_foot:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         limb2_lower_arm_link:
           Alpha: 1
           Show Axes: false
@@ -121,6 +137,11 @@ Visualization Manager:
           Show Trail: false
           Value: true
         limb2_upper_arm_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        limb3_foot:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -145,6 +166,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        limb4_foot:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         limb4_lower_arm_link:
           Alpha: 1
           Show Axes: false
@@ -161,6 +187,16 @@ Visualization Manager:
           Show Trail: false
           Value: true
         limb4_upper_arm_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        lower_plate_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        upper_plate_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -187,6 +223,61 @@ Visualization Manager:
         {}
       Update Interval: 0
       Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/LaserScan
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 47
+      Min Color: 0; 0; 0
+      Min Intensity: 47
+      Name: LaserScan
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /scan
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz_default_plugins/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /map
+      Update Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /map_updates
+      Use Timestamp: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -202,35 +293,35 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 0.7511907815933228
+      Distance: 2.481476068496704
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.01839996874332428
-        Y: -0.016720440238714218
-        Z: 0.056901950389146805
+        X: -0.1272813081741333
+        Y: -0.07276946306228638
+        Z: 0.14693914353847504
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.49500012397766113
+      Pitch: 0.6599998474121094
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.1449995040893555
+      Yaw: 2.3550095558166504
     Saved: ~
 Window Geometry:
   Displays:
-    collapsed: true
-  Height: 800
-  Hide Left Dock: true
+    collapsed: false
+  Height: 1136
+  Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000001cb000002c6fc0200000002fb000000100044006900730070006c006100790073000000003d000001ab000000c900fffffffb0000000a0056006900650077007300000001ee00000115000000a400ffffff000004b0000002c600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000001cb00000416fc0200000002fb000000100044006900730070006c006100790073010000003d000002ec000000c900fffffffb0000000a00560069006500770073010000032f00000124000000a400ffffff000005690000041600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
-    collapsed: true
-  Width: 1200
-  X: 413
-  Y: 99
+    collapsed: false
+  Width: 1850
+  X: 70
+  Y: 27
