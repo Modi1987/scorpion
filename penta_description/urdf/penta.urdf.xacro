@@ -2,9 +2,13 @@
 
 <robot name="penta_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <xacro:arg name="name_space" default="" />
+  <xacro:arg name="use_gazebo_simulation" default="False" />
+  <xacro:arg name="use_pca9685_ros2_control" default="False" />
+
   <xacro:include filename="$(find penta_description)/urdf/penta_robot_macro.urdf.xacro" />
 
-  <xacro:add_penta_bot/>
+  <xacro:add_penta_bot name_space="$(arg name_space)" use_gazebo_simulation="$(arg use_gazebo_simulation)" use_pca9685_ros2_control="$(arg use_pca9685_ros2_control)"/>
 
   <!-- gazebo ros2_control plugins -->
   <gazebo>
