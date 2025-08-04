@@ -109,6 +109,7 @@ private:
   void update_phase(double delta_t_milli);
   void update_feet_positions(double delta_t_milli);
   void publish_base_to_basefootprint_transform();
+  void publish_robot_vel_feedback();
 
   // move feet up (z up) calculation
   double foot_pos_z_generator(double b, double q, double phase_shift, int n) {
