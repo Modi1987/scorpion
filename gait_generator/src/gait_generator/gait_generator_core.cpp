@@ -223,7 +223,7 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
   }
 }
 
-void GaitGenerator::publish_robot_vel_feedback() {
+void GaitGenerator::publish_base_footprint_vel_feedback() {
   auto robot_vel = geometry_msgs::msg::Twist();
   robot_vel.linear.x = - cmd_vel_.linear.x;
   robot_vel.linear.y = - cmd_vel_.linear.y;
@@ -234,8 +234,7 @@ void GaitGenerator::publish_robot_vel_feedback() {
 void GaitGenerator::timer_callback(double delta_t_milli) {
   update_phase(delta_t_milli);
   update_feet_positions(delta_t_milli);
-  publish_robot_vel_feedback();
-  
+  publish_base_footprint_vel_feedback();
 }
 
 } // namespace penta_pod::kin::gait_generator
