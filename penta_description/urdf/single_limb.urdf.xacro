@@ -163,14 +163,14 @@
       <joint name="${name_space}${prefix}/joint1">
         <command_interface name="position"/>
         <state_interface name="position">
-          <param name="initial_value">1.57</param>
+          <param name="initial_value">-0.6</param>
         </state_interface>
         <state_interface name="velocity"/>
       </joint>
       <joint name="${name_space}${prefix}/joint2">
         <command_interface name="position"/>
         <state_interface name="position">
-          <param name="initial_value">0.0</param>
+          <param name="initial_value">0.7</param>
         </state_interface>
         <state_interface name="velocity"/>
       </joint>
