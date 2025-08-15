@@ -1,6 +1,7 @@
 # Dockerfile
 
 FROM osrf/ros:jazzy-desktop-full
+# FROM ros:jazzy-perception-noble
 
 ARG COLCON_WORKSPACE
 ARG ROS_DISTRO=jazzy
@@ -65,6 +66,14 @@ RUN apt-get update && apt-get install -y \
 # gazebo ros2 control packages
 RUN apt-get install -y \
     ros-${ROS_DISTRO}-gz-ros2-control
+
+# I2C librarries and tools
+RUN apt-get install -y \
+    python3-smbus \
+    i2c-tools
+
+RUN pip install RPi.GPIO \
+    adafruit-blinka
 
 # Set up the workspace directory
 WORKDIR $COLCON_WORKSPACE/src
