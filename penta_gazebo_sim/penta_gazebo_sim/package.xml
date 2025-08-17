@@ -12,6 +12,7 @@
   <depend>gz-sim</depend>
   <depend>laser_scan_remapper</depend>
   <depend>penta_description</depend>
+  <depend>penta_gazebo_world</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
