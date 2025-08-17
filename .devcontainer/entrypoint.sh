@@ -10,7 +10,7 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 cd /root/ros_ws
 
 # VSC import
-vcs import src < /root/ros_ws/src/.devcontainer/vcs_repos.yaml
+vcs import src < /root/ros_ws/src/polypod/.devcontainer/vcs_repos.yaml
 
 # Install dependencies and build the workspace
 rosdep install --from-paths src --ignore-src -r -y

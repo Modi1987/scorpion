@@ -6,10 +6,10 @@ services:
       args:
         COLCON_WORKSPACE: /root/ros_ws
     volumes:
-      - ../:/root/ros_ws/src
+      - ../../:/root/ros_ws/src
       - /dev:/dev
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - ./entrypoint.sh:/root/ros_ws/src/.devcontainer/entrypoint.sh
+      - ./entrypoint.sh:/root/ros_ws/src/polypod/.devcontainer/entrypoint.sh
     environment:
       - ROS_DOMAIN_ID=91
       - DISPLAY=${DISPLAY}
@@ -24,7 +24,7 @@ services:
       - /dev/i2c-1:/dev/i2c-1
       - /dev/dri:/dev/dri
     tty: true
-    command: [ "/bin/bash", "-c", "/root/ros_ws/src/.devcontainer/entrypoint.sh" ]
+    command: [ "/bin/bash", "-c", "/root/ros_ws/src/polypod/.devcontainer/entrypoint.sh" ]
 
   penta-jazzy-ros2-test:
     build:
