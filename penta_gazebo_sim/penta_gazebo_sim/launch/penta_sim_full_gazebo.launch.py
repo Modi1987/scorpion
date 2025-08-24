@@ -36,6 +36,7 @@ def generate_launch_description():
         ),
         launch_arguments={
             "name_space": LaunchConfiguration("name_space"),
+            "use_gazebo_simulation": "True",
         }.items(),
     )
     ld.add_action(penta_rviz_sim_full)
@@ -135,7 +136,7 @@ def generate_launch_description():
             os.path.join(
                 get_package_share_directory("ros_to_ros2_control_command_bridge"),
                 "launch",
-                "forward_joint_command_bridge.launch.py",
+                "gazebo_forward_joint_command_bridge.launch.py",
             )
         ),
         launch_arguments={

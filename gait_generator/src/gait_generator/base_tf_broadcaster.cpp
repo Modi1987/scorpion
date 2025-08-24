@@ -7,6 +7,10 @@ BaseTfBroadcaster::BaseTfBroadcaster()
   RCLCPP_INFO(node_->get_logger(),
               "Starting base_tf_broadcaster, subscriping to null_space_pose "
               "topic and broadcasting tf");
+  // declare and get parameters
+  declare_parameters();
+  get_parameters();
+  // create subscriber to null_space_pose topic
   base_pose_subscriber_ = node_->create_subscription<PoseStamped>(
       "null_space_pose", 10, [this](const PoseStamped::SharedPtr msg) {
         this->base_pose_sub_callback(msg);
@@ -18,8 +22,8 @@ auto BaseTfBroadcaster::base_pose_sub_callback(const PoseStamped::SharedPtr msg)
   geometry_msgs::msg::TransformStamped transformStamped;
   // header
   transformStamped.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
-  transformStamped.header.frame_id = "base_footprint";
-  transformStamped.child_frame_id = "base_link";
+  transformStamped.header.frame_id = name_space_ + "base_footprint";
+  transformStamped.child_frame_id = name_space_ + "base_link";
   // translation
   transformStamped.transform.translation.x = msg->pose.position.x;
   transformStamped.transform.translation.y = msg->pose.position.y;
@@ -32,6 +36,17 @@ auto BaseTfBroadcaster::base_pose_sub_callback(const PoseStamped::SharedPtr msg)
   // broadcast
   static auto br = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
   br->sendTransform(transformStamped);
+}
+
+auto BaseTfBroadcaster::declare_parameters() -> void {
+  node_->declare_parameter("name_space", "");
+}
+
+auto BaseTfBroadcaster::get_parameters() -> void {
+  node_->get_parameter("name_space", name_space_);
+  RCLCPP_INFO(node_->get_logger(),
+              "BaseTfBroadcaster: name_space: %s",
+              name_space_.c_str());
 }
 
 } // namespace penta_pod::kin

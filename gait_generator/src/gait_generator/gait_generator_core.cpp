@@ -50,6 +50,9 @@ GaitGenerator::GaitGenerator()
   timer_ = node_->create_wall_timer(
       std::chrono::milliseconds(static_cast<int>(delta_t_milli)),
       [this, delta_t_milli]() { timer_callback(delta_t_milli); });
+  
+  feedback_cmd_vel_publisher_ = node_->create_publisher<geometry_msgs::msg::Twist>(
+      "feedback_cmd_vel", 10);
 
   create_set_gait_pattern_service();
 }
@@ -221,9 +224,18 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
   }
 }
 
+void GaitGenerator::publish_base_footprint_vel_feedback() {
+  auto robot_vel = geometry_msgs::msg::Twist();
+  robot_vel.linear.x = - cmd_vel_.linear.x;
+  robot_vel.linear.y = - cmd_vel_.linear.y;
+  robot_vel.angular.z = - cmd_vel_.angular.z;
+  feedback_cmd_vel_publisher_->publish(robot_vel);
+}
+
 void GaitGenerator::timer_callback(double delta_t_milli) {
   update_phase(delta_t_milli);
   update_feet_positions(delta_t_milli);
+  publish_base_footprint_vel_feedback();
 }
 
 } // namespace penta_pod::kin::gait_generator

@@ -5,14 +5,14 @@
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "std_msgs/msg/float64_multi_array.hpp"
 
-namespace ros2_to_ros2_control_bridge
+namespace gazebo_ros2_to_ros2_control_bridge
 {
-  class ForwardJointCommandControlBridge
+  class GazeboForwardJointCommandControlBridge
   {
       
   public:
-    ForwardJointCommandControlBridge();
-    ~ForwardJointCommandControlBridge();
+    GazeboForwardJointCommandControlBridge();
+    ~GazeboForwardJointCommandControlBridge();
     
     void jointStateCallback(const sensor_msgs::msg::JointState::SharedPtr msg);
     void publishJointCommands();
@@ -28,12 +28,6 @@ namespace ros2_to_ros2_control_bridge
       rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr joint_command_publisher_;
       rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscription_;
 
-      std::vector<double> joint_angles_at_initial_pose_degree_;
-      std::vector<double> actuator_angles_at_initial_pose_degree_;
-      std::vector<double> dir_;
-      
-      void declareParameters();
-      void loadParameters();
   };
 }
 

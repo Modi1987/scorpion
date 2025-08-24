@@ -76,8 +76,10 @@ def generate_launch_description():
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[controller_manager_config],
+        namespace=LaunchConfiguration("name_space"),
         remappings=[
-            ("/controller_manager/robot_description", "/robot_description"),
+            ("controller_manager/robot_description", "robot_description"),
+            ("joint_states", "actuator_states"),
         ],
         output="both",
     )
@@ -85,10 +87,11 @@ def generate_launch_description():
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
+        namespace=LaunchConfiguration("name_space"),
         arguments=[
             "joint_state_broadcaster",
             "--controller-manager",
-            "/controller_manager",
+            "controller_manager",
         ],
         output="screen",
     )
@@ -96,10 +99,11 @@ def generate_launch_description():
     forward_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
+        namespace=LaunchConfiguration("name_space"),
         arguments=[
             "forward_position_controller",
             "--controller-manager",
-            "/controller_manager",
+            "controller_manager",
         ],
         output="screen",
     )

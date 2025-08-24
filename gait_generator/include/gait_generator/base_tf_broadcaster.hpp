@@ -19,6 +19,10 @@ private:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Subscription<PoseStamped>::SharedPtr base_pose_subscriber_;
   auto base_pose_sub_callback(const PoseStamped::SharedPtr msg) -> void;
+  std::string name_space_;
+
+  void declare_parameters();
+  void get_parameters();
 
 public:
   explicit BaseTfBroadcaster();

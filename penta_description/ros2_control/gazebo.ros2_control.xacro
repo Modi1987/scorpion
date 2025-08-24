@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="add_gazebo_ros2_control" params="name_space">
+  
+    <gazebo>
+      <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+        <parameters>$(find penta_description)/config/ros2_control_params.yaml</parameters>
+        <ros>
+          <namespace></namespace>
+          <remapping>/robot_description:='${name_space}'/robot_description</remapping>
+        </ros>
+      </plugin>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>

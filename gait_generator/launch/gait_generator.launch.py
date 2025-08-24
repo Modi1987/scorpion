@@ -44,11 +44,14 @@ def generate_launch_description():
             package="gait_generator",
             executable="base_tf_broadcaster_node",
             output="screen",
-            parameters=[config],
             namespace=LaunchConfiguration("name_space"),
             remappings=[
                 # output topics
                 ("null_space_pose", "null_space_pose"),
+            ],
+            parameters=[
+                {"name_space": LaunchConfiguration("name_space")},
+                config
             ],
         )
     )

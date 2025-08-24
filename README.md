@@ -203,3 +203,15 @@ You can check that the topics are in the namespace, same for services and action
 ```
 
 You can publish on `/robot1/cmd_vel` to control first robot, and on `robot2/cmd_vel` to control second robot and so forth. If you do not have real robot you can use `mode:=virtual` and test
+
+
+
+# ROS2 control
+
+HW interface for PCA9685 is created, and can be used to control the robot with hoppy servo motors
+
+## To bring up real hardware using ros2_control
+
+```
+ros2 launch penta_pod ros2_control_penta.launch.py
+```
