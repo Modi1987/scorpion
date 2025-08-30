@@ -183,11 +183,19 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
     auto foot_index = gait_pattern[i];
     auto temp =
         foot_pos_z_generator(b, current_phase_, phase_shift_vec_[i], feet_num_);
+    // Calculate feet displacement to try keep balance
+    double v_mag = std::sqrt(cmd_vel_.linear.x * cmd_vel_.linear.x + cmd_vel_.linear.y * cmd_vel_.linear.y);
+    double balance_motion_coef = 0.0;
+    node_->get_parameter("gait_parameters.balance_internal_motion_coef", balance_motion_coef);
+    double r =  balance_motion_coef * v_mag;
+    double dx_balance =  r * std::sin(current_phase_ + M_PI) * delta_t_sec;
+    double dy_balance = - r * std::cos(current_phase_ + M_PI) * delta_t_sec;
+    // Finish balance calculation
     if (temp == 0.) {
       double x = feet_pos_in_footprint_[foot_index].x;
       double y = feet_pos_in_footprint_[foot_index].y;
-      feet_pos_in_footprint_[foot_index].x = x + dx - d_theta * y;
-      feet_pos_in_footprint_[foot_index].y = y + dy + d_theta * x;
+      feet_pos_in_footprint_[foot_index].x = x + dx - d_theta * y + dx_balance;
+      feet_pos_in_footprint_[foot_index].y = y + dy + d_theta * x + dy_balance;
       feet_pos_in_footprint_[foot_index].z = 0.;
       final_displacement_[foot_index].x =
           feet_pos_in_footprint_[foot_index].x -

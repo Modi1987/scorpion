@@ -19,6 +19,7 @@ void GaitGenerator::declare_parameters() {
       "gait_parameters.gait_patterns.feet_order", std::vector<long int>{});
   node_->declare_parameter<double>("gait_parameters.gait_radial_frequency");
   node_->declare_parameter<double>("gait_parameters.step_height");
+  node_->declare_parameter<double>("gait_parameters.balance_internal_motion_coef", 0.0);
 }
 
 void GaitGenerator::load_parameters() {

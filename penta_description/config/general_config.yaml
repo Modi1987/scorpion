@@ -35,6 +35,7 @@
     gait_parameters:
       gait_radial_frequency: 2.5 # rad per sec
       step_height: 0.05 # meter
+      balance_internal_motion_coef: 0.0 # meter / (meter/sec)
       max_gait_linear_speed: 0.035 # meter per sec
       max_gait_turning_speed: 0.25 # rad per sec
       gait_patterns:
