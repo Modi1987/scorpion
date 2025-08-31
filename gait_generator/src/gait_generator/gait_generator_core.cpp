@@ -188,14 +188,16 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
     double balance_motion_coef = 0.0;
     node_->get_parameter("gait_parameters.balance_internal_motion_coef", balance_motion_coef);
     double r =  balance_motion_coef * v_mag;
-    double dx_balance =  r * std::sin(current_phase_ + M_PI) * delta_t_sec;
-    double dy_balance = - r * std::cos(current_phase_ + M_PI) * delta_t_sec;
+    double balance_phase = current_phase_ + M_PI / feet_num_;
+    double dx_balance =  -r * std::sin(balance_phase) * delta_t_sec;
+    double dy_balance =  r * std::cos(balance_phase) * delta_t_sec;
     // Finish balance calculation
+    constexpr double move_velocity_override = 1.0; // for debugging, set to 0.0 to stay in place
     if (temp == 0.) {
       double x = feet_pos_in_footprint_[foot_index].x;
       double y = feet_pos_in_footprint_[foot_index].y;
-      feet_pos_in_footprint_[foot_index].x = x + dx - d_theta * y + dx_balance;
-      feet_pos_in_footprint_[foot_index].y = y + dy + d_theta * x + dy_balance;
+      feet_pos_in_footprint_[foot_index].x = x + (dx - d_theta * y) * move_velocity_override + dx_balance;
+      feet_pos_in_footprint_[foot_index].y = y + (dy + d_theta * x) * move_velocity_override + dy_balance;
       feet_pos_in_footprint_[foot_index].z = 0.;
       final_displacement_[foot_index].x =
           feet_pos_in_footprint_[foot_index].x -
@@ -205,12 +207,12 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
           init_feet_pos_in_footprint_[foot_index].y;
     } else {
       double step_interval_sec = (2 * M_PI) / gait_parameters_.gait_radial_frequency;
-      double forward_step_length = -cmd_vel_.linear.x * step_interval_sec * 0.5;
+      double forward_step_length = -cmd_vel_.linear.x * step_interval_sec * 0.5 * move_velocity_override;
       feet_pos_in_footprint_[foot_index].x =
           init_feet_pos_in_footprint_[foot_index].x +
           foot_pos_xy_generator(current_phase_, phase_shift_vec_[i],
                                 final_displacement_[foot_index].x, forward_step_length, feet_num_);
-      double lateral_step_length = -cmd_vel_.linear.y * step_interval_sec * 0.5;
+      double lateral_step_length = -cmd_vel_.linear.y * step_interval_sec * 0.5 * move_velocity_override;
       feet_pos_in_footprint_[foot_index].y =
           init_feet_pos_in_footprint_[foot_index].y +
           foot_pos_xy_generator(current_phase_, phase_shift_vec_[i],
