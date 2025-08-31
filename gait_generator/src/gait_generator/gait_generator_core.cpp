@@ -204,14 +204,17 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
           feet_pos_in_footprint_[foot_index].y -
           init_feet_pos_in_footprint_[foot_index].y;
     } else {
+      double delt_t = (2 * M_PI) / gait_parameters_.gait_radial_frequency;
+      double forward_step_length = -cmd_vel_.linear.x * delt_t * 0.5;
       feet_pos_in_footprint_[foot_index].x =
           init_feet_pos_in_footprint_[foot_index].x +
           foot_pos_xy_generator(current_phase_, phase_shift_vec_[i],
-                                final_displacement_[foot_index].x, -cmd_vel_.linear.x, feet_num_);
+                                final_displacement_[foot_index].x, forward_step_length, feet_num_);
+      double lateral_step_length = -cmd_vel_.linear.y * delt_t * 0.5;
       feet_pos_in_footprint_[foot_index].y =
           init_feet_pos_in_footprint_[foot_index].y +
           foot_pos_xy_generator(current_phase_, phase_shift_vec_[i],
-                                final_displacement_[foot_index].y, -cmd_vel_.linear.y, feet_num_);
+                                final_displacement_[foot_index].y, lateral_step_length, feet_num_);
       feet_pos_in_footprint_[foot_index].z = temp;
     }
     if (foot_index < static_cast<int>(legs_body_transforms_.size())) {
