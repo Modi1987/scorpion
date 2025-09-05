@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import ttk
 import os
 
+MOTOR_RANGE_DEGREES = 180
 class PentapodControlApp:
     def __init__(self, root, node):
         self.node = node
@@ -17,7 +18,7 @@ class PentapodControlApp:
 
         self.slider_objects = []
         self.slider_value_labels = []
-        self.slider_values = [135] * 16  # Initialize with 135 degrees
+        self.slider_values = [(MOTOR_RANGE_DEGREES / 2)] * 16  # Initialize with (MOTOR_RANGE_DEGREES / 2) degrees
         self.number_of_channels_to_command = 16
 
         self.enable_publishing = False # disable ros2 publishing until the the GUI is ready
@@ -43,7 +44,7 @@ class PentapodControlApp:
                 minus_button = ttk.Button(frame, text="-", command=lambda idx=index: self.update_positions_callback(self.slider_values[idx] - 0.5, idx))
                 minus_button.pack(side="left", padx=5)
 
-                slider = ttk.Scale(frame, from_=0, to=270, orient="horizontal", length=400, command=lambda value, idx=index: self.update_positions_callback(value, idx))
+                slider = ttk.Scale(frame, from_=0, to=MOTOR_RANGE_DEGREES, orient="horizontal", length=400, command=lambda value, idx=index: self.update_positions_callback(value, idx))
                 slider.pack(side="left", padx=5)
 
                 plus_button = ttk.Button(frame, text="+", command=lambda idx=index: self.update_positions_callback(self.slider_values[idx] + 0.5, idx))
@@ -51,7 +52,7 @@ class PentapodControlApp:
 
                 self.slider_objects.append(slider)
 
-                self.slider_value_labels.append(ttk.Label(frame, text=f"135"))
+                self.slider_value_labels.append(ttk.Label(frame, text=f"{MOTOR_RANGE_DEGREES / 2:.2f}"))
                 self.slider_value_labels[-1].pack(side="left", padx=5)
 
         self.update_button = ttk.Button(self.root, text="Update Values to Wardware", command=self.flush_values_to_ros)
@@ -61,7 +62,7 @@ class PentapodControlApp:
         self.save_button.pack(pady=10)
 
         for slider in self.slider_objects:
-            slider.set(135)  # Set initial value to 135
+            slider.set((MOTOR_RANGE_DEGREES / 2))  # Set initial value to (MOTOR_RANGE_DEGREES / 2)
         self.enable_publishing = True
 
     def update_positions_callback(self, value, index):
