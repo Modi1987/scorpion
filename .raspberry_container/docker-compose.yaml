@@ -10,10 +10,11 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./entrypoint.sh:/root/ros_ws/src/polypod/.devcontainer/entrypoint.sh
     environment:
-      - ROS_DOMAIN_ID=91
+      - ROS_DOMAIN_ID=95
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
     privileged: true
+    network_mode: host
     devices:
       - /dev/bus/usb:/dev/bus/usb
       - /dev/i2c-1:/dev/i2c-1
