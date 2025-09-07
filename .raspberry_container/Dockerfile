@@ -30,9 +30,6 @@ RUN apt install -y \
     sudo \
     lsb-release
 
-# Install NVIDIA runtime dependencies
-RUN apt install -y nvidia-cuda-toolkit
-
 # Install ROS 2 control and additional ROS2 utilities
 RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-ros2-control \
@@ -55,7 +52,9 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
     ros-${ROS_DISTRO}-rmw-zenoh-cpp \
     ros-${ROS_DISTRO}-plotjuggler \
-    ros-${ROS_DISTRO}-plotjuggler-ros
+    ros-${ROS_DISTRO}-plotjuggler-ros \
+    ros-${ROS_DISTRO}-joy \
+    ros-${ROS_DISTRO}-joy-teleop
 
 # Install navigation2 packages
 RUN apt-get update && apt-get install -y \

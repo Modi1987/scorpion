@@ -45,6 +45,8 @@ private:
     double step_height;            // m
     double max_gait_linear_speed;  // m/s
     double max_gait_turning_speed; // rad/s
+    double forward_step_length_ratio; // [0.0, 1.0]
+    double balance_internal_motion_coef; // meter / (meter/sec)
   } gait_parameters_;
 
   struct GatiPatterns {
@@ -131,7 +133,9 @@ private:
 
   // moving foot back to equilbrium
   double foot_pos_xy_generator(double q, double phase_shift,
-                               double delta_xFinal, int legsNum) {
+                               double delta_xFinal,
+                               double forward_displacement,
+                               int legsNum) {
     q = q + phase_shift;
     q = q - std::floor(q / (2 * M_PI)) * 2 * M_PI;
     double epsilon = M_PI / legsNum;
@@ -140,8 +144,8 @@ private:
       return delta_xFinal;
     } else if (q < 2 * M_PI) {
       double u = q - 2 * epsilon * (legsNum - 1);
-      double alfa = delta_xFinal / (2 * epsilon);
-      return delta_xFinal - alfa * u;
+      double alfa = u / (2 * epsilon);
+      return (1.0 - alfa) * delta_xFinal + forward_displacement * alfa;
     } else {
       return 0.0;
     }

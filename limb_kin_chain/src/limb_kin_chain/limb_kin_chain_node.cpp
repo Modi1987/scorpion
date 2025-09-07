@@ -19,11 +19,12 @@ LimbNode::LimbNode(Limb limb)
   RCLCPP_INFO(node_->get_logger(), "Starting limb node");
   this->declare_parameters();
 
-  int dof;
+  int dof=3;
   if (node_->get_parameter("modified_dh.dof", dof)) {
     RCLCPP_INFO(node_->get_logger(), "limb dof loaded successfully");
   } else {
     RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    rclcpp::shutdown();
   }
   std::vector<double> a;
   if (node_->get_parameter("modified_dh.a", a)) {
@@ -31,6 +32,7 @@ LimbNode::LimbNode(Limb limb)
                 "limb DH paramter (a) loaded successfully");
   } else {
     RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    rclcpp::shutdown();
   }
   std::vector<double> d;
   if (node_->get_parameter("modified_dh.d", d)) {
@@ -38,6 +40,7 @@ LimbNode::LimbNode(Limb limb)
                 "limb DH paramter (d) loaded successfully");
   } else {
     RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    rclcpp::shutdown();
   }
   std::vector<double> alfa;
   if (node_->get_parameter("modified_dh.alfa", alfa)) {
@@ -45,18 +48,21 @@ LimbNode::LimbNode(Limb limb)
                 "limb DH parameter (alfa) loaded successfully");
   } else {
     RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    rclcpp::shutdown();
   }
   std::vector<double> eef_trans;
   if (node_->get_parameter("modified_dh.eef_trans", eef_trans)) {
     RCLCPP_INFO(node_->get_logger(), "limb eef_trans loaded successfully");
   } else {
     RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    rclcpp::shutdown();
   }
   // get initial q0
   if (node_->get_parameter("modified_dh.q0", q_state)) {
 
   } else {
     RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
+    rclcpp::shutdown();
   }
   std::vector<double> q_max;
   if (node_->get_parameter("modified_dh.q_max", q_max)) {
@@ -71,6 +77,7 @@ LimbNode::LimbNode(Limb limb)
   } else {
     RCLCPP_ERROR(node_->get_logger(),
                  "ERROR, can not load maximum joint limits q_max");
+    rclcpp::shutdown();
   }
   std::vector<double> q_min;
   if (node_->get_parameter("modified_dh.q_min", q_min)) {
@@ -86,6 +93,7 @@ LimbNode::LimbNode(Limb limb)
   } else {
     RCLCPP_ERROR(node_->get_logger(),
                  "ERROR, can not load minimum joint limits q_min");
+    rclcpp::shutdown();
   }
 
   limb_->init(dof, a, d, alfa, eef_trans, q_max, q_min);

@@ -19,7 +19,7 @@
 MyPCA9685::MyPCA9685(const std::vector<MotorParams>& motor_params, const std::string& i2c_device, int address)
     : motor_params_(motor_params), device_path_(i2c_device), i2c_address_(address), i2c_file_(-1) {
         servo_command_ticks_ = std::vector<int>(motor_params.size(), 0);
-        for (size_t i; i < servo_command_ticks_.size(); i++) {
+        for (size_t i=0; i < servo_command_ticks_.size(); i++) {
             std::cout << "[MyPca9685.cpp] motor params [" << i
                       << "]: " << motor_params[i].name
                       << " pwm_channel: " << motor_params[i].pwm_channel
