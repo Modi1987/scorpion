@@ -45,6 +45,8 @@ private:
     double step_height;            // m
     double max_gait_linear_speed;  // m/s
     double max_gait_turning_speed; // rad/s
+    double forward_step_length_ratio; // [0.0, 1.0]
+    double balance_internal_motion_coef; // meter / (meter/sec)
   } gait_parameters_;
 
   struct GatiPatterns {

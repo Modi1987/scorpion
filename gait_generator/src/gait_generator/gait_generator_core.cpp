@@ -185,8 +185,7 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
         foot_pos_z_generator(b, current_phase_, phase_shift_vec_[i], feet_num_);
     // Calculate feet displacement to try keep balance
     double v_mag = std::sqrt(cmd_vel_.linear.x * cmd_vel_.linear.x + cmd_vel_.linear.y * cmd_vel_.linear.y);
-    double balance_motion_coef = 0.0;
-    node_->get_parameter("gait_parameters.balance_internal_motion_coef", balance_motion_coef);
+    double balance_motion_coef = gait_parameters_.balance_internal_motion_coef;
     double r =  balance_motion_coef * v_mag;
     double balance_phase = current_phase_ + M_PI / feet_num_;
     double dx_balance =  -r * std::sin(balance_phase) * delta_t_sec;
@@ -207,7 +206,9 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
           init_feet_pos_in_footprint_[foot_index].y;
     } else {
       double step_interval_sec = (2 * M_PI) / gait_parameters_.gait_radial_frequency;
-      double forward_step_length = -cmd_vel_.linear.x * step_interval_sec * 0.5 * move_velocity_override;
+      double forward_step_length_ratio = gait_parameters_.forward_step_length_ratio;
+      double forward_step_length = -cmd_vel_.linear.x * step_interval_sec * forward_step_length_ratio;
+      forward_step_length = forward_step_length * move_velocity_override; // use move_velocity_override = 0 for debugging
       feet_pos_in_footprint_[foot_index].x =
           init_feet_pos_in_footprint_[foot_index].x +
           foot_pos_xy_generator(current_phase_, phase_shift_vec_[i],

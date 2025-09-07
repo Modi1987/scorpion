@@ -201,6 +201,21 @@ void GaitGenerator::load_parameters() {
     }
     RCLCPP_INFO(node_->get_logger(), log_message.c_str());
   }
+
+  // Load additional gait parameters
+  if (!node_->get_parameter("gait_parameters.balance_internal_motion_coef", gait_parameters_.balance_internal_motion_coef)) {
+    RCLCPP_WARN(node_->get_logger(), "Parameter gait_parameters.balance_internal_motion_coef was not found. Defaulting to 0.0");
+    gait_parameters_.balance_internal_motion_coef = 0.0;
+  } else {
+    RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.balance_internal_motion_coef value is: %f [meter/(meter/sec)]", gait_parameters_.balance_internal_motion_coef);
+  }
+
+  if (!node_->get_parameter("gait_parameters.forward_step_length_ratio", gait_parameters_.forward_step_length_ratio)) {
+    RCLCPP_WARN(node_->get_logger(), "Parameter gait_parameters.forward_step_length_ratio was not found. Defaulting to 0.5");
+    gait_parameters_.forward_step_length_ratio = 0.5;
+  } else {
+    RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.forward_step_length_ratio value is: %f", gait_parameters_.forward_step_length_ratio);
+  }
 }
 
 } // namespace penta_pod::kin::gait_generator
