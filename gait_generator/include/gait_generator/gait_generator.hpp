@@ -145,7 +145,7 @@ private:
       return (1.0 - alfa) * x0 + alfa * x1;
   }
 
-  double pos_vel_interpolation_only_x1(double alfa, double alfa_dot, double x1, double v0, double v1) {
+  double pos_vel_interpolation_only_x1(double alfa, double alfa_dot, double x0, double x1, double v0, double v1) {
     // interpolation equation is:
     // x(alfa) = (c1*alfa + c2*alfa^2 + c3*alfa^3 ) * x1
     // dx(alfa)/dt = (c1 + 2*c2*alfa + 3*c3*alfa^2) * alfa_dot * x1
@@ -176,7 +176,7 @@ private:
       return x1;
     else {
       if (std::abs(x0) < 1e-6) { // can not devide by zero
-        return pos_vel_interpolation_only_x1(alfa, alfa_dot, x1, v0, v1);
+        return pos_vel_interpolation_only_x1(alfa, alfa_dot, x0, x1, v0, v1);
       }
       double c1 = - (v0 / alfa_dot - x1) / x0;
       double c2 = 3 -2*c1 + (v1 / alfa_dot - x1) / x0;
