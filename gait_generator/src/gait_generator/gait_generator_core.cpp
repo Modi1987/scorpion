@@ -219,6 +219,7 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
       feet_pos_in_footprint_[foot_index].x =
           init_feet_pos_in_footprint_[foot_index].x +
           foot_pos_xy_generator(current_phase_,
+                                gait_parameters_.gait_radial_frequency,
                                 phase_shift_vec_[i],
                                 final_displacement_[foot_index].x,
                                 forward_step_length, 
@@ -232,6 +233,7 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
       feet_pos_in_footprint_[foot_index].y =
           init_feet_pos_in_footprint_[foot_index].y +
           foot_pos_xy_generator(current_phase_,
+                                gait_parameters_.gait_radial_frequency,
                                 phase_shift_vec_[i],
                                 final_displacement_[foot_index].y,
                                 lateral_step_length,
