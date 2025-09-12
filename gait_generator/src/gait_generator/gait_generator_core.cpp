@@ -32,6 +32,7 @@ GaitGenerator::GaitGenerator()
     xyz_publishers_.push_back(
         node_->create_publisher<limb_msgs::msg::Pxyz>(topic_name, 10));
     final_displacement_.push_back(geometry_msgs::msg::Point());
+    final_foot_v_.push_back({0.0, 0.0});
   }
   phase_shift_vec_ = init_phase_shift(feet_num_);
 
@@ -195,8 +196,10 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
     if (temp == 0.) {
       double x = feet_pos_in_footprint_[foot_index].x;
       double y = feet_pos_in_footprint_[foot_index].y;
-      feet_pos_in_footprint_[foot_index].x = x + (dx - d_theta * y) * move_velocity_override + dx_balance;
-      feet_pos_in_footprint_[foot_index].y = y + (dy + d_theta * x) * move_velocity_override + dy_balance;
+      double foot_dx = (dx - d_theta * y) * move_velocity_override + dx_balance;
+      double foot_dy = (dy + d_theta * x) * move_velocity_override + dy_balance;
+      feet_pos_in_footprint_[foot_index].x = x + foot_dx;
+      feet_pos_in_footprint_[foot_index].y = y + foot_dy;
       feet_pos_in_footprint_[foot_index].z = 0.;
       final_displacement_[foot_index].x =
           feet_pos_in_footprint_[foot_index].x -
@@ -204,20 +207,37 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
       final_displacement_[foot_index].y =
           feet_pos_in_footprint_[foot_index].y -
           init_feet_pos_in_footprint_[foot_index].y;
+      final_foot_v_[foot_index].x = foot_dx / delta_t_sec;
+      final_foot_v_[foot_index].y = foot_dy / delta_t_sec;
     } else {
       double step_interval_sec = (2 * M_PI) / gait_parameters_.gait_radial_frequency;
       double forward_step_length_ratio = gait_parameters_.forward_step_length_ratio;
+      /* step along x direction */
       double forward_step_length = -cmd_vel_.linear.x * step_interval_sec * forward_step_length_ratio;
       forward_step_length = forward_step_length * move_velocity_override; // use move_velocity_override = 0 for debugging
+      double target_velocity_x = cmd_vel_.linear.x - cmd_vel_.angular.z * feet_pos_in_footprint_[foot_index].y;
       feet_pos_in_footprint_[foot_index].x =
           init_feet_pos_in_footprint_[foot_index].x +
-          foot_pos_xy_generator(current_phase_, phase_shift_vec_[i],
-                                final_displacement_[foot_index].x, forward_step_length, feet_num_);
-      double lateral_step_length = -cmd_vel_.linear.y * step_interval_sec * 0.5 * move_velocity_override;
+          foot_pos_xy_generator(current_phase_,
+                                phase_shift_vec_[i],
+                                final_displacement_[foot_index].x,
+                                forward_step_length, 
+                                final_foot_v_[foot_index].x,
+                                target_velocity_x,
+                                feet_num_);
+      /* step along y direction */
+      double lateral_step_length = -cmd_vel_.linear.y * step_interval_sec * forward_step_length_ratio;
+      lateral_step_length = lateral_step_length * move_velocity_override; // use move_velocity_override = 0 for debugging
+      double target_velocity_y = cmd_vel_.linear.y + cmd_vel_.angular.z * feet_pos_in_footprint_[foot_index].x;
       feet_pos_in_footprint_[foot_index].y =
           init_feet_pos_in_footprint_[foot_index].y +
-          foot_pos_xy_generator(current_phase_, phase_shift_vec_[i],
-                                final_displacement_[foot_index].y, lateral_step_length, feet_num_);
+          foot_pos_xy_generator(current_phase_,
+                                phase_shift_vec_[i],
+                                final_displacement_[foot_index].y,
+                                lateral_step_length,
+                                final_foot_v_[foot_index].y,
+                                target_velocity_y,
+                                feet_num_);
       feet_pos_in_footprint_[foot_index].z = temp;
     }
     if (foot_index < static_cast<int>(legs_body_transforms_.size())) {

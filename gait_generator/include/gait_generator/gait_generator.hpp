@@ -83,6 +83,11 @@ private:
       init_feet_pos_in_footprint_; // feet pos at equilibrium
   std::vector<geometry_msgs::msg::Point>
       final_displacement_; // feet pos displacement from equilbrium
+  struct Vector2 {
+    double x;
+    double y;
+  };
+  std::vector<Vector2> final_foot_v_; // feet velocity in x and y direction
   std::vector<double> phase_shift_vec_;
 
   std::vector<rclcpp::Publisher<limb_msgs::msg::Pxyz>::SharedPtr>
@@ -131,10 +136,61 @@ private:
     }
   }
 
+  double simple_pos_interpolation(double alfa, double x0, double x1) {
+    if (alfa < 0.0)
+      return x0;
+    else if (alfa > 1.0)
+      return x1;
+    else
+      return (1.0 - alfa) * x0 + alfa * x1;
+  }
+
+  double pos_vel_interpolation_only_x1(double alfa, double alfa_dot, double x0, double x1, double v0, double v1) {
+    // interpolation equation is:
+    // x(alfa) = (c1*alfa + c2*alfa^2 + c3*alfa^3 ) * x1
+    // dx(alfa)/dt = (c1 + 2*c2*alfa + 3*c3*alfa^2) * alfa_dot * x1
+    // alfa in [0, 1]
+    if (alfa < 0.0)
+      return x0;
+    else if (alfa > 1.0)
+      return x1;
+    else {
+      if (std::abs(x1) < 1e-6) { // can not devide by zero
+        return simple_pos_interpolation(alfa, x0, x1);
+      }
+      double c1 = (v0 / alfa_dot) / x1;
+      double c2 = 3 -2*c1 - (v1 / alfa_dot) / x1;
+      double c3 = 1 - c1 - c2;
+      return (c1*alfa + c2*alfa*alfa + c3*alfa*alfa*alfa)*x1;
+    }
+  }
+
+  double pos_vel_interpolation(double alfa, double alfa_dot, double x0, double x1, double v0, double v1) {
+    // interpolation equation is:
+    // x(alfa) = x0 * (1 - c1*alfa - c2*alfa^2 - c3*alfa^3 ) + alfa * x1
+    // dx(alfa)/dt = x0 * (-c1*alfa_dot - 2*c2*alfa*alfa_dot - 3*c3*alfa^2*alfa_dot) + alfa_dot * x1
+    // alfa in [0, 1]
+    if (alfa < 0.0)
+      return x0;
+    else if (alfa > 1.0)
+      return x1;
+    else {
+      if (std::abs(x0) < 1e-6) { // can not devide by zero
+        return pos_vel_interpolation_only_x1(alfa, alfa_dot, x0, x1, v0, v1);
+      }
+      double c1 = - (v0 / alfa_dot - x1) / x0;
+      double c2 = 3 -2*c1 + (v1 / alfa_dot - x1) / x0;
+      double c3 = 1 - c1 - c2;
+      return (1 - c1*alfa - c2*alfa*alfa - c3*alfa*alfa*alfa)*x0 + alfa*x1;
+    }
+  }
+
   // moving foot back to equilbrium
   double foot_pos_xy_generator(double q, double phase_shift,
                                double delta_xFinal,
                                double forward_displacement,
+                               double v0,
+                               double v1,
                                int legsNum) {
     q = q + phase_shift;
     q = q - std::floor(q / (2 * M_PI)) * 2 * M_PI;
@@ -145,7 +201,13 @@ private:
     } else if (q < 2 * M_PI) {
       double u = q - 2 * epsilon * (legsNum - 1);
       double alfa = u / (2 * epsilon);
-      return (1.0 - alfa) * delta_xFinal + forward_displacement * alfa;
+      double alfa_dot = gait_parameters_.gait_radial_frequency / (2 * epsilon);
+      /* This reverts to simple_pos_interpolation 
+      double v = (-delta_xFinal + forward_displacement) * alfa_dot;
+      double result = pos_vel_interpolation(alfa, alfa_dot, delta_xFinal, forward_displacement, v, v);
+      */
+      double result = pos_vel_interpolation(alfa, alfa_dot, delta_xFinal, forward_displacement, v0, v1);
+      return result;
     } else {
       return 0.0;
     }
