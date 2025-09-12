@@ -25,6 +25,7 @@ add_library(${PROJECT_NAME}
         src/${PROJECT_NAME}/${PROJECT_NAME}_parameters.cpp
         src/${PROJECT_NAME}/${PROJECT_NAME}_core.cpp
         src/${PROJECT_NAME}/base_tf_broadcaster.cpp
+        src/${PROJECT_NAME}/gait_utils.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
