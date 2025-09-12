@@ -212,6 +212,7 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
     } else {
       double step_interval_sec = (2 * M_PI) / gait_parameters_.gait_radial_frequency;
       double forward_step_length_ratio = gait_parameters_.forward_step_length_ratio;
+      /* step along x direction */
       double forward_step_length = -cmd_vel_.linear.x * step_interval_sec * forward_step_length_ratio;
       forward_step_length = forward_step_length * move_velocity_override; // use move_velocity_override = 0 for debugging
       double target_velocity_x = cmd_vel_.linear.x - cmd_vel_.angular.z * feet_pos_in_footprint_[foot_index].y;
@@ -224,7 +225,9 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
                                 final_foot_v_[foot_index].x,
                                 target_velocity_x,
                                 feet_num_);
-      double lateral_step_length = -cmd_vel_.linear.y * step_interval_sec * 0.5 * move_velocity_override;
+      /* step along y direction */
+      double lateral_step_length = -cmd_vel_.linear.y * step_interval_sec * forward_step_length_ratio;
+      lateral_step_length = lateral_step_length * move_velocity_override; // use move_velocity_override = 0 for debugging
       double target_velocity_y = cmd_vel_.linear.y + cmd_vel_.angular.z * feet_pos_in_footprint_[foot_index].x;
       feet_pos_in_footprint_[foot_index].y =
           init_feet_pos_in_footprint_[foot_index].y +
