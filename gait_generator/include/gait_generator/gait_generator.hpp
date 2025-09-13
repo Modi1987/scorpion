@@ -33,7 +33,6 @@ private:
   double current_phase_;
   bool is_walking_{false};
   int feet_num_;
-  FootUpMotionType foot_up_motion_type_{FootUpMotionType::UNKNOWN};
 
   struct GaitParameters {
     double gait_radial_frequency;  // rad/s
@@ -43,6 +42,7 @@ private:
     double forward_step_length_ratio; // [0.0, 1.0]
     double balance_internal_motion_coef; // meter / (meter/sec)
   } gait_parameters_;
+  FootUpMotion foot_up_motion_interpolator; // at some point we can specify different z motion for each foot
 
   struct GatiPatterns {
     int active_gait_index_ = 0;

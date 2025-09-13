@@ -182,8 +182,8 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
   auto gait_pattern = gait_patterns_.get_active_pattern();
   for (int i = 0; i < feet_num_; i++) {
     auto foot_index = gait_pattern[i];
-    auto temp =
-        foot_pos_z_generator(b, current_phase_, phase_shift_vec_[i], feet_num_, foot_up_motion_type_);
+    auto temp = foot_up_motion_interpolator.
+        foot_pos_z_generator(b, current_phase_, phase_shift_vec_[i], feet_num_);
     // Calculate feet displacement to try keep balance
     double v_mag = std::sqrt(cmd_vel_.linear.x * cmd_vel_.linear.x + cmd_vel_.linear.y * cmd_vel_.linear.y);
     double balance_motion_coef = gait_parameters_.balance_internal_motion_coef;
