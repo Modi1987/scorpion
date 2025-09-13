@@ -20,6 +20,7 @@ void GaitGenerator::declare_parameters() {
   node_->declare_parameter<double>("gait_parameters.gait_radial_frequency");
   node_->declare_parameter<double>("gait_parameters.step_height");
   node_->declare_parameter<double>("gait_parameters.balance_internal_motion_coef", 0.0);
+  node_->declare_parameter<std::string>("gait_parameters.foot_up_motion_type_str");
 }
 
 void GaitGenerator::load_parameters() {
@@ -215,6 +216,16 @@ void GaitGenerator::load_parameters() {
     gait_parameters_.forward_step_length_ratio = 0.5;
   } else {
     RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.forward_step_length_ratio value is: %f", gait_parameters_.forward_step_length_ratio);
+  }
+
+  std::string foot_up_motion_type_str;
+  if (!node_->get_parameter("gait_parameters.foot_up_motion_type_str", foot_up_motion_type_str)) {
+    RCLCPP_WARN(node_->get_logger(), "Parameter gait_parameters.foot_up_motion_type_str was not found. Defaulting to 'cycloid'");
+    FootUpMotion::Type type = foot_up_motion_interpolator.foot_up_motion_type_from_string("cycloid");
+    foot_up_motion_interpolator.set_foot_up_motion_type(type);
+  } else {
+    foot_up_motion_interpolator.set_foot_up_motion_type(FootUpMotion::Type::UNKNOWN);
+    RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.foot_up_motion_type_str value is: %s", foot_up_motion_type_str.c_str());
   }
 }
 

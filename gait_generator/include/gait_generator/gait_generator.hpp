@@ -19,17 +19,11 @@
 #include <iomanip>
 #include <sstream>
 
+#include "gait_generator/gait_utils.hpp"
+
 namespace penta_pod::kin::gait_generator {
 
 using SetGaitPattern = gait_generator_msgs::srv::SetGaitPattern;
-
-inline auto double_to_string_formatted(double number, int digits_after_point)
-    -> std::string {
-  std::ostringstream oss;
-  oss << std::fixed << std::setprecision(digits_after_point) << number;
-  std::string formatted_string = oss.str();
-  return formatted_string;
-};
 
 class GaitGenerator {
 private:
@@ -48,6 +42,7 @@ private:
     double forward_step_length_ratio; // [0.0, 1.0]
     double balance_internal_motion_coef; // meter / (meter/sec)
   } gait_parameters_;
+  FootUpMotion foot_up_motion_interpolator; // at some point we can specify different z motion for each foot
 
   struct GatiPatterns {
     int active_gait_index_ = 0;
@@ -117,24 +112,6 @@ private:
   void update_feet_positions(double delta_t_milli);
   void publish_base_to_basefootprint_transform();
   void publish_base_footprint_vel_feedback();
-
-  // move feet up (z up) calculation
-  double foot_pos_z_generator(double b, double q, double phase_shift, int n) {
-    q = q + phase_shift; // add the phase
-    q = q - std::floor(q / (2 * M_PI)) * 2 *
-                M_PI; // remove multiples of 2*pi (resulting q is always less
-                      // than 2*pi)
-    double epsilon = M_PI / n;
-
-    if (q < ((n - 1) * 2 * epsilon)) { // interval where feet is on ground
-      return 0.0;
-    } else if (q < 2 * M_PI) { // when feet is off the ground
-      double u = M_PI * (q - (n - 1) * 2 * epsilon) / (2 * epsilon);
-      return b * std::sin(u);
-    } else {
-      return 0.0;
-    }
-  }
 
   double simple_pos_interpolation(double alfa, double x0, double x1) {
     if (alfa < 0.0)
