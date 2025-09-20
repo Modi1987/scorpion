@@ -52,12 +52,15 @@ hardware_interface::CallbackReturn Pca9685HardwareInterface::on_init(
   std::string max_angle_string  = info_.hardware_parameters.at("motors.max_joint_angle_for_each_channel");
   auto max_angle = parse_list<long>(max_angle_string);
   auto init_angles = parse_list<long>(info_.hardware_parameters.at("motors.init_angles"));
+  auto max_angular_velocity_degrees_per_sec_string = info_.hardware_parameters.at("motors.max_angular_velocity");
+  auto max_angular_velocity_degrees_per_sec = parse_list<long>(max_angular_velocity_degrees_per_sec_string);
 
   if (min_pulse.size() != static_cast<size_t>(number_of_motors_) ||
       max_pulse.size() != static_cast<size_t>(number_of_motors_) ||
       min_angle.size() != static_cast<size_t>(number_of_motors_) ||
       max_angle.size() != static_cast<size_t>(number_of_motors_) ||
-      init_angles.size() != static_cast<size_t>(number_of_motors_))
+      init_angles.size() != static_cast<size_t>(number_of_motors_) ||
+      max_angular_velocity_degrees_per_sec.size() != static_cast<size_t>(number_of_motors_))
   {
     RCLCPP_FATAL(
       get_logger(), "Number of motors (%d) does not match size of pulse or angle parameters.",
@@ -72,13 +75,15 @@ hardware_interface::CallbackReturn Pca9685HardwareInterface::on_init(
     params.pwm_channel = static_cast<int>(i);
     params.min_pulse = min_pulse[i] / 1000.0; // Convert to milliseconds
     params.max_pulse = max_pulse[i] / 1000.0; // Convert to milliseconds
-    params.min_angle = min_angle[i];
-    params.max_angle = max_angle[i];
+    params.min_angle = min_angle[i]; // in degrees
+    params.max_angle = max_angle[i]; // in degrees
+    params.max_angular_velocity = max_angular_velocity_degrees_per_sec[i]; // in degrees per second
     motor_params_list_.push_back(params);
   }
 
   // Initialize vectors for positions, velocities, efforts and commands
   actuator_position_commands_rad_ = std::vector<double>(number_of_motors_, 0.);
+  actuator_position_filtered_rad_ = std::vector<double>(number_of_motors_, 0.);
   actuator_positions_feedback_rad_ = std::vector<double>(number_of_motors_, 0.);
   for (int i = 0; i < number_of_motors_; ++i) {
     if (init_angles[i] < min_angle[i] || init_angles[i] > max_angle[i]) {
@@ -89,6 +94,7 @@ hardware_interface::CallbackReturn Pca9685HardwareInterface::on_init(
     } else {
       auto angle_rad = init_angles[i] * (M_PI / 180.0); // Convert degrees to radians
       actuator_position_commands_rad_[i] = angle_rad; // Store in radians
+      actuator_position_filtered_rad_[i] = angle_rad; // Initialize filtered positions with initial angles
       actuator_positions_feedback_rad_[i] = angle_rad; // Initialize positions with initial angles
     }
   }
@@ -225,19 +231,19 @@ hardware_interface::CallbackReturn Pca9685HardwareInterface::on_deactivate(
 hardware_interface::return_type Pca9685HardwareInterface::read(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
 {
-  static std::vector<double> previous_actuator_position_commands_rad_;
+  static std::vector<double> previous_actuator_position_filtered_rad_;
   // forward positions
   for (int index = 0; index < number_of_motors_; ++index) {
       // read position commands from the motors
-      actuator_positions_feedback_rad_[index] = actuator_position_commands_rad_[index];
+      actuator_positions_feedback_rad_[index] = actuator_position_filtered_rad_[index];
   }
   // defferintiate velocities
-  if (previous_actuator_position_commands_rad_.empty()) {
-    previous_actuator_position_commands_rad_ = actuator_position_commands_rad_;
+  if (previous_actuator_position_filtered_rad_.empty()) {
+    previous_actuator_position_filtered_rad_ = actuator_position_filtered_rad_;
   } else {
     for (int index = 0; index < number_of_motors_; ++index) {
-      actuator_velocities_rad_per_sec_[index] = (actuator_position_commands_rad_[index] - previous_actuator_position_commands_rad_[index]) / period.seconds();
-      previous_actuator_position_commands_rad_[index] = actuator_position_commands_rad_[index];
+      actuator_velocities_rad_per_sec_[index] = (actuator_position_filtered_rad_[index] - previous_actuator_position_filtered_rad_[index]) / period.seconds();
+      previous_actuator_position_filtered_rad_[index] = actuator_position_filtered_rad_[index];
     }
   }
   // efforst stays zero
@@ -245,11 +251,23 @@ hardware_interface::return_type Pca9685HardwareInterface::read(
 }
 
 hardware_interface::return_type Pca9685HardwareInterface::write(
-  const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
+  const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
 {
+  // Filter position commands to limit the rate of change
+  for (int index = 0; index < number_of_motors_; ++index) {
+      double command = actuator_position_commands_rad_[index];
+      double current = actuator_position_filtered_rad_[index];
+      double max_step = (motor_params_list_[index].max_angular_velocity * M_PI / 180.0) * period.seconds();
+      double step = command - current;
+      if (std::abs(step) > max_step) {
+          step = (step > 0) ? max_step : -max_step;
+      }
+      actuator_position_filtered_rad_[index] = current + step;
+  }
+
   // write position commands to the motors
   for (int index = 0; index < number_of_motors_; ++index) {
-      float degree = actuator_position_commands_rad_[index] * (180.0 / M_PI); // Convert radians to degrees
+      float degree = actuator_position_filtered_rad_[index] * (180.0 / M_PI); // Convert radians to degrees
       pca_api_->setMotorCommand(index, degree); 
   }            
   pca_api_->flushInternalCommands2Motors();
