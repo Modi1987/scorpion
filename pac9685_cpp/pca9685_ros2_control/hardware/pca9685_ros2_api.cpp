@@ -143,7 +143,7 @@ int MyPCA9685::setMotorCommand(int channel, float setpoint_deg) {
     float max_pulse = motor_params_[channel].max_pulse;
     float pulse_span = max_pulse - min_pulse;
 
-    float pulseMs = min_pulse + pulse_span*(setpoint_deg / angle_span);
+    float pulseMs = min_pulse + pulse_span*((setpoint_deg - min_angle) / angle_span);
     int pulseTicks = static_cast<int>((pulseMs / 20.0) * 4096); // 20ms = 50Hz
     // update servo ticks when successful
     if (pulseTicks < 0 || pulseTicks > 4095) {
