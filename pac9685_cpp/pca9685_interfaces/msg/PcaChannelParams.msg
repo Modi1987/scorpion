@@ -4,3 +4,4 @@ float64 min_pulse
 float64 max_pulse
 float64 min_angle
 float64 max_angle
+float64 max_angular_velocity

@@ -70,7 +70,8 @@ private:
   rclcpp::Clock::SharedPtr clock_;
 
   // Store command and joints feedback
-  std::vector<double> actuator_position_commands_rad_;
+  std::vector<double> actuator_position_commands_rad_; // setpoints received from ros2_control
+  std::vector<double> actuator_position_filtered_rad_; // filtered commands sent to motors
   std::vector<double> actuator_positions_feedback_rad_;
   std::vector<double> actuator_velocities_rad_per_sec_;
   std::vector<double> actuator_efforts_;

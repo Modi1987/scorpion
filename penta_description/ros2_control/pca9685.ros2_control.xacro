@@ -24,14 +24,16 @@
         <param name="motors.number_of_channels">16</param>
         <param name="motors.min_joint_angle_for_each_channel">[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]</param>
-        <param name="motors.max_joint_angle_for_each_channel">[180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0,
-                                         180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0, 180.0]</param>
+        <param name="motors.max_joint_angle_for_each_channel">[270.0, 270.0, 270.0, 270.0, 270.0, 270.0, 270.0, 270.0,
+                                         270.0, 270.0, 270.0, 270.0, 270.0, 270.0, 270.0, 270.0]</param>
         <param name="motors.min_pulse_width_for_each_channel_microsec">[500, 500, 500, 500, 500, 500, 500, 500,
                                          500, 500, 500, 500, 500, 500, 500, 500]</param>
         <param name="motors.max_pulse_width_for_each_channel_microsec">[2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500,
                                          2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500]</param>
         <param name="motors.init_angles">[135.0, 146.0, 87.0, 135.0, 138.0, 87.0, 135.0, 138.0, 
                                          87.0, 135.0, 131.0, 91.0, 135.0, 131.0, 83.0, 90.0]</param>
+        <param name="motors.max_angular_velocity">[180, 180, 180, 180, 180, 180, 180, 180,
+                                         180, 180, 180, 180, 180, 180, 180, 180]</param>
       </hardware>
 
       <xacro:joint_interface limb_idx="0" joint_idx="0"/>
