@@ -35,7 +35,7 @@ cd ~/my_ws/src
 - Clone the repo
 
 ```
-git clone git@github.com:Modi1987/pentapod.git
+git clone https://github.com/Modi1987/polypod.git
 
 cd polypod
 

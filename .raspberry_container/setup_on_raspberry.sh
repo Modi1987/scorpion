@@ -6,6 +6,8 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+DOCKER_COMPOSE_SERVICE_NAME="raspberry-penta-jazzy-ros2"
+
 # Make sure vcs is installed
 apt-get update
 apt-get install -y python3-vcstool
@@ -21,12 +23,6 @@ then
     exit
 fi
 
-if ! command -v docker-compose &> /dev/null
-then
-    echo "Docker Compose could not be found, please install Docker Compose."
-    exit
-fi
-
 # Check if docker works without sudo
 if ! docker info &> /dev/null
 then
@@ -35,4 +31,11 @@ then
 fi
 
 # Docker compose up the container
-docker compose up -d raspberry-penta-jazzy-ros2
+if command -v docker &> /dev/null && docker compose version &> /dev/null; then
+    docker compose up -d $DOCKER_COMPOSE_SERVICE_NAME
+elif command -v docker-compose &> /dev/null; then
+    docker-compose up -d $DOCKER_COMPOSE_SERVICE_NAME
+else
+    echo "Docker Compose not found. Please install either 'docker compose' (plugin) or 'docker-compose' (standalone)."
+    exit 1
+fi
