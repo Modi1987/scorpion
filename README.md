@@ -27,9 +27,9 @@ Then, restart the Raspberry PI to apply the changes
 - Create your workspace folder
 
 ```
-mkdir -p ~/my_ws/src
+mkdir -p ~/ros2_ws/src
 
-cd ~/my_ws/src
+cd ~/ros2_ws/src
 ```
 
 - Clone the repo
@@ -45,7 +45,7 @@ git checkout poc/jazzy
 - Then, do the installation using the installation scripts (this script will build your workspace inside docker on Raspberry PI and autostart the robot on boot)
 
 ```
-cd ~/my_ws/src/polypod/.raspberry_container
+cd ~/ros2_ws/src/polypod/.raspberry_container
 
 sudo ./setup_on_raspberry.sh
 ```
