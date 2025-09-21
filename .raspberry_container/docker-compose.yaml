@@ -1,7 +1,10 @@
+version: "3.3"
+
 services:
   raspberry-penta-jazzy-ros2:
     build:
       context: ../
+      dockerfile: ./.raspberry_container/Dockerfile
       args:
         COLCON_WORKSPACE: /root/ros_ws
     volumes:
@@ -11,8 +14,6 @@ services:
       - ./entrypoint.sh:/root/ros_ws/src/polypod/.devcontainer/entrypoint.sh
     environment:
       - ROS_DOMAIN_ID=95
-      - DISPLAY=${DISPLAY}
-      - QT_X11_NO_MITSHM=1
     privileged: true
     network_mode: host
     devices:
@@ -21,4 +22,4 @@ services:
       - /dev/dri:/dev/dri
     tty: true
     command: [ "/bin/bash", "-c", "/root/ros_ws/src/polypod/.devcontainer/entrypoint.sh" ]
-
+    restart: unless-stopped

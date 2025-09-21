@@ -24,4 +24,10 @@
   </gazebo>
   </xacro:if>
 
+  <!-- pca9685 ros2_control hardware interface plugin-->
+  <xacro:if value="$(arg use_pca9685_ros2_control)">
+    <xacro:include filename="$(find penta_description)/ros2_control/pca9685.ros2_control.xacro" />
+    <xacro:add_pca9685_hw_interface name="pca9685" prefix="$(arg name_space)" use_mock_hardware="false"/>
+  </xacro:if>
+
 </robot>
