@@ -21,4 +21,5 @@ services:
       - /dev/dri:/dev/dri
     tty: true
     command: [ "/bin/bash", "-c", "/root/ros_ws/src/polypod/.devcontainer/entrypoint.sh" ]
+    autorestart: unless-stopped
 
