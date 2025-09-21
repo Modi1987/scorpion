@@ -2,6 +2,7 @@ version: "3.3"
 
 services:
   raspberry-penta-jazzy-ros2:
+    container_name: raspberry-penta-jazzy-ros2
     build:
       context: ../
       dockerfile: ./.raspberry_container/Dockerfile

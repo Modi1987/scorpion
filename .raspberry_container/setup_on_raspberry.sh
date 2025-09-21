@@ -50,3 +50,11 @@ else
     echo "Docker Compose not found. Please install either 'docker compose' (plugin) or 'docker-compose' (standalone)."
     exit 1
 fi
+
+# Add progress bar while building
+echo "Setting up the workspace inside the docker container. This may take a while..."
+# Wait until the container is fully built
+while [ "$(docker inspect -f '{{.State.Running}}' $DOCKER_COMPOSE_SERVICE_NAME)" != "true" ]; do
+    echo -n "."
+    sleep 5
+done
