@@ -53,8 +53,9 @@ fi
 
 # Add progress bar while building
 echo "Setting up the workspace inside the docker container. This may take a while..."
+CONTAINER_NAME=$(docker ps --filter "name=$DOCKER_COMPOSE_SERVICE_NAME" --format "{{.Names}}")
 # Wait until the container is fully built
-while [ "$(docker inspect -f '{{.State.Running}}' $DOCKER_COMPOSE_SERVICE_NAME)" != "true" ]; do
+while [ "$(docker inspect -f '{{.State.Running}}' $CONTAINER_NAME)" != "true" ]; do
     echo -n "."
     sleep 5
 done
