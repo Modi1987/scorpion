@@ -1,5 +1,5 @@
 repositories:
   cmd_vel_mux:
     type: git
-    url: git@github.com:Modi1987/cmd_vel_mux.git
+    url: https://github.com/Modi1987/cmd_vel_mux.git
     version: devel
