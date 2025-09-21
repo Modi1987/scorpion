@@ -1,9 +1,10 @@
-version: "3.9"
+version: "3.3"
 
 services:
   raspberry-penta-jazzy-ros2:
     build:
       context: ../
+      dockerfile: ./.raspberry_container/Dockerfile
       args:
         COLCON_WORKSPACE: /root/ros_ws
     volumes:
