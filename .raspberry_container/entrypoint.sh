@@ -18,7 +18,9 @@ colcon build --packages-up-to penta_pod --cmake-args -DCMAKE_BUILD_TYPE=RelWithD
 
 # Launch the application
 source install/setup.bash
-ros2 launch penta_pod ros2_control_penta.launch.py
+ros2 launch penta_pod ros2_control_penta.launch.py &
+
+touch /root/ros_ws/.ready
 
 # Keep the container running
 tail -f /dev/null

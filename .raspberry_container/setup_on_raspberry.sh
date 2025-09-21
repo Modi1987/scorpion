@@ -59,3 +59,11 @@ while [ "$(docker inspect -f '{{.State.Running}}' $CONTAINER_NAME)" != "true" ];
     echo -n "."
     sleep 5
 done
+
+# Wait until the ROS nodes are launched (indicated by the presence of a .ready file)
+echo "Waiting for ROS2 workspace to be built and nodes to start inside the container..."
+while ! docker exec "$CONTAINER_NAME" [ -f /root/ros_ws/.ready ]; do
+    echo -n "."
+    sleep 5
+done
+echo "Installation complete!"
