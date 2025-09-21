@@ -17,6 +17,7 @@ rosdep install --from-paths src --ignore-src -r -y  || true
 colcon build --packages-up-to penta_pod --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --parallel-workers 2
 
 # Launch the application
+source install/setup.bash
 ros2 launch penta_pod ros2_control_penta.launch.py
 
 # Keep the container running
