@@ -8,6 +8,17 @@ fi
 
 DOCKER_COMPOSE_SERVICE_NAME="raspberry-penta-jazzy-ros2"
 
+# Check for service native pentapod service, and stop it if it exists
+NATIVE_SERVICE_NAME="pentapod_bringup.service"
+NATIVE_SERVICE_PATH="/etc/systemd/system/$NATIVE_SERVICE_NAME"
+if [ -f $NATIVE_SERVICE_PATH ]; then
+    echo "Stopping and disabling existing native service: $NATIVE_SERVICE_NAME"
+    sudo systemctl stop $NATIVE_SERVICE_NAME
+    sudo systemctl disable $NATIVE_SERVICE_NAME
+    sudo rm $NATIVE_SERVICE_PATH
+    sudo systemctl daemon-reload
+fi
+
 # Make sure vcs is installed
 apt-get update
 apt-get install -y python3-vcstool
