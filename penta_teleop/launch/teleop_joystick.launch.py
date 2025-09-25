@@ -18,6 +18,15 @@ def generate_launch_description():
     )
     ld.add_action(name_space_arg)
 
+    joystick_extra_controls_config_file_arg = DeclareLaunchArgument(
+        "joystick_extra_controls_config_file",
+        default_value=os.path.join(
+            get_package_share_directory("penta_teleop"), "config", "joy_extra_controls.yaml"
+        ),
+        description="Joystick extra controls config file to use (xbox, ps4, logitech)",
+    )
+    ld.add_action(joystick_extra_controls_config_file_arg)
+
     """ Nodes """
 
     joy_params = os.path.join(
@@ -40,9 +49,7 @@ def generate_launch_description():
         # remappings=[("/cmd_vel", "/input/cmd_vel_teleop_joy")],
     )
 
-    joystick_extra_controls_configs = os.path.join(
-        get_package_share_directory("penta_teleop"), "config", "joy_extra_controls.yaml"
-    )
+    joystick_extra_controls_configs = LaunchConfiguration("joystick_extra_controls_config_file")
 
     general_config_params = os.path.join(
         get_package_share_directory("penta_description"), "config", "general_config.yaml"
