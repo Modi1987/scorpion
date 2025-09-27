@@ -16,6 +16,8 @@
 #define MODE1_AI 0x20      // Auto-Increment
 #define MODE1_RESTART 0x80 // Restart enabled
 
+#define PWM_FREQUENCY_HZ 200.0 // 200Hz for high end servos 50 for all servos
+
 MyPCA9685::MyPCA9685(const std::vector<MotorParams>& motor_params, const std::string& i2c_device, int address)
     : motor_params_(motor_params), device_path_(i2c_device), i2c_address_(address), i2c_file_(-1) {
         servo_command_ticks_ = std::vector<int>(motor_params.size(), 0);
@@ -49,7 +51,7 @@ bool MyPCA9685::init() {
 
     writeRegister(MODE1_REG_ADDRESS, MODE1_RESTART);
     usleep(5000); // Wait for the device to initialize
-    setPWMFreq(50);             // 50Hz for servos
+    setPWMFreq(PWM_FREQUENCY_HZ); // 200Hz for high end servos 50 for all servos
     // initiate all motors to 0 degrees
     for (int i = 0; i < static_cast<int>(motor_params_.size()); ++i) {
         setMotorCommand(i, 0.0f); // Set all motors to 0 degrees
@@ -144,7 +146,8 @@ int MyPCA9685::setMotorCommand(int channel, float setpoint_deg) {
     float pulse_span = max_pulse - min_pulse;
 
     float pulseMs = min_pulse + pulse_span*((setpoint_deg - min_angle) / angle_span);
-    int pulseTicks = static_cast<int>((pulseMs / 20.0) * 4096); // 20ms = 50Hz
+    double period = 1000.0 / PWM_FREQUENCY_HZ; // in ms
+    int pulseTicks = static_cast<int>((pulseMs / period) * 4096); // period = 5ms for 200Hz
     // update servo ticks when successful
     if (pulseTicks < 0 || pulseTicks > 4095) {
         std::cerr << "Pulse ticks out of range for channel " << channel << ": " << pulseTicks << std::endl;
