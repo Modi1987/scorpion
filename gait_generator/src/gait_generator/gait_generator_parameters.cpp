@@ -227,6 +227,13 @@ void GaitGenerator::load_parameters() {
     foot_up_motion_interpolator.set_foot_up_motion_type(FootUpMotion::Type::UNKNOWN);
     RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.foot_up_motion_type_str value is: %s", foot_up_motion_type_str.c_str());
   }
+
+  if (!node_->get_parameter("gait_parameters.update_cycle_time_milli", gait_parameters_.update_cycle_time_milli)) {
+    RCLCPP_WARN(node_->get_logger(), "Parameter gait_parameters.update_cycle_time_milli was not found. Defaulting to 10.0 ms");
+    gait_parameters_.update_cycle_time_milli = 10.0;
+  } else {
+    RCLCPP_INFO(node_->get_logger(), "Loaded gait_parameters.update_cycle_time_milli value is: %f [ms]", gait_parameters_.update_cycle_time_milli);
+  }
 }
 
 } // namespace penta_pod::kin::gait_generator

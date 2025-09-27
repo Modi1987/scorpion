@@ -24,7 +24,7 @@ GaitGenerator::GaitGenerator()
   RCLCPP_INFO(node_->get_logger(), "Starting gait_generator_node");
   this->declare_parameters();
   this->load_parameters();
-  const double delta_t_milli = 10.;
+  double delta_t_milli = gait_parameters_.update_cycle_time_milli;
 
   current_phase_ = 0.;
   for (int i = 0; i < feet_num_; i++) {

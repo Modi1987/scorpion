@@ -41,6 +41,7 @@ private:
     double max_gait_turning_speed; // rad/s
     double forward_step_length_ratio; // [0.0, 1.0]
     double balance_internal_motion_coef; // meter / (meter/sec)
+    double update_cycle_time_milli; // ms
   } gait_parameters_;
   FootUpMotion foot_up_motion_interpolator; // at some point we can specify different z motion for each foot
 
