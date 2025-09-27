@@ -11,6 +11,7 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./entrypoint.sh:/root/ros_ws/src/polypod/.devcontainer/entrypoint.sh
     environment:
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
       - ROS_DOMAIN_ID=95
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
