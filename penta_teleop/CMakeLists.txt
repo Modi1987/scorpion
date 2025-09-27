@@ -18,6 +18,7 @@ find_package(commons REQUIRED)
 add_library(${PROJECT_NAME}
         src/${PROJECT_NAME}/joystick_extra_controls.cpp
         src/${PROJECT_NAME}/declare_load_parameters.cpp
+        src/${PROJECT_NAME}/cmd_vel_smoothing.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
@@ -39,6 +40,11 @@ target_link_libraries(joystick_extra_controls_node
         ${PROJECT_NAME}
         )
 
+add_executable(cmd_vel_smoothing_node src/cmd_vel_smoothing_node.cpp)
+target_link_libraries(cmd_vel_smoothing_node
+        ${PROJECT_NAME}
+        )
+
 # Install
 install(
   DIRECTORY include/
@@ -47,6 +53,7 @@ install(
 
 install(TARGETS 
   joystick_extra_controls_node
+  cmd_vel_smoothing_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -37,7 +37,7 @@ def generate_launch_description():
         name="teleop_node",
         namespace=LaunchConfiguration("name_space"),
         parameters=[joy_params],
-        # remappings=[("/cmd_vel", "/input/cmd_vel_teleop_joy")],
+        remappings=[("cmd_vel", "cmd_vel_not_smoothed")],
     )
 
     joystick_extra_controls_configs = os.path.join(
@@ -61,10 +61,26 @@ def generate_launch_description():
         parameters=[joystick_extra_controls_configs, general_config_params],
     )
 
+    cmd_vel_smoothing_configs = os.path.join(
+        get_package_share_directory("penta_teleop"), "config", "cmd_vel_smoothing.yaml"
+    )
+    cmd_vel_smoothing_node = Node(
+        package="penta_teleop",
+        executable="cmd_vel_smoothing_node",
+        name="cmd_vel_smoothing_node",
+        namespace=LaunchConfiguration("name_space"),
+        remappings=[
+            ("cmd_vel", "cmd_vel_not_smoothed"),
+            ("smoothed_cmd_vel", "cmd_vel"),
+        ],
+        parameters=[cmd_vel_smoothing_configs],
+    )
+
     nodes = [
         joy_node,
         teleop_twist_joy_node,
         joystick_extra_controls_node,
+        cmd_vel_smoothing_node,
     ]
     for node in nodes:
         ld.add_action(node)
