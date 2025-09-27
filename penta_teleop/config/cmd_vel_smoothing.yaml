@@ -1,0 +1,6 @@
+/**:
+  ros__parameters:
+    max_linear_acceleration: 0.1   # m/s^2
+    max_angular_acceleration: 1.0  # rad/s^2
+    publishing_rate: 100.0         # hz
+    input_cmd_vel_timeout_sec: 0.2 # seconds
