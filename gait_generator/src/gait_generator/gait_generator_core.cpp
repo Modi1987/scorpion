@@ -173,7 +173,7 @@ void GaitGenerator::update_phase(double delta_t_milli) {
 
 void GaitGenerator::update_feet_positions(double delta_t_milli) {
 
-  auto delta_t_sec = delta_t_milli / 1000.;
+  double delta_t_sec = delta_t_milli / 1000.;
 
   double dx = cmd_vel_.linear.x * delta_t_sec;
   double dy = cmd_vel_.linear.y * delta_t_sec;
