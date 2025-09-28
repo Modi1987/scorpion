@@ -21,6 +21,7 @@ void GaitGenerator::declare_parameters() {
   node_->declare_parameter<double>("gait_parameters.step_height");
   node_->declare_parameter<double>("gait_parameters.balance_internal_motion_coef", 0.0);
   node_->declare_parameter<std::string>("gait_parameters.foot_up_motion_type_str");
+  node_->declare_parameters<double>("gait_parameters.update_cycle_time_milli", 10.0);
 }
 
 void GaitGenerator::load_parameters() {
