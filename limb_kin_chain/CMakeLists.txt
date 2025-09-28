@@ -22,6 +22,7 @@ find_package(sensor_msgs REQUIRED)
 add_library(${PROJECT_NAME}
         src/${PROJECT_NAME}/${PROJECT_NAME}.cpp
         src/${PROJECT_NAME}/${PROJECT_NAME}_node.cpp
+        src/${PROJECT_NAME}/simple_3r_link_ik.cpp
         )
 
 target_include_directories(${PROJECT_NAME}

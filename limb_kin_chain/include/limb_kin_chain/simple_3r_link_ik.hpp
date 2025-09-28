@@ -1,5 +1,5 @@
-#ifndef LIMB_KIN_CHAIN_HPP_
-#define LIMB_KIN_CHAIN_HPP_
+#ifndef SIMPLE_3R_LINK_IK_HPP_
+#define SIMPLE_3R_LINK_IK_HPP_
 
 #include "rclcpp/rclcpp.hpp" // for rclcpp
 #include <rclcpp/executors.hpp>
@@ -13,40 +13,38 @@ namespace penta_pod::kin::limb_kin_chain {
  * - init: to initialize with modified DH
  * - get_ik: to calculate inverse kinematics
  */
-class Limb : public LimbIKInterface {
+
+template <class T>
+constexpr int sign(T x) noexcept {
+    return (x >= 0) ? 1 : -1;
+};
+
+class Simple3RLinkLimb : public LimbIKInterface {
 private:
-  // kinematic variables
-  std::vector<double> tcp_xyz_base;
-  std::vector<std::vector<double>> J;
-  std::vector<std::vector<double>> JJT;
-  std::vector<std::vector<std::vector<double>>> T;
-  std::vector<std::vector<double>> Ttemp;
+
   // kinematic constants
   int dof;
   std::vector<double> a;
   std::vector<double> d;
   std::vector<double> alfa;
   std::vector<double> eef_trans;
+
   std::vector<double> q_max;
   std::vector<double> q_min;
 
-  // private functions
-  std::vector<std::vector<double>> JJT_dls_inverter(double lambda);
-  void fk(const std::vector<double> &q);
-  void ik();
-  std::vector<double> get_vector(const int n, const std::vector<double> &vec);
-  void calculate_Ttemp_at_i(int i, const std::vector<double> &q);
+  std::vector<double> get_vector(const int n,
+                                     const std::vector<double> &vec);
 
 public:
-  explicit Limb(){};
+  explicit Simple3RLinkLimb(){};
   void init(const int n, const std::vector<double> &a,
             const std::vector<double> &d, const std::vector<double> &alfa,
             const std::vector<double> &eef_trans,
             const std::vector<double> &q_max, const std::vector<double> &q_min) override;
   std::vector<double> get_ik(const double &x, const double &y, const double &z,
-                             const std::vector<double> &q0) override;
+                             const std::vector<double> &/*q0*/) override;
 };
 
 } // namespace penta_pod::kin::limb_kin_chain
 
-#endif // LIMB_KIN_CHAIN_HPP_
+#endif // SIMPLE_3R_LINK_IK_HPP_

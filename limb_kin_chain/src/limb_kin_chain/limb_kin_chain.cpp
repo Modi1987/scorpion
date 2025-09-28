@@ -18,7 +18,7 @@ void Limb::init(const int n, const std::vector<double> &a,
                 const std::vector<double> &q_min) {
   size_t n_size = static_cast<size_t>(n);
   if (a.size() < n_size || d.size() < n_size || alfa.size() < n_size ||
-          eef_trans.size() < 3 || q_max.size() < n_size,
+          eef_trans.size() < 3 || q_max.size() < n_size ||
       q_min.size() < n_size) {
     throw std::invalid_argument("Input vector size is incorrect");
   }

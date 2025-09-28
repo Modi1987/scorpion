@@ -13,9 +13,9 @@
 
 namespace penta_pod::kin::limb_kin_chain {
 
-LimbNode::LimbNode(Limb limb)
+LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb)
     : node_{rclcpp::Node::make_shared("limb_node")},
-      limb_(std::make_shared<Limb>(limb)) {
+      limb_(limb) {
   RCLCPP_INFO(node_->get_logger(), "Starting limb node");
   this->declare_parameters();
 

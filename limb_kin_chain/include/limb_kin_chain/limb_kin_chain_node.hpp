@@ -5,6 +5,8 @@
 #include <rclcpp/executors.hpp>
 
 // include librarries
+#include "limb_kin_chain/limb_ik_interface.hpp"
+#include "limb_kin_chain/simple_3r_link_ik.hpp"
 #include "limb_kin_chain/limb_kin_chain.hpp"
 
 // include messages
@@ -16,7 +18,7 @@ namespace penta_pod::kin::limb_kin_chain {
 class LimbNode {
 private:
   rclcpp::Node::SharedPtr node_;
-  std::shared_ptr<Limb> limb_;
+  std::shared_ptr<LimbIKInterface> limb_;
   std::vector<std::string> joints_names;
   std::vector<double> q_state;
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr
@@ -25,7 +27,7 @@ private:
   void declare_parameters(); // shall declarte modified dh paramters
 
 public:
-  explicit LimbNode(Limb limb);
+  explicit LimbNode(std::shared_ptr<LimbIKInterface> limb);
   void spin() { rclcpp::spin(node_); };
 };
 
