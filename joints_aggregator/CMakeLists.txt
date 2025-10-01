@@ -17,6 +17,7 @@ find_package(rclcpp REQUIRED)
 find_package(limb_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(commons REQUIRED)
 
 # # Declare library
 add_library(${PROJECT_NAME}
@@ -35,6 +36,7 @@ ament_target_dependencies(${PROJECT_NAME}
         geometry_msgs
         limb_msgs
         sensor_msgs
+        commons
         )
 
 

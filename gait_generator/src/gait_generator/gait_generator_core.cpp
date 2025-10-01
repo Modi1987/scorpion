@@ -19,9 +19,17 @@
 
 namespace penta_pod::kin::gait_generator {
 
-GaitGenerator::GaitGenerator()
-    : node_{rclcpp::Node::make_shared("gait_generator_node")} {
+GaitGenerator::GaitGenerator(rclcpp::Node::SharedPtr node)
+    : node_{node} {
   RCLCPP_INFO(node_->get_logger(), "Starting gait_generator_node");
+
+  const auto & opts = node_->get_node_options();
+  if (opts.use_intra_process_comms()) {
+    RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is ENABLED");
+  } else {
+    RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is DISABLED");
+  }
+
   this->declare_parameters();
   this->load_parameters();
   double delta_t_milli = gait_parameters_.update_cycle_time_milli;

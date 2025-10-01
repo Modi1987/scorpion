@@ -6,8 +6,8 @@
 
 // include librarries
 #include "limb_kin_chain/limb_ik_interface.hpp"
-#include "limb_kin_chain/simple_3r_link_ik.hpp"
 #include "limb_kin_chain/limb_kin_chain.hpp"
+#include "limb_kin_chain/simple_3r_link_ik.hpp"
 
 // include messages
 #include "limb_msgs/msg/pxyz.hpp"
@@ -27,7 +27,8 @@ private:
   void declare_parameters(); // shall declarte modified dh paramters
 
 public:
-  explicit LimbNode(std::shared_ptr<LimbIKInterface> limb);
+  explicit LimbNode(std::shared_ptr<LimbIKInterface> limb,
+                    rclcpp::Node::SharedPtr node);
   void spin() { rclcpp::spin(node_); };
 };
 

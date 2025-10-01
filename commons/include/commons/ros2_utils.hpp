@@ -31,6 +31,22 @@ auto service_call_template(
   }
 }
 
+inline bool is_intra_process_arg(int argc, char **argv) {
+  // parse interaprocess arg
+  bool use_intra = false;
+  for (int i = 1; i < argc - 1; i++) {
+    if (std::string(argv[i]).find("--intra-process") != std::string::npos) {
+      if (!(i + 1 < argc))
+        break;
+      std::string val = std::string(argv[i + 1]);
+      if (val.find("true") != std::string::npos) {
+        use_intra = true;
+      }
+    }
+  }
+  return use_intra;
+}
+
 } // namespace penta_pod::kin::commons
 
 #endif // COMMONS_ROS2_UTILS_HPP_

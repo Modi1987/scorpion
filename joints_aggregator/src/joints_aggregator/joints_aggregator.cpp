@@ -10,9 +10,17 @@
 
 namespace penta_pod::kin::joints_aggregator {
 
-JointsAggregator::JointsAggregator()
-    : node_{rclcpp::Node::make_shared("joints_aggregator_node")} {
+JointsAggregator::JointsAggregator(rclcpp::Node::SharedPtr node)
+    : node_{node} {
   RCLCPP_INFO(node_->get_logger(), "Starting joints aggregator node");
+  
+  const auto & opts = node_->get_node_options();
+  if (opts.use_intra_process_comms()) {
+    RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is ENABLED");
+  } else {
+    RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is DISABLED");
+  }
+
   this->declare_parameters();
   if (!this->get_parameters()) {
     rclcpp::shutdown();

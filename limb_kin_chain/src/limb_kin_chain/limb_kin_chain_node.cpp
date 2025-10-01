@@ -13,10 +13,19 @@
 
 namespace penta_pod::kin::limb_kin_chain {
 
-LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb)
-    : node_{rclcpp::Node::make_shared("limb_node")},
+LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb,
+      rclcpp::Node::SharedPtr node)
+    : node_{node},
       limb_(limb) {
   RCLCPP_INFO(node_->get_logger(), "Starting limb node");
+
+  const auto & opts = node_->get_node_options();
+  if (opts.use_intra_process_comms()) {
+    RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is ENABLED");
+  } else {
+    RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is DISABLED");
+  }
+
   this->declare_parameters();
 
   int dof=3;

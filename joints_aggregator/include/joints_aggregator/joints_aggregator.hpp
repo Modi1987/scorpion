@@ -42,7 +42,7 @@ private:
   auto get_parameters() -> bool;
 
 public:
-  explicit JointsAggregator();
+  explicit JointsAggregator(rclcpp::Node::SharedPtr node);
   void spin() { rclcpp::spin(node_); };
 };
 

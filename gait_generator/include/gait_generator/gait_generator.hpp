@@ -232,7 +232,7 @@ private:
   }
 
 public:
-  explicit GaitGenerator();
+  explicit GaitGenerator(rclcpp::Node::SharedPtr node);
   void spin() { rclcpp::spin(node_); };
 };
 
