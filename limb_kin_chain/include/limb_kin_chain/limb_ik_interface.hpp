@@ -19,6 +19,8 @@ public:
                                        const double &y,
                                        const double &z,
                                        const std::vector<double> &q0) = 0;
+
+    virtual std::string solver_type() = 0;
 };
 
 

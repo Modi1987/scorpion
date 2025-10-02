@@ -43,6 +43,7 @@ public:
             const std::vector<double> &q_max, const std::vector<double> &q_min) override;
   std::vector<double> get_ik(const double &x, const double &y, const double &z,
                              const std::vector<double> &/*q0*/) override;
+  std::string solver_type() override { return std::string("ANALYTIC"); };
 };
 
 } // namespace penta_pod::kin::limb_kin_chain
