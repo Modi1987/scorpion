@@ -196,10 +196,19 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
     double twist_mag = std::sqrt(cmd_vel_.linear.x * cmd_vel_.linear.x +
         cmd_vel_.linear.y * cmd_vel_.linear.y + cmd_vel_.angular.z * cmd_vel_.angular.z / 50.0);
     double balance_motion_coef = gait_parameters_.balance_internal_motion_coef;
-    double r =  balance_motion_coef * twist_mag;
+    double r =  balance_motion_coef * (twist_mag + 0.02);
     double balance_phase = current_phase_ + M_PI / feet_num_;
-    double dx_balance =  -r * std::sin(balance_phase) * delta_t_sec;
-    double dy_balance =  r * std::cos(balance_phase) * delta_t_sec;
+    static ExponentialMovingAverage dx_balance_filter(0.1);
+    static ExponentialMovingAverage dy_balance_filter(0.1);
+    double dx_balance = -r * std::sin(balance_phase) * delta_t_sec;;
+    double dy_balance = r * std::cos(balance_phase) * delta_t_sec;
+    if (is_walking_) {
+      dx_balance = dx_balance_filter.update(dx_balance);
+      dy_balance = dy_balance_filter.update(dy_balance);
+    } else {
+      dx_balance = dx_balance_filter.update(0.0);
+      dy_balance = dy_balance_filter.update(0.0);
+    }
     // Finish balance calculation
     constexpr double move_velocity_override = 1.0; // for debugging, set to 0.0 to stay in place
     if (temp == 0.) {
