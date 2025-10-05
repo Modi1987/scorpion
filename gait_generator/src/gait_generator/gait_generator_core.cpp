@@ -12,6 +12,7 @@
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include "commons/general_utils.hpp"
 
 #include <stdexcept>
 
@@ -153,28 +154,52 @@ void GaitGenerator::cmd_null_pos_sub_callback(
 void GaitGenerator::update_phase(double delta_t_milli) {
 
   auto delta_t_sec = delta_t_milli / 1000.;
-  double w = gait_parameters_.gait_radial_frequency;
+  double w = 0.0;
+  auto get_current_cycle = [this]() {return std::floor(current_phase_ / (2 * pi));};
 
   // check if cmd_vel is zero and feet near the equilibrium
-  double vel_mag = std::sqrt(cmd_vel_.linear.x * cmd_vel_.linear.x +
-                             cmd_vel_.linear.y * cmd_vel_.linear.y);
-  auto collective_xy_distance_from_equilibrium = 0.0;
-  for (int i = 0; i < feet_num_; i++) {
-    collective_xy_distance_from_equilibrium +=
-        std::abs(feet_pos_in_footprint_[i].x -
-                 init_feet_pos_in_footprint_[i].x) +
-        std::abs(feet_pos_in_footprint_[i].y -
-                 init_feet_pos_in_footprint_[i].y);
+  double twist_mag = std::sqrt(cmd_vel_.linear.x * cmd_vel_.linear.x +
+                             cmd_vel_.linear.y * cmd_vel_.linear.y +
+                             cmd_vel_.angular.z * cmd_vel_.angular.z);
+
+  static bool is_zero_cmd_vel{true};
+  static long cycle_at_last_stop_cmd = -1;
+  constexpr uint CYCLES_AFTER_ZERO_VEL = 1;
+  if ( twist_mag < 0.002 ) {
+    if (!is_zero_cmd_vel) {
+      cycle_at_last_stop_cmd = get_current_cycle();
+    }
+    is_zero_cmd_vel = true;
+  } else {
+    cycle_at_last_stop_cmd = -1;
+    is_zero_cmd_vel = false;
   }
 
-  if ((collective_xy_distance_from_equilibrium < 0.005) && (vel_mag < 0.001)) {
-    auto check_z_near_zero =
-        current_phase_ - std::floor(current_phase_ / (2 * pi)) * 2 * pi;
-    if (check_z_near_zero < w * delta_t_sec + 0.001) {
+  if (!is_zero_cmd_vel) { 
+    w = gait_parameters_.gait_radial_frequency;
+  } else {
+    if (cycle_at_last_stop_cmd == -1) {
       w = 0.0;
-      current_phase_ = std::floor(current_phase_ / (2 * pi)) * 2 * pi;
+      current_phase_ =  get_current_cycle() * 2 * pi;
+    } else {
+      w = gait_parameters_.gait_radial_frequency;
+      auto phase_difference = 
+          current_phase_ - get_current_cycle() * 2 * pi;
+      auto check_z_near_zero = std::abs(phase_difference) < (2*w * delta_t_sec + 0.001);
+      auto cycles_count_while_stopped = get_current_cycle() - cycle_at_last_stop_cmd;
+      RCLCPP_INFO_THROTTLE(
+          node_->get_logger(),
+          *node_->get_clock(),
+          2000, // throttle period in ms
+          "Current cycle after last stop: %f",
+          cycles_count_while_stopped
+      );
+      if ( check_z_near_zero && (cycle_at_last_stop_cmd > 0) && (cycles_count_while_stopped >= CYCLES_AFTER_ZERO_VEL) ) {
+        cycle_at_last_stop_cmd = -1;
+      }
     }
   }
+
   is_walking_ = (w == 0.0) ? false : true;
   current_phase_ = current_phase_ + w * delta_t_sec;
 }
@@ -196,7 +221,7 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
     double twist_mag = std::sqrt(cmd_vel_.linear.x * cmd_vel_.linear.x +
         cmd_vel_.linear.y * cmd_vel_.linear.y + cmd_vel_.angular.z * cmd_vel_.angular.z / 50.0);
     double balance_motion_coef = gait_parameters_.balance_internal_motion_coef;
-    double r =  balance_motion_coef * (twist_mag + 0.02);
+    double r =  balance_motion_coef * (twist_mag + 0.03);
     double balance_phase = current_phase_ + M_PI / feet_num_;
     static ExponentialMovingAverage dx_balance_filter(0.1);
     static ExponentialMovingAverage dy_balance_filter(0.1);
