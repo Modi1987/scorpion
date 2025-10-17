@@ -1,0 +1,9 @@
+<library path="rtrobot_ros2_control">
+  <class name="rtrobot_ros2_control/RtRobotHardwareInterface"
+         type="rtrobot_ros2_control::RtRobotHardwareInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      The ros2 hardware interface for pca9685.
+    </description>
+  </class>
+</library>

@@ -1,0 +1,75 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 10
+
+    joint_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    
+    forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    test_one_motor_controller:
+      type: forward_command_controller/ForwardCommandController
+
+joint_trajectory_controller:
+  ros__parameters:
+    joints:
+      - limb0/joint0
+      - limb0/joint1
+      - limb0/joint2
+      - limb1/joint0
+      - limb1/joint1
+      - limb1/joint2
+      - limb2/joint0
+      - limb2/joint1
+      - limb2/joint2
+      - limb3/joint0
+      - limb3/joint1
+      - limb3/joint2
+      - limb4/joint0
+      - limb4/joint1
+      - limb4/joint2
+    interface_name: position
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+    allow_partial_joints_goal: true
+    # open_loop_control: true
+    # constraints:
+    #   goal_time: 2.0
+    #   stopped_velocity_tolerance: 0.01
+    #   leg1/joint0:
+    #     trajectory: 0.2
+    #     goal: 0.1
+      # ... Add constraints for each joint as needed
+
+forward_position_controller:
+  ros__parameters:
+    joints:
+      - limb0/joint0
+      - limb0/joint1
+      - limb0/joint2
+      - limb1/joint0
+      - limb1/joint1
+      - limb1/joint2
+      - limb2/joint0
+      - limb2/joint1
+      - limb2/joint2
+      - limb3/joint0
+      - limb3/joint1
+      - limb3/joint2
+      - limb4/joint0
+      - limb4/joint1
+      - limb4/joint2
+    interface_name: position
+
+test_one_motor_controller:
+  ros__parameters:
+    joints:
+      - limb0/joint0
+    interface_name: position
