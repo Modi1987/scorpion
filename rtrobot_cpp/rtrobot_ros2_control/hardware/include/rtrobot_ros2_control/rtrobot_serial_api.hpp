@@ -20,13 +20,16 @@ private:
     int baudRate;
     bool isConnected;
     std::string trajectoryParam;
+    std::vector<int> lastPwmCommand;
 
 public:
     RtRobotSerial(
         const std::string& portName = "/dev/ttyUSB0",
         int baudRate = DEFAULT_BAUD_RATE,
         const std::string& trajectory_param = ""
-    ) : fd(-1), portName(portName), baudRate(baudRate), isConnected(false), trajectoryParam(trajectory_param) {}
+    ) : fd(-1), portName(portName), baudRate(baudRate), isConnected(false), trajectoryParam(trajectory_param) {
+        lastPwmCommand = std::vector<int>(32, -1);
+    }
     bool connect();
     void disconnect();
     ssize_t writeData(const std::vector<int>& data, int update_time_ms = -1);

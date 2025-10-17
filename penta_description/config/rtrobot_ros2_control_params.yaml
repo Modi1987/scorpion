@@ -1,6 +1,6 @@
 controller_manager:
   ros__parameters:
-    update_rate: 10
+    update_rate: 5
 
     joint_trajectory_controller:
       type: joint_trajectory_controller/JointTrajectoryController

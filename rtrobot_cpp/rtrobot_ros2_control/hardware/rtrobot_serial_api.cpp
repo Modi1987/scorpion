@@ -63,16 +63,24 @@ ssize_t RtRobotSerial::writeData(const std::vector<int>& pwm_commands_micro_sec,
 
     // Convert PWM commands to a format suitable for writing
     std::string data;
-    int count = 1;
+    int count = 0;
     for (const auto& pwm : pwm_commands_micro_sec) {
-        data += "#" + std::to_string(count) + "P" + std::to_string(pwm);
+        if (pwm != lastPwmCommand[count]) {
+            data += "#" + std::to_string(count+1) + "P" + std::to_string(pwm);
+        }
+        lastPwmCommand[count] = pwm;
         count++;
     }
 
+    if (data.empty()) {
+        // No changes to send
+        return 0;
+    }
+
     if (update_time_ms < 0) {
-        data += trajectoryParam; // Default trajecotrt parameter
+        data += trajectoryParam; // Default trajectory parameter
     } else {
-        update_time_ms = update_time_ms + (2 * update_time_ms / 10); // Add 10% margin
+        update_time_ms = update_time_ms + (update_time_ms / 10); // Add 10% margin
         data += "T" + std::to_string(update_time_ms) + "D0";
     }
     data += "\r\n"; // Add newline to indicate end of command
