@@ -1,0 +1,6 @@
+string name
+int32 pwm_channel
+float64 min_pulse_micro
+float64 max_pulse_micro
+float64 min_angle_degree
+float64 max_angle_degree

@@ -1,0 +1,16 @@
+/**:
+  ros__parameters:
+    enable_base_motion_button_index: 4
+    base_link_x_axis_index: 1
+    base_link_y_axis_index: 0
+    base_link_pitch_axis_index: 4
+    base_link_yaw_axis_index: 3
+    base_link_x_scale: 0.045 # m
+    base_link_y_scale: 0.045 # m
+    base_link_yaw_scale: 0.5 # rad
+    base_link_pitch_scale: 0.25 # rad
+    service_name:
+      get_base_pose: "base_twerk/get_current_null_pose"
+      set_base_pose: "base_twerk/cmd_null_setpoint"
+    limits:
+      minimum_init_z_value: 0.1

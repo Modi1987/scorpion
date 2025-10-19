@@ -5,6 +5,7 @@
   <xacro:arg name="name_space" default="" />
   <xacro:arg name="use_gazebo_simulation" default="False" />
   <xacro:arg name="use_pca9685_ros2_control" default="False" />
+  <xacro:arg name="use_rtrobot_ros2_control" default="False" />
 
   <xacro:include filename="$(find penta_description)/urdf/penta_robot_macro.urdf.xacro" />
 
@@ -28,6 +29,12 @@
   <xacro:if value="$(arg use_pca9685_ros2_control)">
     <xacro:include filename="$(find penta_description)/ros2_control/pca9685.ros2_control.xacro" />
     <xacro:add_pca9685_hw_interface name="pca9685" prefix="$(arg name_space)" use_mock_hardware="false"/>
+  </xacro:if>
+
+  <!-- rtrobot ros2_control hardware interface plugin-->
+  <xacro:if value="$(arg use_rtrobot_ros2_control)">
+    <xacro:include filename="$(find penta_description)/ros2_control/rtrobot.ros2_control.xacro" />
+    <xacro:add_rtrobot_hw_interface name="rtrobot" prefix="$(arg name_space)"/>
   </xacro:if>
 
 </robot>
