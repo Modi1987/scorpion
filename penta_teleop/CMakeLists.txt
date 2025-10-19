@@ -19,6 +19,7 @@ add_library(${PROJECT_NAME}
         src/${PROJECT_NAME}/joystick_extra_controls.cpp
         src/${PROJECT_NAME}/declare_load_parameters.cpp
         src/${PROJECT_NAME}/cmd_vel_smoothing.cpp
+        src/${PROJECT_NAME}/joystick_base_link_motion.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
@@ -45,6 +46,10 @@ target_link_libraries(cmd_vel_smoothing_node
         ${PROJECT_NAME}
         )
 
+add_executable(joystick_base_link_motion_node src/joystick_base_link_motion_node.cpp)
+target_link_libraries(joystick_base_link_motion_node
+        ${PROJECT_NAME}
+        )   
 # Install
 install(
   DIRECTORY include/
@@ -54,6 +59,7 @@ install(
 install(TARGETS 
   joystick_extra_controls_node
   cmd_vel_smoothing_node
+  joystick_base_link_motion_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

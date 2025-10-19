@@ -9,8 +9,8 @@
       x: 1 # left stick up/down
       y: 0 # left stick left/right
     scale_linear:
-      x: 0.01
-      y: 0.01
+      x: 0.0
+      y: 0.0
     scale_linear_turbo:
       x: 0.035
       y: 0.035
@@ -18,7 +18,7 @@
     axis_angular:
       yaw: 3 # right stick left/right
     scale_angular:
-      yaw: 0.1
+      yaw: 0.0
     scale_angular_turbo:
       yaw: 0.25
 
