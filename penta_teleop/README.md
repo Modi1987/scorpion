@@ -27,6 +27,6 @@ Note, make sure to enable the motion using:
 
 1- `Right Trigger button (RT)` to enable walking in turbo mode
 
-2- `Left Trigger button (LT)` to enable waling in slow mode
+2- `Left Trigger button (LT)` to enable body motion while feet in place
 
 3- Walking pattern changes only when the robot is in stand-still
