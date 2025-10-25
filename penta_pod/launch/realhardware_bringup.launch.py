@@ -43,6 +43,13 @@ def generate_launch_description():
         launch_arguments={'mode': mode}.items()  # Pass the mode argument
     )
 
+    penta_hiwonder_actuators_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(FindPackageShare('penta_hiwonder_actuators').find('penta_hiwonder_actuators'), 'launch', 'penta_hiwonder_actuators.launch.py')
+        ),
+        launch_arguments={'mode': mode}.items()  # Pass the mode argument
+    )
+
         # Include the null space cmd publisher launch file
     null_space_publisher = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -63,6 +70,7 @@ def generate_launch_description():
         gait_generator_launch,
         joints_aggregator_launch,
         penta_i2c_actuators_launch,
+        penta_hiwonder_actuators_launch,
         null_space_publisher,
         twerk_action_server
     ])
