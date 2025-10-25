@@ -14,16 +14,9 @@ You can build this package
  colcon build --packages-select penta_hiwonder_actuators
 ```
 
-## To test in simulation
-
-```
-ros2 launch penta_i2c_actuators penta_i2c_actuators.launch.py mode:=virtual
-```
-
-
 ## To use on real-robot:
 
 ```
-ros2 launch penta_i2c_actuators penta_i2c_actuators.launch.py mode:=real
+ros2 launch penta_pod realhardware_bringup.launch.py motors_interface:=hiwonder
 ```
 
