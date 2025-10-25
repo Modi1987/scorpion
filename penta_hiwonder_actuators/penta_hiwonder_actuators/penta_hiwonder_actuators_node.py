@@ -1,6 +1,8 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
 import serial
 import time
 import math
@@ -42,14 +44,18 @@ class PentaHiwonderActuators(Node):
 
         # Publisher actuators setpoint from joint states
         self.setpoint_publisher_ = self.create_publisher(JointState, 'actuator_setpoint_degree', 1)
+        self.ticks_publisher_ = self.create_publisher(JointState, 'actuator_ticks', 1)
+        sub_callback_group = MutuallyExclusiveCallbackGroup()
         self.joint_states_subscriber = self.create_subscription(
                 JointState,
                 "joint_states",
                 lambda msg : self.on_joint_states_callback(msg),
-                1  # Set QoS to 1
+                1,
+                callback_group=sub_callback_group
             )
-        self.motor_update_timer = self.create_timer(UPDATE_INTERVAL, self.update_motors_callback)
-    
+        timer_callback_group = MutuallyExclusiveCallbackGroup()
+        self.motor_update_timer = self.create_timer(UPDATE_INTERVAL, self.update_motors_callback, callback_group=timer_callback_group)
+
     def open_serial_connection(self):
         try:
             self.serial = serial.Serial(PORT, BAUDRATE, timeout=1)
@@ -67,13 +73,18 @@ class PentaHiwonderActuators(Node):
                 actuation_range_degree = self.servo_actuation_range_degree[i]
                 ticks_span = self.servo_max_ticks[i] - self.servo_min_ticks[i]
                 position_ticks = self.servo_min_ticks[i] + (position_degree * ticks_span) / actuation_range_degree
+                if (self.last_position_ticks[i] == position_ticks):
+                    continue  # No change in position, skip
+                self.last_position_ticks[i] = position_ticks
                 servo_id = i + 1  # Servo IDs start from 1
                 self.move_one_servo(servo_id, position_ticks)
+        self.publish_ticks_message()
 
     def initialize_properties(self):
-        # Initialize i2c related joint states names and servo position vector (degrees)
+        self.index_cache = None
         self.joints_states_names = []
         self.q = [0.0] * self.joints_count # geometrical joint angle rads
+        self.last_position_ticks = [-1] * self.joints_count # to track last sent position
         self.actuator_setpoint_degree = [0.0] * self.joints_count # servo motor angle degree
         for i in range(self.limbs_num):
             for j in range(self.joints_per_limb[i]):
@@ -81,26 +92,26 @@ class PentaHiwonderActuators(Node):
                 self.joints_states_names.append(joint_name)
 
     def on_joint_states_callback(self, msg):
-        # Create dictionary of joints stats from received /joint_states message
-        joint_states_dict = {name: {'position': pos, 'velocity': vel, 'effort': eff}
-                        for name, pos, vel, eff in zip(
-                            msg.name,
-                            msg.position if msg.position else [None] * len(msg.name),
-                            msg.velocity if msg.velocity else [None] * len(msg.name),
-                            msg.effort if msg.effort else [None] * len(msg.name)
-                        )}
-        # Update received joints states and log errors
-        for i, name in enumerate(self.joints_states_names):
-            if name in joint_states_dict:
-                joint_state = joint_states_dict[name]
-                self.q[i] = joint_state['position']
-            else:
-                self.get_logger().error(f"Joint {name} not found in the current message.")
-        # Calculate actuator setpoints in degrees
+        pos_list = msg.position
+        # Pre-map joint names to indices for O(1) lookup
+        if self.index_cache is None:
+            self.index_cache = []
+            names = msg.name
+            for i, name in enumerate(self.joints_states_names):
+                if name in names:
+                    index = names.index(name)
+                    self.index_cache.append(index)
+                else:
+                    self.node.get_logger().error(f"Joint {name} not found in message.")
+            return
+        # Compute actuator setpoints (vectorized-like)
+        deg_per_rad = 180.0 / math.pi
         for i in range(self.joints_count):
-            servo_setpoint = self.dir[i] * (self.q[i] * 180.0 / math.pi) + self.initial_joints_bias_degree[i]
-            max_val = self.servo_actuation_range_degree[i]
-            self.actuator_setpoint_degree[i] = self.clamp(servo_setpoint, i, 0.0, max_val)
+            self.q[i] = pos_list[self.index_cache[i]]
+            servo_setpoint = self.dir[i] * (self.q[i] * deg_per_rad) + self.initial_joints_bias_degree[i]
+            self.actuator_setpoint_degree[i] = self.clamp(
+                servo_setpoint, i, 0.0, self.servo_actuation_range_degree[i]
+            )
         # Publish actuators setpoint
         self.publish_actuators_setpoint()
 
@@ -145,6 +156,13 @@ class PentaHiwonderActuators(Node):
         msg_setpoint.name = self.joints_states_names
         msg_setpoint.position = self.actuator_setpoint_degree
         self.setpoint_publisher_.publish(msg_setpoint)
+    
+    def publish_ticks_message(self):
+        msg_ticks = JointState()
+        msg_ticks.header.stamp = self.get_clock().now().to_msg()
+        msg_ticks.name = self.joints_states_names
+        msg_ticks.position = [float(tick) for tick in self.last_position_ticks]
+        self.ticks_publisher_.publish(msg_ticks)
 
     def declare_params(self):
         # Declare robot geometry parameters
@@ -212,9 +230,14 @@ def main(args=None):
     node = PentaHiwonderActuators(mode=mode)
 
     # Keep the node alive to receive and process messages
-    rclpy.spin(node)
+    executor = MultiThreadedExecutor()
+    executor.add_node(node)
 
-    # Clean up on shutdown
+    try:
+        node.get_logger().info('Beginning Hiwonder servo control, shut down with CTRL-C')
+        executor.spin()
+    except KeyboardInterrupt:
+        node.get_logger().info('Keyboard interrupt, shutting down.\n')
     node.destroy_node()
     rclpy.shutdown()
 
