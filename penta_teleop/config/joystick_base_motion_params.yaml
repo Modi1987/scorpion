@@ -14,3 +14,9 @@
       set_base_pose: "base_twerk/cmd_null_setpoint"
     limits:
       minimum_init_z_value: 0.1
+    turn_right_left_with_bumper:
+      enable_base_motion_button_index: 5
+      yaw_turn_right_axis_index: 5
+      yaw_turn_left_axis_index: 2
+      yaw_angle_scale: 0.5
+      filter: 0.2

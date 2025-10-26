@@ -121,6 +121,7 @@ void GaitGenerator::cmd_vel_sub_callback(
         msg->angular.z * gait_parameters_.max_gait_turning_speed / mag;
   }
   cmd_vel_ = *msg;
+  cmd_vel_.angular.z = - cmd_vel_.angular.z;
   /*
   RCLCPP_INFO(node_->get_logger(), "Received cmd_vel: linear.x=%.2f,
   linear.y=%.2f, angular=%.2f", cmd_vel_.linear.x, cmd_vel_.linear.y,
@@ -270,7 +271,7 @@ void GaitGenerator::publish_base_footprint_vel_feedback() {
   auto robot_vel = geometry_msgs::msg::Twist();
   robot_vel.linear.x = - cmd_vel_.linear.x;
   robot_vel.linear.y = - cmd_vel_.linear.y;
-  robot_vel.angular.z = - cmd_vel_.angular.z;
+  robot_vel.angular.z = cmd_vel_.angular.z;
   feedback_cmd_vel_publisher_->publish(robot_vel);
 }
 

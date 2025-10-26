@@ -13,6 +13,8 @@ find_package(base_twerk_msgs REQUIRED)
 find_package(gait_generator_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(commons REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 # Declare library
 add_library(${PROJECT_NAME}
@@ -20,6 +22,7 @@ add_library(${PROJECT_NAME}
         src/${PROJECT_NAME}/declare_load_parameters.cpp
         src/${PROJECT_NAME}/cmd_vel_smoothing.cpp
         src/${PROJECT_NAME}/joystick_base_link_motion.cpp
+        src/${PROJECT_NAME}/joystick_turn_head_using_bumper.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
@@ -34,6 +37,8 @@ ament_target_dependencies(${PROJECT_NAME}
         gait_generator_msgs
         rclcpp_action
         commons
+        tf2
+        tf2_geometry_msgs
         )
 
 add_executable(joystick_extra_controls_node src/joystick_extra_controls_node.cpp)
