@@ -31,6 +31,10 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
+      - name: Remove nvidia runtime for CI
+        run: |
+          sed -i 's/runtime: nvidia//g' .devcontainer/docker-compose.yaml
+
       - name: Build workspace container
         run: |
           docker-compose -f .devcontainer/docker-compose.yaml up --build -d penta-jazzy-ros2
