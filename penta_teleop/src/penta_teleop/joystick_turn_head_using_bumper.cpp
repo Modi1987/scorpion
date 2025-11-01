@@ -24,6 +24,9 @@ JoystickTurnHead::JoystickTurnHead(
   set_base_pose_ = clients_node_->create_client<SetTargetBasePose>(
       turn_left_right_motion_params_.set_base_pose_service_name,
       rclcpp::QoS(rclcpp::ServicesQoS()));
+  // publisher
+  set_base_pose_pub_ = node_->create_publisher<PoseStampedMsg>(
+      turn_left_right_motion_params_.set_base_pose_topic_name, 1);
 }
 
 void JoystickTurnHead::joystick_msg_callback(
@@ -133,6 +136,12 @@ void JoystickTurnHead::store_current_base_pose() {
 
 void JoystickTurnHead::set_target_base_pose(
     const PoseStampedMsg::SharedPtr target_base_pose) {
+  // If command by topic (command is set with no interpolation on server)
+  if (turn_left_right_motion_params_.command_by_topic) {
+    set_base_pose_pub_->publish(*target_base_pose);
+    return;
+  }
+  // If command by service, command is ineterpolated on server side
   // check if service exists
   if (!set_base_pose_->wait_for_service(std::chrono::seconds(100))) {
     RCLCPP_ERROR(node_->get_logger(), "Service %s is unavailable.",
@@ -168,10 +177,13 @@ void JoystickTurnHead::declare_parameters() {
   node_->declare_parameter<int>("turn_right_left_with_bumper.yaw_turn_right_axis_index", 3);
   node_->declare_parameter<int>("turn_right_left_with_bumper.yaw_turn_left_axis_index", 3);
   node_->declare_parameter<double>("turn_right_left_with_bumper.yaw_angle_scale", 0.3);
+  node_->declare_parameter<bool>("command_by_topic", true);
   node_->declare_parameter<std::string>("service_name.get_base_pose",
                                         "base_twerk/get_current_null_pose");
   node_->declare_parameter<std::string>("service_name.set_base_pose",
                                         "base_twerk/cmd_null_setpoint");
+  node_->declare_parameter<std::string>("topic_name.set_base_pose",
+                                        "set_base_pose");
   node_->declare_parameter<double>("turn_right_left_with_bumper.filter", 0.1);
 }
 
@@ -184,10 +196,13 @@ void JoystickTurnHead::get_parameters() {
                        turn_left_right_motion_params_.yaw_turn_left_axis_index);
   node_->get_parameter("turn_right_left_with_bumper.yaw_angle_scale",
                        turn_left_right_motion_params_.yaw_angle_scale);
+  node_->get_parameter("command_by_topic", turn_left_right_motion_params_.command_by_topic);
   node_->get_parameter("service_name.get_base_pose",
                        turn_left_right_motion_params_.get_base_pose_service_name);
   node_->get_parameter("service_name.set_base_pose",
                        turn_left_right_motion_params_.set_base_pose_service_name);
+  node_->get_parameter("topic_name.set_base_pose",
+                       turn_left_right_motion_params_.set_base_pose_topic_name);
     node_->get_parameter("turn_right_left_with_bumper.filter",
                        turn_left_right_motion_params_.filter);
 }

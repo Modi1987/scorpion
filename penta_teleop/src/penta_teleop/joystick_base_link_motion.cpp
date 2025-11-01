@@ -24,8 +24,8 @@ JoystickBaseLinkMotion::JoystickBaseLinkMotion(
       base_link_motion_params_.set_base_pose_service_name,
       rclcpp::QoS(rclcpp::ServicesQoS()));
   // publisher
-  set_base_pose_pub_ =
-      node_->create_publisher<PoseStampedMsg>("set_null_space_pose", 1);
+  set_base_pose_pub_ = node_->create_publisher<PoseStampedMsg>(
+      base_link_motion_params_.set_base_pose_topic_name, 1);
 }
 
 void JoystickBaseLinkMotion::joystick_msg_callback(
@@ -240,6 +240,8 @@ void JoystickBaseLinkMotion::get_parameters() {
                        base_link_motion_params_.get_base_pose_service_name);
   node_->get_parameter("service_name.set_base_pose",
                        base_link_motion_params_.set_base_pose_service_name);
+  node_->get_parameter("topic_name.set_base_pose",
+                       base_link_motion_params_.set_base_pose_topic_name);
   node_->get_parameter("limits.minimum_init_z_value",
                        base_link_motion_params_.minimum_init_z_value);
 }

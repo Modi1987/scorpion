@@ -18,6 +18,7 @@ class JoystickTurnHead {
 private:
   rclcpp::Node::SharedPtr node_, clients_node_;
   rclcpp::Subscription<JoyMsg>::SharedPtr joy_subscriber_;
+  rclcpp::Publisher<PoseStampedMsg>::SharedPtr set_base_pose_pub_;
   rclcpp::Client<GetCurrentBasePose>::SharedPtr get_base_pose_;
   rclcpp::Client<SetTargetBasePose>::SharedPtr set_base_pose_;
 
@@ -31,8 +32,10 @@ private:
     int yaw_turn_right_axis_index{3};   // Turn right
     int yaw_turn_left_axis_index{4};    // Turn left
     double yaw_angle_scale{0.0};
+    bool command_by_topic{true}; 
     std::string get_base_pose_service_name;
     std::string set_base_pose_service_name;
+    std::string set_base_pose_topic_name;
     double filter{0.1};
   } turn_left_right_motion_params_;
 
