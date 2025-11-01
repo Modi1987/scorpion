@@ -21,6 +21,7 @@ class BaseTwerkCmdPuplisher {
 private:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<PoseStamped>::SharedPtr base_pose_publisher_;
+  rclcpp::Subscription<PoseStamped>::SharedPtr base_pose_sub_;
   rclcpp::Service<BasePoseSetpoint>::SharedPtr setpoint_service_;
   rclcpp::Service<GetCurrentBasePose>::SharedPtr get_current_base_pose_;
   rclcpp::CallbackGroup::SharedPtr callback_group_;

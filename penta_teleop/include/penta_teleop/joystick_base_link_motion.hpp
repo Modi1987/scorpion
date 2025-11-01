@@ -20,6 +20,7 @@ private:
   rclcpp::Subscription<JoyMsg>::SharedPtr joy_subscriber_;
   rclcpp::Client<GetCurrentBasePose>::SharedPtr get_base_pose_;
   rclcpp::Client<SetTargetBasePose>::SharedPtr set_base_pose_;
+  rclcpp::Publisher<PoseStampedMsg>::SharedPtr set_base_pose_pub_;
 
   std::shared_ptr<PoseStampedMsg> initial_base_pose;
   std::shared_ptr<PoseStampedMsg> filtered_base_pose;
@@ -37,8 +38,10 @@ private:
     double x_scale{0.0};
     double y_scale{0.0};
     double minimum_init_z_value{0.0};
+    bool command_by_topic{true};
     std::string get_base_pose_service_name;
     std::string set_base_pose_service_name;
+    std::string set_base_pose_topic_name;
     double filter_value{0.1};
   } base_link_motion_params_;
 

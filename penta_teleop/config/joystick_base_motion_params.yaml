@@ -9,9 +9,12 @@
     base_link_y_scale: 0.045 # m
     base_link_yaw_scale: 0.5 # rad
     base_link_pitch_scale: 0.25 # rad
+    command_by_topic: true # if false, then command is sent by service
     service_name:
       get_base_pose: "base_twerk/get_current_null_pose"
       set_base_pose: "base_twerk/cmd_null_setpoint"
+    topic_name:
+      set_base_pose: "set_null_space_pose"
     limits:
       minimum_init_z_value: 0.1
     turn_right_left_with_bumper:
@@ -19,4 +22,4 @@
       yaw_turn_right_axis_index: 5
       yaw_turn_left_axis_index: 2
       yaw_angle_scale: 0.5
-      filter: 0.2
+      filter: 0.8

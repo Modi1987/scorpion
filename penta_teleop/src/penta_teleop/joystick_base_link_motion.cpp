@@ -12,7 +12,7 @@ JoystickBaseLinkMotion::JoystickBaseLinkMotion(
   initial_base_pose = nullptr;
   // Create  publishers/subscribers
   joy_subscriber_ = node_->create_subscription<JoyMsg>(
-      "joy", 10, [this](const JoyMsg::SharedPtr msg) {
+      "joy", 1, [this](const JoyMsg::SharedPtr msg) {
         this->joystick_msg_callback(msg);
       });
   // auto client_callback_group = node_->create_callback_group(
@@ -23,6 +23,9 @@ JoystickBaseLinkMotion::JoystickBaseLinkMotion(
   set_base_pose_ = clients_node_->create_client<SetTargetBasePose>(
       base_link_motion_params_.set_base_pose_service_name,
       rclcpp::QoS(rclcpp::ServicesQoS()));
+  // publisher
+  set_base_pose_pub_ =
+      node_->create_publisher<PoseStampedMsg>("set_null_space_pose", 1);
 }
 
 void JoystickBaseLinkMotion::joystick_msg_callback(
@@ -117,9 +120,10 @@ void JoystickBaseLinkMotion::joy_msg_to_base_link_motion(
              target_base_pose->pose.position.z, c);
   filtered_base_pose->pose.orientation = target_base_pose->pose.orientation;
   set_target_base_pose(filtered_base_pose);
-  RCLCPP_INFO(node_->get_logger(),
-              "Base Link Motion Commands - X: %f, Y: %f, Yaw: %f, Pitch: %f",
-              x_command, y_command, yaw_command, pitch_command);
+  RCLCPP_INFO_THROTTLE(
+      node_->get_logger(), *node_->get_clock(), 1000,
+      "Base Link Motion Commands - X: %f, Y: %f, Yaw: %f, Pitch: %f", x_command,
+      y_command, yaw_command, pitch_command);
 }
 
 void JoystickBaseLinkMotion::store_current_base_pose() {
@@ -156,6 +160,12 @@ void JoystickBaseLinkMotion::store_current_base_pose() {
 
 void JoystickBaseLinkMotion::set_target_base_pose(
     const PoseStampedMsg::SharedPtr target_base_pose) {
+  // If command by topic (command is set with no interpolation on server)
+  if (base_link_motion_params_.command_by_topic) {
+    set_base_pose_pub_->publish(*target_base_pose);
+    return;
+  }
+  // If command by service, command is ineterpolated on server side
   // check if service exists
   if (!set_base_pose_->wait_for_service(std::chrono::seconds(100))) {
     RCLCPP_ERROR(node_->get_logger(), "Service %s is unavailable.",
@@ -197,10 +207,13 @@ void JoystickBaseLinkMotion::declare_parameters() {
   node_->declare_parameter<double>("base_link_pitch_scale", 0.0);
   node_->declare_parameter<double>("base_link_x_scale", 0.0);
   node_->declare_parameter<double>("base_link_y_scale", 0.0);
+  node_->declare_parameter<bool>("command_by_topic", true);
   node_->declare_parameter<std::string>("service_name.get_base_pose",
                                         "base_twerk/get_current_null_pose");
   node_->declare_parameter<std::string>("service_name.set_base_pose",
                                         "base_twerk/cmd_null_setpoint");
+  node_->declare_parameter<std::string>("topic_name.set_base_pose",
+                                        "set_base_pose");
   node_->declare_parameter<double>("limits.minimum_init_z_value", 0.1);
 }
 
@@ -221,6 +234,8 @@ void JoystickBaseLinkMotion::get_parameters() {
                        base_link_motion_params_.pitch_scale);
   node_->get_parameter("base_link_x_scale", base_link_motion_params_.x_scale);
   node_->get_parameter("base_link_y_scale", base_link_motion_params_.y_scale);
+  node_->get_parameter("command_by_topic",
+                       base_link_motion_params_.command_by_topic);
   node_->get_parameter("service_name.get_base_pose",
                        base_link_motion_params_.get_base_pose_service_name);
   node_->get_parameter("service_name.set_base_pose",

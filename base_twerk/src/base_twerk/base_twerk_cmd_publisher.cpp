@@ -14,7 +14,15 @@ BaseTwerkCmdPuplisher::BaseTwerkCmdPuplisher()
   this->load_parameters();
 
   base_pose_publisher_ =
-      node_->create_publisher<PoseStamped>("null_space_pose", 10);
+      node_->create_publisher<PoseStamped>("null_space_pose", 1);
+
+  auto topic_callback = [this](PoseStamped::UniquePtr msg) -> void {
+    this->base_pose_ = *msg;
+    this->setpoint_base_pose_ = *msg;
+  };
+
+  base_pose_sub_ = node_->create_subscription<PoseStamped>(
+      "set_null_space_pose", 1, topic_callback);
 
   timer_ = node_->create_wall_timer(
       std::chrono::milliseconds(static_cast<int>(update_interval_millis_)),
@@ -50,8 +58,8 @@ void BaseTwerkCmdPuplisher::create_setpoint_service() {
     return true;
   };
 
-  setpoint_service_ = node_->create_service<BasePoseSetpoint>(
-      "cmd_null_setpoint", lambda);
+  setpoint_service_ =
+      node_->create_service<BasePoseSetpoint>("cmd_null_setpoint", lambda);
 }
 
 void BaseTwerkCmdPuplisher::create_get_current_base_pose_service() {

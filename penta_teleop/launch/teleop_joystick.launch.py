@@ -94,6 +94,7 @@ def generate_launch_description():
         remappings=[
             ("cmd_vel", "cmd_vel_not_smoothed"),
             ("smoothed_cmd_vel", "cmd_vel"),
+            ("set_null_space_pose", "set_null_space_pose"),
         ],
         parameters=[joystick_base_motion_configs],
     )
