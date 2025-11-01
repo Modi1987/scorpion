@@ -7,6 +7,14 @@ namespace penta_pod::teleop::joystick_turn_head_using_bumpers {
 JoystickTurnHead::JoystickTurnHead(
     rclcpp::Node::SharedPtr node, rclcpp::Node::SharedPtr clients_node)
     : node_(node), clients_node_(clients_node) {
+  RCLCPP_INFO(node_->get_logger(), "JoystickTurnHead starting");
+  // Log intracomm status
+  const auto & opts = node_->get_node_options();
+  if (opts.use_intra_process_comms()) {
+      RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is ENABLED");
+  } else {
+      RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is DISABLED");
+  }
   // Initialize private members
   this->declare_parameters();
   this->get_parameters();
@@ -46,7 +54,7 @@ void JoystickTurnHead::joystick_msg_callback(
     RCLCPP_INFO(node_->get_logger(), "Restoring initial pose!");
     previous_enable_button_value =
         enable_button_value; // very important, shall be before service call
-    this->restore_initial_base_pose();
+    if (restore_init_pose_) this->restore_initial_base_pose();
     return;
   }
   if ((previous_enable_button_value == 1) && (enable_button_value == 1)) {
@@ -72,11 +80,20 @@ void JoystickTurnHead::joy_msg_to_base_link_motion(
 
   get_parameters(); // to update parameter values if changing on the fly
   double factor = 0.;
-  factor += (-1.0 + msg->axes[turn_left_right_motion_params_.yaw_turn_right_axis_index]) / 2.0;
-  factor -= (-1.0 + msg->axes[turn_left_right_motion_params_.yaw_turn_left_axis_index]) / 2.0;
-  double yaw_command = factor * turn_left_right_motion_params_.yaw_angle_scale;
-  // filter command
   double c = turn_left_right_motion_params_.filter;
+  cmd_right = (1.0 - c) * cmd_right + c * msg->axes[turn_left_right_motion_params_.yaw_turn_right_axis_index];
+  cmd_left = (1.0 - c) * cmd_left + c * msg->axes[turn_left_right_motion_params_.yaw_turn_left_axis_index];
+  constexpr double cmd_threshold = 0.998;
+  if((cmd_right <= cmd_threshold) || (cmd_left <= cmd_threshold)) {
+    restore_init_pose_ = true;
+  } else {
+    restore_init_pose_ = false;
+    return;
+  }
+  factor += (-1.0 + cmd_right) / 2.0;
+  factor -= (-1.0 + cmd_left) / 2.0;
+  double yaw_command = factor * turn_left_right_motion_params_.yaw_angle_scale;
+  // filter commands
   filtered_yaw_cmd = c * yaw_command + (1.0 - c) * filtered_yaw_cmd;
   // compensate with intial pose
   double x_command = initial_base_pose->pose.position.x;

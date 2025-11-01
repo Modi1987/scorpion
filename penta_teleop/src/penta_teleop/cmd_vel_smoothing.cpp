@@ -5,6 +5,14 @@ namespace penta_pod::teleop::twist_smoothing
 
 CmdVelSmoothing::CmdVelSmoothing(rclcpp::Node::SharedPtr node)
     : node_(node) {
+    RCLCPP_INFO(node_->get_logger(), "CmdVelSmoothing starting");
+    // Log intracomm status
+    const auto & opts = node_->get_node_options();
+    if (opts.use_intra_process_comms()) {
+        RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is ENABLED");
+    } else {
+        RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is DISABLED");
+    }
     // Parameters for maximum acceleration
     declare_parameters();
     load_parameters();

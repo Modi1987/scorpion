@@ -6,6 +6,14 @@ namespace penta_pod::teleop::joystick_base_link_motion {
 JoystickBaseLinkMotion::JoystickBaseLinkMotion(
     rclcpp::Node::SharedPtr node, rclcpp::Node::SharedPtr clients_node)
     : node_(node), clients_node_(clients_node) {
+  RCLCPP_INFO(node_->get_logger(), "JoystickBaseLinkMotion starting");
+  // Log intracomm status
+  const auto &opts = node_->get_node_options();
+  if (opts.use_intra_process_comms()) {
+    RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is ENABLED");
+  } else {
+    RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is DISABLED");
+  }
   // Initialize private members
   this->declare_parameters();
   this->get_parameters();
@@ -85,6 +93,23 @@ void JoystickBaseLinkMotion::joy_msg_to_base_link_motion(
                  initial_z_limit);
     return;
   }
+  // Check input is more than deadzone
+  std::vector<double> commands = {
+      msg->axes[base_link_motion_params_.yaw_axis_index],
+      msg->axes[base_link_motion_params_.pitch_axis_index],
+      msg->axes[base_link_motion_params_.x_axis_index],
+      msg->axes[base_link_motion_params_.y_axis_index]};
+  auto no_input = true;
+  auto deadzone = 0.05;
+  for (auto &cmd : commands) {
+    if (std::abs(cmd) > deadzone) {
+      no_input = false;
+    }
+  }
+  if (no_input) {
+    return;
+  }
+  // Calculate command
   double yaw_command = msg->axes[base_link_motion_params_.yaw_axis_index] *
                        base_link_motion_params_.yaw_scale;
   double pitch_command = msg->axes[base_link_motion_params_.pitch_axis_index] *
