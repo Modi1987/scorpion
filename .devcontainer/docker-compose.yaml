@@ -27,3 +27,15 @@ services:
     tty: true
     command: [ "/bin/bash", "-c", "/root/ros_ws/src/polypod/.devcontainer/entrypoint.sh" ]
 
+  penta-jazzy-ros2-test:
+    build:
+      context: ../
+      dockerfile: ./.devcontainer/Dockerfile
+      args:
+        COLCON_WORKSPACE: /root/ros_ws
+    volumes:
+      - ../:/root/ros_ws/src
+    environment:
+      - ROS_DOMAIN_ID=91
+    network_mode: "host"
+    command: [ "/bin/bash", "-c", "source /opt/ros/jazzy/setup.bash && cd /root/ros_ws && colcon test" ]

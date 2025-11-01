@@ -33,11 +33,11 @@ jobs:
 
       - name: Build workspace container
         run: |
-          docker-compose -f .devcontainer/docker-compose.yaml up --build -d scorpion-ros2
+          docker-compose -f .devcontainer/docker-compose.yaml up --build -d penta-jazzy-ros2
           
       - name: Run test container
         run: |
-          docker-compose -f .devcontainer/docker-compose.yaml up scorpion-ros2-test
+          docker-compose -f .devcontainer/docker-compose.yaml up penta-jazzy-ros2-test
           
       - name: Tear down
         run: docker-compose -f .devcontainer/docker-compose.yaml down
