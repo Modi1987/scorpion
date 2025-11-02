@@ -15,7 +15,7 @@
 
 #include <stdexcept>
 
-#define pi 3.141592
+#define pi M_PI
 
 namespace penta_pod::kin::gait_generator {
 
@@ -42,6 +42,7 @@ GaitGenerator::GaitGenerator(rclcpp::Node::SharedPtr node)
     final_displacement_.push_back(geometry_msgs::msg::Point());
     final_foot_v_.push_back({0.0, 0.0});
   }
+  phase_publisher_ = node_->create_publisher<Float64>("gait_phase", 1);
   phase_shift_vec_ = init_phase_shift(feet_num_);
 
   cmd_vel_subscription_ = node_->create_subscription<geometry_msgs::msg::Twist>(
@@ -156,28 +157,29 @@ void GaitGenerator::update_phase(double delta_t_milli) {
   auto delta_t_sec = delta_t_milli / 1000.;
   double w = gait_parameters_.gait_radial_frequency;
 
-  // check if cmd_vel is zero and feet near the equilibrium
+  // Check if cmd_vel is zero and feet near the equilibrium
   double vel_mag = std::sqrt(cmd_vel_.linear.x * cmd_vel_.linear.x +
-                             cmd_vel_.linear.y * cmd_vel_.linear.y);
-  auto collective_xy_distance_from_equilibrium = 0.0;
-  for (int i = 0; i < feet_num_; i++) {
-    collective_xy_distance_from_equilibrium +=
-        std::abs(feet_pos_in_footprint_[i].x -
-                 init_feet_pos_in_footprint_[i].x) +
-        std::abs(feet_pos_in_footprint_[i].y -
-                 init_feet_pos_in_footprint_[i].y);
-  }
+                             cmd_vel_.linear.y * cmd_vel_.linear.y +
+                             cmd_vel_.angular.z * cmd_vel_.angular.z);
+  
+  // Check if phase is multiple of two PI
+  auto cycles = std::floor(current_phase_ / (2 * M_PI));
+  auto error = current_phase_ - (2 * M_PI) * cycles;
 
-  if ((collective_xy_distance_from_equilibrium < 0.005) && (vel_mag < 0.001)) {
-    auto check_z_near_zero =
-        current_phase_ - std::floor(current_phase_ / (2 * pi)) * 2 * pi;
-    if (check_z_near_zero < w * delta_t_sec + 0.001) {
-      w = 0.0;
-      current_phase_ = std::floor(current_phase_ / (2 * pi)) * 2 * pi;
-    }
+  if ((std::abs(error) < w * delta_t_sec + 0.001) && (vel_mag < 0.001)) {
+    w = 0.0;
+    current_phase_ = std::floor(current_phase_ / (2 * pi)) * 2 * pi;
   }
   is_walking_ = (w == 0.0) ? false : true;
-  current_phase_ = current_phase_ + w * delta_t_sec;
+  if (w == 0.0) {
+    is_walking_ = false;
+    current_phase_ = current_phase_;
+  } else {
+    is_walking_ = true;
+    current_phase_ = current_phase_ + w * delta_t_sec;
+  }
+  phase_msg_.data = current_phase_;
+  phase_publisher_->publish(phase_msg_);
 }
 
 void GaitGenerator::update_feet_positions(double delta_t_milli) {
@@ -189,19 +191,25 @@ void GaitGenerator::update_feet_positions(double delta_t_milli) {
   double d_theta = cmd_vel_.angular.z * delta_t_sec;
   double b = gait_parameters_.step_height;
   auto gait_pattern = gait_patterns_.get_active_pattern();
+  // Wich foot is off ground
+  int off_ground_foot_index = -1;
   for (int i = 0; i < feet_num_; i++) {
     auto foot_index = gait_pattern[i];
     auto temp = foot_up_motion_interpolator.
         foot_pos_z_generator(b, current_phase_, phase_shift_vec_[i], feet_num_);
-    // Calculate feet displacement to try keep balance
-    double twist_mag = std::sqrt(cmd_vel_.linear.x * cmd_vel_.linear.x +
-        cmd_vel_.linear.y * cmd_vel_.linear.y + cmd_vel_.angular.z * cmd_vel_.angular.z / 50.0);
-    double balance_motion_coef = gait_parameters_.balance_internal_motion_coef;
-    double r =  balance_motion_coef * twist_mag;
-    double balance_phase = current_phase_ + M_PI / feet_num_;
-    double dx_balance =  -r * std::sin(balance_phase) * delta_t_sec;
-    double dy_balance =  r * std::cos(balance_phase) * delta_t_sec;
-    // Finish balance calculation
+    if (temp == 0) continue;
+    off_ground_foot_index = foot_index;
+  }
+  // Calculate COM shift velocity to try keep balance
+  Point polygon_centroid = get_support_centroid(off_ground_foot_index);
+  double k = gait_parameters_.balance_internal_motion_coef;
+  double dx_balance = - k * polygon_centroid.x * delta_t_sec;
+  double dy_balance = - k * polygon_centroid.y * delta_t_sec;
+  // Calculate foot motion
+  for (int i = 0; i < feet_num_; i++) {
+    auto foot_index = gait_pattern[i];
+    auto temp = foot_up_motion_interpolator.
+        foot_pos_z_generator(b, current_phase_, phase_shift_vec_[i], feet_num_);
     constexpr double move_velocity_override = 1.0; // for debugging, set to 0.0 to stay in place
     if (temp == 0.) {
       double x = feet_pos_in_footprint_[foot_index].x;

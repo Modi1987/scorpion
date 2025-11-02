@@ -11,6 +11,7 @@
 #include "geometry_msgs/msg/transform.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "limb_msgs/msg/pxyz.hpp"
+#include "std_msgs/msg/float64.hpp"
 
 #include <cmath>
 #include <tf2/LinearMath/Matrix3x3.h>
@@ -20,10 +21,12 @@
 #include <sstream>
 
 #include "gait_generator/gait_utils.hpp"
+#include "gait_generator/balancing_helper_funs.hpp"
 
 namespace penta_pod::kin::gait_generator {
 
 using SetGaitPattern = gait_generator_msgs::srv::SetGaitPattern;
+using Float64 = std_msgs::msg::Float64;
 
 class GaitGenerator {
 private:
@@ -40,7 +43,7 @@ private:
     double max_gait_linear_speed;  // m/s
     double max_gait_turning_speed; // rad/s
     double forward_step_length_ratio; // [0.0, 1.0]
-    double balance_internal_motion_coef; // meter / (meter/sec)
+    double balance_internal_motion_coef;
     double update_cycle_time_milli; // ms
   } gait_parameters_;
   FootUpMotion foot_up_motion_interpolator; // at some point we can specify different z motion for each foot
@@ -95,6 +98,9 @@ private:
                                   // basefootprint)
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr 
       feedback_cmd_vel_publisher_;
+  rclcpp::Publisher<Float64>::SharedPtr phase_publisher_;
+  Float64 phase_msg_{};
+
   rclcpp::TimerBase::SharedPtr timer_;
   geometry_msgs::msg::Twist cmd_vel_{};
 
@@ -229,6 +235,21 @@ private:
     result.z = tf2_point_rotated.z();
 
     return result;
+  }
+
+  Point get_support_centroid(int off_ground_foot_index) {
+    auto gait_pattern = gait_patterns_.get_active_pattern();
+    std::vector<Point> feet_pos;
+    for (int i = 0; i < feet_num_; i++) {
+      auto foot_index = gait_pattern[i];
+      if (foot_index == off_ground_foot_index) continue;
+      Point p;
+      p.x = feet_pos_in_footprint_[foot_index].x;
+      p.y = feet_pos_in_footprint_[foot_index].y;
+      feet_pos.push_back(p);
+    }
+    Point xy_com = polygon_centroid(feet_pos);
+    return xy_com;
   }
 
 public:
