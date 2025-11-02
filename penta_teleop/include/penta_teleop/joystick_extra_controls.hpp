@@ -147,8 +147,7 @@ private:
   } twerk_it_params_;
 
 public:
-  explicit JoystickExtraControls();
-  auto get_node() { return node_; };
+  explicit JoystickExtraControls(rclcpp::Node::SharedPtr node);
 };
 
 } // namespace penta_pod::teleop::joystick_extra_controls

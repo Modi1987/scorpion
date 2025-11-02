@@ -3,11 +3,16 @@
 
 namespace penta_pod::teleop::joystick_extra_controls {
 
-JoystickExtraControls::JoystickExtraControls()
-    : node_{rclcpp::Node::make_shared("joystick_extra_controls")} {
-  RCLCPP_INFO(node_->get_logger(),
-              "Starting joystick_extra_controls, subscribing to joy topic and "
-              "calling base_pose_setpoint service");
+JoystickExtraControls::JoystickExtraControls(rclcpp::Node::SharedPtr node)
+    : node_(node) {
+  RCLCPP_INFO(node_->get_logger(), "JoystickExtraControls starting");
+  // Log intracomm status
+  const auto & opts = node_->get_node_options();
+  if (opts.use_intra_process_comms()) {
+      RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is ENABLED");
+  } else {
+      RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is DISABLED");
+  }
   // load parameters
   this->declare_parameters();
   this->get_parameters();

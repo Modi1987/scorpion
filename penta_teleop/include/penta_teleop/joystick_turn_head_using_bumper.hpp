@@ -40,7 +40,10 @@ private:
   } turn_left_right_motion_params_;
 
   double filtered_yaw_cmd{0.0};
+  double cmd_right {0.0};
+  double cmd_left {0.0};
   double previous_yaw_command{0.0};
+  bool restore_init_pose_{false};
 
   void joy_msg_to_base_link_motion(const JoyMsg::SharedPtr msg);
 

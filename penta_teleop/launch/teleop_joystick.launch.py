@@ -27,6 +27,13 @@ def generate_launch_description():
     )
     ld.add_action(joystick_extra_controls_config_file_arg)
 
+    intra_process_arg = DeclareLaunchArgument(
+        "use_intra_process",
+        default_value="false",
+        description="Enable ROS2 intra-process communication"
+    )
+    ld.add_action(intra_process_arg)
+
     """ Nodes """
 
     joy_params = os.path.join(
@@ -47,6 +54,10 @@ def generate_launch_description():
         namespace=LaunchConfiguration("name_space"),
         parameters=[joy_params],
         remappings=[("cmd_vel", "cmd_vel_not_smoothed")],
+        arguments=[
+                "--intra-process ",
+                LaunchConfiguration("use_intra_process"),
+        ],
     )
 
     joystick_extra_controls_configs = LaunchConfiguration("joystick_extra_controls_config_file")
@@ -66,6 +77,10 @@ def generate_launch_description():
             ("get_current_null_pose", "base_twerk/get_current_null_pose"),
         ],
         parameters=[joystick_extra_controls_configs, general_config_params],
+        arguments=[
+                "--intra-process ",
+                LaunchConfiguration("use_intra_process"),
+        ],
     )
 
     cmd_vel_smoothing_configs = os.path.join(
@@ -81,6 +96,10 @@ def generate_launch_description():
             ("smoothed_cmd_vel", "cmd_vel"),
         ],
         parameters=[cmd_vel_smoothing_configs],
+        arguments=[
+                "--intra-process ",
+                LaunchConfiguration("use_intra_process"),
+        ],
     )
 
     joystick_base_motion_configs = os.path.join(
@@ -97,6 +116,10 @@ def generate_launch_description():
             ("set_null_space_pose", "set_null_space_pose"),
         ],
         parameters=[joystick_base_motion_configs],
+        arguments=[
+                "--intra-process ",
+                LaunchConfiguration("use_intra_process"),
+        ],
     )
 
     nodes = [
