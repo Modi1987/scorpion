@@ -84,8 +84,7 @@ class PentaHiwonderActuators(Node):
             for i in range(self.joints_count):
                 position_degree = self.actuator_setpoint_degree[i]
                 actuation_range_degree = self.servo_actuation_range_degree[i]
-                ticks_span = self.servo_max_ticks[i] - self.servo_min_ticks[i]
-                position_ticks = self.servo_min_ticks[i] + float(position_degree * ticks_span) / actuation_range_degree
+                position_ticks = self.servo_min_ticks[i] + float(position_degree * self.ticks_spans[i]) / actuation_range_degree
                 position_ticks = int(position_ticks)
                 if (self.last_position_ticks[i] == position_ticks):
                     continue  # No change in position, skip
@@ -95,6 +94,10 @@ class PentaHiwonderActuators(Node):
         self.publish_ticks_message()
 
     def initialize_properties(self):
+        # Pre-compute conversion factors
+        self.deg_per_rad = 180.0 / math.pi
+        self.ticks_spans = [max_tick - min_tick for max_tick, min_tick in 
+                           zip(self.servo_max_ticks, self.servo_min_ticks)]
         self.index_cache = None
         self.joints_states_names = []
         self.last_position_ticks = [-1] * self.joints_count # to track last sent position
@@ -141,10 +144,9 @@ class PentaHiwonderActuators(Node):
                 self.index_cache = None
             return
         # Compute actuator setpoints (vectorized-like)
-        deg_per_rad = 180.0 / math.pi
         for i in range(self.joints_count):
             q_rad = pos_list[self.index_cache[i]] # geometrical joint angle rads
-            setpoint_degree = self.dir[i] * (q_rad * deg_per_rad) + self.initial_joints_bias_degree[i]
+            setpoint_degree = self.dir[i] * (q_rad * self.deg_per_rad) + self.initial_joints_bias_degree[i]
             self.actuator_setpoint_degree[i] = self.clamp(
                 setpoint_degree, i, 0.0, self.servo_actuation_range_degree[i]
             )
@@ -172,6 +174,7 @@ class PentaHiwonderActuators(Node):
         packet.append(checksum)
         now  = time.time()
         self.serial.write(bytearray(packet))
+        self.serial.flush()  # Ensure immediate transmission
         index = servo_id - 1
         if self.actuator_update_stamps[index].last_serial_update < 0.0:
             self.actuator_update_stamps[index].last_serial_update = now
@@ -204,7 +207,6 @@ class PentaHiwonderActuators(Node):
     
     def publish_ticks_message(self):
         self.actuator_msg_ticks.header.stamp = self.get_clock().now().to_msg()
-        self.actuator_msg_ticks.name = self.joints_states_names
         self.actuator_msg_ticks.position = [float(tick) for tick in self.last_position_ticks]
         self.ticks_publisher_.publish(self.actuator_msg_ticks)
         self.motors_update_msg_hz.data = self.motor_update_hz
