@@ -10,6 +10,8 @@ services:
     environment:
       - ROS_DOMAIN_ID=91
     network_mode: "host"
+    group_add:
+      - "dialout"
     devices:
       - "/dev:/dev"
     privileged: true
