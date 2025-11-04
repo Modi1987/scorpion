@@ -29,7 +29,14 @@ def generate_launch_description():
         output='screen',
         parameters=[config],
         # Pass 'mode' argument to the node
-        arguments=[LaunchConfiguration('mode')]
+        arguments=[LaunchConfiguration('mode')],
+        remappings=[
+            # published
+            ('actuator_setpoint_degree', 'actuator_setpoint_degree'),
+            ('actuator_ticks', 'actuator_ticks'),
+            # subscribed
+            ('joint_states', 'joint_states'),
+        ]
     )
 
     # Create a launch description and add the actions
