@@ -8,10 +8,10 @@ import time
 import math
 import sys
 
-# Serial settings
-PORT = "/dev/ttyUSB0"
-BAUDRATE = 115200
-UPDATE_INTERVAL = 0.1  # seconds
+# Serial default settings, overridden from config.yaml
+DEFAULT_PORT = "/dev/ttyUSB0"
+DEFAULT_BAUDRATE = 115200
+DEFAULT_UPDATE_INTERVAL = 0.1  # seconds
 
 # --- LX-824 Communication Constants ---
 HEADER = [0x55, 0x55]
@@ -54,15 +54,17 @@ class PentaHiwonderActuators(Node):
                 callback_group=sub_callback_group
             )
         timer_callback_group = MutuallyExclusiveCallbackGroup()
-        self.motor_update_timer = self.create_timer(UPDATE_INTERVAL, self.update_motors_callback, callback_group=timer_callback_group)
+        self.motor_update_timer = self.create_timer(self.update_interval_sec, self.update_motors_callback, callback_group=timer_callback_group)
 
     def open_serial_connection(self):
         try:
-            self.serial = serial.Serial(PORT, BAUDRATE, timeout=1)
-            self.get_logger().info(f'Serial port {PORT} opened successfully at {BAUDRATE} baudrate.')
+            port = self.serial_port
+            baudrate = self.baudrate
+            self.serial = serial.Serial(port, baudrate, timeout=1)
+            self.get_logger().info(f'Serial port {port} opened successfully at {baudrate} baudrate.')
             return True
         except serial.SerialException as e:
-            self.get_logger().error(f'Error opening serial port {PORT}: {e}')
+            self.get_logger().error(f'Error opening serial port {port}: {e}')
             return False
 
     def update_motors_callback(self):
@@ -142,7 +144,8 @@ class PentaHiwonderActuators(Node):
         Move LX-824 servo to position (0-1000).
         Default center ≈ 500.
         """
-        time_ms = int(UPDATE_INTERVAL * 1000 * 0.8)  # time in ms
+        ratio = self.actuation_time_ratio
+        time_ms = int(self.update_interval_sec * 1000 * ratio)  # time in ms
         position_ticks = int(position_ticks)
         pos_l = position_ticks & 0xFF
         pos_h = (position_ticks >> 8) & 0xFF
@@ -168,11 +171,16 @@ class PentaHiwonderActuators(Node):
         # Declare robot geometry parameters
         self.declare_parameter('limbs_num', 5)  # Default value 5
         self.declare_parameter('joints_per_limb', [3]*5)  # Default value 3
-        self.declare_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree', [0.0] * 15)  # Default bias
-        self.declare_parameter('i2c_actuators_params.dir', [1.0] * 15)  # Default direction (1.0 for no inversion)
-        self.declare_parameter('servo_parameters.servo_actuation_range_degree', [270.0] * 15) # angular range degree
-        self.declare_parameter('servo_parameters.servo_min_ticks', [0] * 15) # ticks
-        self.declare_parameter('servo_parameters.servo_max_ticks', [1000] * 15) # ticks
+        # Hiwonder specific params
+        self.declare_parameter('hiwonder.serial_port', DEFAULT_PORT)
+        self.declare_parameter('hiwonder.baudrate', DEFAULT_BAUDRATE)
+        self.declare_parameter('hiwonder.update_interval_sec', DEFAULT_UPDATE_INTERVAL)
+        self.declare_parameter('hiwonder.actuator_angle_bias_at_joint_zero_degree', [0.0] * 15)  # Default bias
+        self.declare_parameter('hiwonder.dir', [1.0] * 15)  # Default direction (1.0 for no inversion)
+        self.declare_parameter('hiwonder.servo_actuation_range_degree', [270.0] * 15) # angular range degree
+        self.declare_parameter('hiwonder.servo_min_ticks', [0] * 15) # ticks
+        self.declare_parameter('hiwonder.servo_max_ticks', [1000] * 15) # ticks
+        self.declare_parameter('hiwonder.actuation_time_ratio', 0.8)
 
     def load_params(self):
         # Load parameters and handle errors
@@ -186,11 +194,20 @@ class PentaHiwonderActuators(Node):
         self.get_logger().info(f'Loaded limbs_num: {self.limbs_num}, joints_per_limb: {format_array_to_string(self.joints_per_limb)}')
         self.joints_count = sum(self.joints_per_limb)
         self.get_logger().info(f'Total limbs joints count is: {self.joints_count}') 
-        self.initial_joints_bias_degree = self.get_parameter('i2c_actuators_params.actuator_angle_bias_at_joint_zero_degree').get_parameter_value().double_array_value
-        self.dir = self.get_parameter('i2c_actuators_params.dir').get_parameter_value().double_array_value
-        self.servo_actuation_range_degree = self.get_parameter('servo_parameters.servo_actuation_range_degree').get_parameter_value().double_array_value
-        self.servo_min_ticks = self.get_parameter('servo_parameters.servo_min_ticks').get_parameter_value().integer_array_value
-        self.servo_max_ticks = self.get_parameter('servo_parameters.servo_max_ticks').get_parameter_value().integer_array_value
+        # Hiwonder specific params
+        self.serial_port = self.get_parameter('hiwonder.serial_port').get_parameter_value().string_value
+        self.get_logger().info(f'Hiwonder specified serial port: {self.serial_port}')
+        self.baudreate = self.get_parameter_value('hiwonder.baudrate').get_parameter_value().integer_value
+        self.get_logger().info(f'Hiwonder serial port baudrate is: {self.baudreate}')
+        self.update_interval_sec = self.get_parameter_value('hiwonder.update_interval_sec').get_parameter_value().double_value
+        self.get_logger().info(f'Hiwonder update interval Hz: {self.update_interval_sec}')
+        self.initial_joints_bias_degree = self.get_parameter('hiwonder.actuator_angle_bias_at_joint_zero_degree').get_parameter_value().double_array_value
+        self.dir = self.get_parameter('hiwonder.dir').get_parameter_value().double_array_value
+        self.servo_actuation_range_degree = self.get_parameter('hiwonder.servo_actuation_range_degree').get_parameter_value().double_array_value
+        self.servo_min_ticks = self.get_parameter('hiwonder.servo_min_ticks').get_parameter_value().integer_array_value
+        self.servo_max_ticks = self.get_parameter('hiwonder.servo_max_ticks').get_parameter_value().integer_array_value
+        self.actuation_time_ratio = self.get_parameter('hiwonder.actuation_time_ratio').get_parameter_value().double_value
+        self.get_logger().info(f'actuation_time_ratio specified is {self.actuation_time_ratio}')
 
         if len(self.initial_joints_bias_degree) != self.joints_count:
             self.get_logger().error('ERROR: actuator_angle_bias_at_joint_zero_degree parameter size mismatch!')
