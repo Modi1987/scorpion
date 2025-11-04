@@ -11,7 +11,7 @@ services:
       - ROS_DOMAIN_ID=91
     network_mode: "host"
     devices:
-      - "/dev/i2c-1:/dev/i2c-1"
+      - "/dev:/dev"
     privileged: true
     command: ["/bin/bash", "-c", "/root/ros_ws/src/.devcontainer/entrypoint.sh"]
 
