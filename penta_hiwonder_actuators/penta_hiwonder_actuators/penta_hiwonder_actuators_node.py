@@ -40,6 +40,7 @@ class PentaHiwonderActuators(Node):
             is_successful = self.open_serial_connection()
             if not is_successful:
                 self.get_logger().error('Failed to open serial port. Exiting...')
+                rclpy.shutdown() 
                 sys.exit(1)
 
         # Publisher actuators setpoint from joint states
@@ -95,6 +96,15 @@ class PentaHiwonderActuators(Node):
 
     def on_joint_states_callback(self, msg):
         pos_list = msg.position
+        # Sanity checks
+        if pos_list is None:
+            self.get_logger().error('Received joints setpoint positions are None, ignoring!')
+            return
+        if len(pos_list) < self.joints_count:
+            self.get_logger().error(
+                f'Received joints setpoint positions size {len(pos_list)} is less than {self.joints_count}, ignoring!'
+            )
+            return
         # Pre-map joint names to indices for O(1) lookup
         if self.index_cache is None:
             self.index_cache = []
@@ -104,7 +114,13 @@ class PentaHiwonderActuators(Node):
                     index = names.index(name)
                     self.index_cache.append(index)
                 else:
-                    self.node.get_logger().error(f"Joint {name} not found in message.")
+                    self.get_logger().error(f"Joint {name} not found in message.")
+            n = len(self.index_cache)
+            if n < self.joints_count:
+                self.get_logger().error(
+                    f'Joints index cache size {n} is less than {self.joints_count}, clearing index cache!'
+                )
+            self.index_cache = None
             return
         # Compute actuator setpoints (vectorized-like)
         deg_per_rad = 180.0 / math.pi
@@ -197,9 +213,9 @@ class PentaHiwonderActuators(Node):
         # Hiwonder specific params
         self.serial_port = self.get_parameter('hiwonder.serial_port').get_parameter_value().string_value
         self.get_logger().info(f'Hiwonder specified serial port: {self.serial_port}')
-        self.baudreate = self.get_parameter_value('hiwonder.baudrate').get_parameter_value().integer_value
-        self.get_logger().info(f'Hiwonder serial port baudrate is: {self.baudreate}')
-        self.update_interval_sec = self.get_parameter_value('hiwonder.update_interval_sec').get_parameter_value().double_value
+        self.baudrate = self.get_parameter('hiwonder.baudrate').get_parameter_value().integer_value
+        self.get_logger().info(f'Hiwonder serial port baudrate is: {self.baudrate}')
+        self.update_interval_sec = self.get_parameter('hiwonder.update_interval_sec').get_parameter_value().double_value
         self.get_logger().info(f'Hiwonder update interval Hz: {self.update_interval_sec}')
         self.initial_joints_bias_degree = self.get_parameter('hiwonder.actuator_angle_bias_at_joint_zero_degree').get_parameter_value().double_array_value
         self.dir = self.get_parameter('hiwonder.dir').get_parameter_value().double_array_value
