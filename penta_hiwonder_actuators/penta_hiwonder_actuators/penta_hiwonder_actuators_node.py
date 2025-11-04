@@ -1,12 +1,14 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 import serial
 import time
 import math
 import sys
+from dataclasses import dataclass
+from std_msgs.msg import Float32MultiArray
 
 # Serial default settings, overridden from config.yaml
 DEFAULT_PORT = "/dev/ttyUSB0"
@@ -15,6 +17,13 @@ DEFAULT_UPDATE_INTERVAL = 0.1  # seconds
 
 # --- LX-824 Communication Constants ---
 HEADER = [0x55, 0x55]
+
+@dataclass
+class TimeStamp:
+    last_serial_update: float
+    serial_update_interval: float
+    serial_update_hz: float
+
 
 class PentaHiwonderActuators(Node):
     def __init__(self, mode):
@@ -46,6 +55,7 @@ class PentaHiwonderActuators(Node):
         # Publisher actuators setpoint from joint states
         self.setpoint_publisher_ = self.create_publisher(JointState, 'actuator_setpoint_degree', 1)
         self.ticks_publisher_ = self.create_publisher(JointState, 'actuator_ticks', 1)
+        self.serial_hz_publisher_ = self.create_publisher(Float32MultiArray, "actuator_update_rate_hz", 1)
         sub_callback_group = MutuallyExclusiveCallbackGroup()
         self.joint_states_subscriber = self.create_subscription(
                 JointState,
@@ -54,7 +64,7 @@ class PentaHiwonderActuators(Node):
                 1,
                 callback_group=sub_callback_group
             )
-        timer_callback_group = MutuallyExclusiveCallbackGroup()
+        timer_callback_group = ReentrantCallbackGroup()
         self.motor_update_timer = self.create_timer(self.update_interval_sec, self.update_motors_callback, callback_group=timer_callback_group)
 
     def open_serial_connection(self):
@@ -75,7 +85,8 @@ class PentaHiwonderActuators(Node):
                 position_degree = self.actuator_setpoint_degree[i]
                 actuation_range_degree = self.servo_actuation_range_degree[i]
                 ticks_span = self.servo_max_ticks[i] - self.servo_min_ticks[i]
-                position_ticks = self.servo_min_ticks[i] + (position_degree * ticks_span) / actuation_range_degree
+                position_ticks = self.servo_min_ticks[i] + float(position_degree * ticks_span) / actuation_range_degree
+                position_ticks = int(position_ticks)
                 if (self.last_position_ticks[i] == position_ticks):
                     continue  # No change in position, skip
                 self.last_position_ticks[i] = position_ticks
@@ -86,9 +97,16 @@ class PentaHiwonderActuators(Node):
     def initialize_properties(self):
         self.index_cache = None
         self.joints_states_names = []
-        self.q = [0.0] * self.joints_count # geometrical joint angle rads
         self.last_position_ticks = [-1] * self.joints_count # to track last sent position
-        self.actuator_setpoint_degree = [0.0] * self.joints_count # servo motor angle degree
+        self.actuator_setpoint_degree = [0.0] * self.joints_count
+        self.actuator_update_stamps = [TimeStamp(-1.0, -1.0, -1.0) for i in range(self.joints_count)]
+        self.motor_update_hz = [0.0 for i in range(self.joints_count)]
+        # messages
+        self.motors_update_msg_hz = Float32MultiArray()
+        self.actuator_msg_ticks = JointState()
+        self.actuator_msg_setpoint = JointState()
+        for i in range(self.joints_count):
+            self.actuator_setpoint_degree[i] = self.initial_joints_bias_degree[i]
         for i in range(self.limbs_num):
             for j in range(self.joints_per_limb[i]):
                 joint_name = f'limb{i}/joint{j}'
@@ -120,26 +138,26 @@ class PentaHiwonderActuators(Node):
                 self.get_logger().error(
                     f'Joints index cache size {n} is less than {self.joints_count}, clearing index cache!'
                 )
-            self.index_cache = None
+                self.index_cache = None
             return
         # Compute actuator setpoints (vectorized-like)
         deg_per_rad = 180.0 / math.pi
         for i in range(self.joints_count):
-            self.q[i] = pos_list[self.index_cache[i]]
-            servo_setpoint = self.dir[i] * (self.q[i] * deg_per_rad) + self.initial_joints_bias_degree[i]
+            q_rad = pos_list[self.index_cache[i]] # geometrical joint angle rads
+            setpoint_degree = self.dir[i] * (q_rad * deg_per_rad) + self.initial_joints_bias_degree[i]
             self.actuator_setpoint_degree[i] = self.clamp(
-                servo_setpoint, i, 0.0, self.servo_actuation_range_degree[i]
+                setpoint_degree, i, 0.0, self.servo_actuation_range_degree[i]
             )
         # Publish actuators setpoint
         self.publish_actuators_setpoint()
 
     def clamp(self, value, index, min_val, max_val, margin=1.0):
         min_safe_limit = min_val + margin
-        if value < (min_safe_limit):
+        if value < min_safe_limit:
             self.get_logger().error(f'ERROR: Servo[{index}] calculated setpoint is {value} degrees, however its minimum permissible angle is {min_safe_limit}, clamping value to {min_safe_limit}!')
             return min_safe_limit
         max_safe_limit = max_val - margin
-        if value > (max_val - margin):
+        if value > max_safe_limit:
             self.get_logger().error(f'ERROR: Servo[{index}] calculated setpoint is {value} degrees, however maximum servo angle is {max_safe_limit}, clamping value to {max_safe_limit}!')            
             return max_safe_limit
         return value
@@ -152,7 +170,16 @@ class PentaHiwonderActuators(Node):
         packet = HEADER + [servo_id, length, cmd] + params
         checksum = (~(sum(packet[2:])) & 0xFF)
         packet.append(checksum)
+        now  = time.time()
         self.serial.write(bytearray(packet))
+        index = servo_id - 1
+        if self.actuator_update_stamps[index].last_serial_update < 0.0:
+            self.actuator_update_stamps[index].last_serial_update = now
+        else:
+            self.actuator_update_stamps[index].serial_update_interval = now - self.actuator_update_stamps[index].last_serial_update
+            self.actuator_update_stamps[index].last_serial_update = now
+            self.actuator_update_stamps[index].serial_update_hz = 1.0 / self.actuator_update_stamps[index].serial_update_interval
+            self.motor_update_hz[index] = self.actuator_update_stamps[index].serial_update_hz
         time.sleep(0.005)
 
     def move_one_servo(self, servo_id, position_ticks):
@@ -170,18 +197,18 @@ class PentaHiwonderActuators(Node):
         self.send_serial_command(servo_id, 1, [pos_l, pos_h, time_l, time_h])
 
     def publish_actuators_setpoint(self):
-        msg_setpoint = JointState()
-        msg_setpoint.header.stamp = self.get_clock().now().to_msg()
-        msg_setpoint.name = self.joints_states_names
-        msg_setpoint.position = self.actuator_setpoint_degree
-        self.setpoint_publisher_.publish(msg_setpoint)
+        self.actuator_msg_setpoint.header.stamp = self.get_clock().now().to_msg()
+        self.actuator_msg_setpoint.name = self.joints_states_names
+        self.actuator_msg_setpoint.position = self.actuator_setpoint_degree
+        self.setpoint_publisher_.publish(self.actuator_msg_setpoint)
     
     def publish_ticks_message(self):
-        msg_ticks = JointState()
-        msg_ticks.header.stamp = self.get_clock().now().to_msg()
-        msg_ticks.name = self.joints_states_names
-        msg_ticks.position = [float(tick) for tick in self.last_position_ticks]
-        self.ticks_publisher_.publish(msg_ticks)
+        self.actuator_msg_ticks.header.stamp = self.get_clock().now().to_msg()
+        self.actuator_msg_ticks.name = self.joints_states_names
+        self.actuator_msg_ticks.position = [float(tick) for tick in self.last_position_ticks]
+        self.ticks_publisher_.publish(self.actuator_msg_ticks)
+        self.motors_update_msg_hz.data = self.motor_update_hz
+        self.serial_hz_publisher_.publish(self.motors_update_msg_hz)
 
     def declare_params(self):
         # Declare robot geometry parameters
@@ -216,7 +243,7 @@ class PentaHiwonderActuators(Node):
         self.baudrate = self.get_parameter('hiwonder.baudrate').get_parameter_value().integer_value
         self.get_logger().info(f'Hiwonder serial port baudrate is: {self.baudrate}')
         self.update_interval_sec = self.get_parameter('hiwonder.update_interval_sec').get_parameter_value().double_value
-        self.get_logger().info(f'Hiwonder update interval Hz: {self.update_interval_sec}')
+        self.get_logger().info(f'Hiwonder update interval [sec]: {self.update_interval_sec}')
         self.initial_joints_bias_degree = self.get_parameter('hiwonder.actuator_angle_bias_at_joint_zero_degree').get_parameter_value().double_array_value
         self.dir = self.get_parameter('hiwonder.dir').get_parameter_value().double_array_value
         self.servo_actuation_range_degree = self.get_parameter('hiwonder.servo_actuation_range_degree').get_parameter_value().double_array_value
