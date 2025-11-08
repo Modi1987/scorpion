@@ -16,7 +16,7 @@
 #define MODE1_AI 0x20      // Auto-Increment
 #define MODE1_RESTART 0x80 // Restart enabled
 
-#define PWM_FREQUENCY_HZ 200.0 // 200Hz for high end servos 50 for all servos
+#define PWM_FREQUENCY_HZ 250.0 // 200Hz for high end servos 50 for all servos
 
 MyPCA9685::MyPCA9685(const std::vector<MotorParams>& motor_params, const std::string& i2c_device, int address)
     : motor_params_(motor_params), device_path_(i2c_device), i2c_address_(address), i2c_file_(-1) {
