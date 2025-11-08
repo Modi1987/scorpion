@@ -20,8 +20,11 @@
 
 MyPCA9685::MyPCA9685(const std::vector<MotorParams>& motor_params, const std::string& i2c_device, int address)
     : motor_params_(motor_params), device_path_(i2c_device), i2c_address_(address), i2c_file_(-1) {
-        servo_command_ticks_ = std::vector<int>(motor_params.size(), 0);
-        for (size_t i=0; i < servo_command_ticks_.size(); i++) {
+        // initialize static data
+        number_of_connected_motors_ = static_cast<int>(motor_params.size());
+        i2c_buffer_.data[0] = LED0_ON_L_ADDRESS; // Start address for the first channel
+        i2c_buffer_.actual_data_size = 1 + number_of_connected_motors_ * 4;
+        for (int i=0; i < number_of_connected_motors_; i++) {
             std::cout << "[MyPca9685.cpp] motor params [" << i
                       << "]: " << motor_params[i].name
                       << " pwm_channel: " << motor_params[i].pwm_channel
@@ -53,7 +56,7 @@ bool MyPCA9685::init() {
     usleep(5000); // Wait for the device to initialize
     setPWMFreq(PWM_FREQUENCY_HZ); // 200Hz for high end servos 50 for all servos
     // initiate all motors to 0 degrees
-    for (int i = 0; i < static_cast<int>(motor_params_.size()); ++i) {
+    for (int i = 0; i < number_of_connected_motors_; ++i) {
         setMotorCommand(i, 0.0f); // Set all motors to 0 degrees
     }
     return true;
@@ -129,7 +132,7 @@ void MyPCA9685::setPWM(int channel, int on, int off) {
 }
 
 int MyPCA9685::setMotorCommand(int channel, float setpoint_deg) {
-    if (channel < 0 || channel >= static_cast<int>(motor_params_.size())) {
+    if (channel < 0 || channel >= number_of_connected_motors_) {
         std::cerr << "Invalid channel index: " << channel << std::endl;
         return -1;
     }
@@ -167,20 +170,15 @@ void MyPCA9685::commandOneMotorAngleDegree(int channel, float setpoint_deg) {
 }
 
 void MyPCA9685::flushInternalCommands2Motors() {
-    auto number_of_channels = static_cast<int>(motor_params_.size());
-    constexpr int buffer_size = 1 + 4 * 16; // total chanels in PCA9685 is 16, each channel requires 4 bytes (on_l, on_h, off_l, off_h)
-    unsigned char buffer[buffer_size];
 
-    buffer[0] = LED0_ON_L_ADDRESS; // Start address for the first channel
-
-    for(int i = 0; i < number_of_channels; ++i) {
-        buffer[1 + 4 * i] = 0;
-        buffer[2 + 4 * i] = 0; 
-        buffer[3 + 4 * i] = static_cast<unsigned char>(servo_command_ticks_[i] & 0xFF);
-        buffer[4 + 4 * i] = static_cast<unsigned char>(servo_command_ticks_[i] >> 8);    
+    for(int i = 0; i < number_of_connected_motors_; ++i) {
+        i2c_buffer_.data[1 + 4 * i] = 0;
+        i2c_buffer_.data[2 + 4 * i] = 0; 
+        i2c_buffer_.data[3 + 4 * i] = static_cast<unsigned char>(servo_command_ticks_[i] & 0xFF);
+        i2c_buffer_.data[4 + 4 * i] = static_cast<unsigned char>(servo_command_ticks_[i] >> 8);    
     }
 
-    if (write(i2c_file_, buffer, buffer_size) != buffer_size) {
+    if (write(i2c_file_, i2c_buffer_.data, i2c_buffer_.actual_data_size) != i2c_buffer_.actual_data_size) {
         std::cerr << "Failed to write all PWM commands to PCA9685" << std::endl;
     }
 }

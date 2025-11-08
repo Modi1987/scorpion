@@ -9,6 +9,9 @@
 #include <fcntl.h>
 #include <cstdint>
 
+#define MAX_NUMBER_OF_MOTORS 16
+#define I2C_MAX_BUFFER_SIZE 1 + 4 * MAX_NUMBER_OF_MOTORS
+
 using MotorParams = pca9685_interfaces::msg::PcaChannelParams;
 
 class MyPCA9685 {
@@ -36,7 +39,14 @@ private:
     std::string device_path_;
     int i2c_address_;
     int i2c_file_;
-    std::vector<int> servo_command_ticks_;
+    int servo_command_ticks_[MAX_NUMBER_OF_MOTORS];
+    int number_of_connected_motors_{0};
+
+    // i2c data buffer
+    struct i2c_buffer {
+        unsigned char data[I2C_MAX_BUFFER_SIZE];
+        int actual_data_size;
+    } i2c_buffer_;
     
     void writeRegister(unsigned char reg, unsigned char value);
     void reset();
