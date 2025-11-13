@@ -64,6 +64,12 @@ Finally, you can move the robot around from external PC using keyboard
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
 
+## If you are using Hiwonder motors over serial bus
+
+'''
+ros2 launch penta_pod realhardware_bringup.launch.py motors_interface:=hiwonder
+'''
+
 ## Setup as a service (automatic on boot)
 
 To bring-up the robot automatically each time you boot the robot (without having to launch the brinup manually), run the following script on the Raspberry Pi
