@@ -15,6 +15,7 @@ services:
       - QT_X11_NO_MITSHM=1
     privileged: true
     devices:
+      - "/dev:/dev"
       - /dev/bus/usb:/dev/bus/usb
       - /dev/i2c-0:/dev/i2c-0
       - /dev/i2c-1:/dev/i2c-1
