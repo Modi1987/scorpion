@@ -8,6 +8,14 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
+    # Declare the 'name_space' argument with a default value of ''
+    name_space_arg = DeclareLaunchArgument(
+        "name_space",
+        default_value="",
+        description="Robot name space",
+    )
+    name_space = LaunchConfiguration('name_space')
+
     # Declare the launch argument 'mode'
     mode_arg = DeclareLaunchArgument(
         'mode',
@@ -36,6 +44,7 @@ def generate_launch_description():
         executable='penta_hiwonder_actuators_node',
         output='screen',
         parameters=[config],
+        namespace=name_space,
         # Pass 'mode' argument to the node
         arguments=[LaunchConfiguration('mode')],
         remappings=[
@@ -49,6 +58,7 @@ def generate_launch_description():
 
     # Create a launch description and add the actions
     ld = LaunchDescription([
+        name_space_arg,     # Add the name_space argument
         mode_arg,            # Add the mode argument
         joints_setpoint_topic_arg,
         penta_hiwonder_actuators_node   # Add the node

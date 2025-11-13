@@ -74,7 +74,11 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(FindPackageShare('penta_hiwonder_actuators').find('penta_hiwonder_actuators'), 'launch', 'penta_hiwonder_actuators.launch.py')
         ),
-        launch_arguments={'mode': LaunchConfiguration('mode')}.items(),  # Pass the mode argument
+        launch_arguments={
+            'mode': LaunchConfiguration('mode'),
+            'name_space': LaunchConfiguration('name_space'),
+            'joints_setpoint_topic': 'joint_setpoints',
+        }.items(),  # Pass the mode argument
         condition=IfCondition(EqualsSubstitution(motors_interface, 'hiwonder'))
     )
 
