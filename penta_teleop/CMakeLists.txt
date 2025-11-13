@@ -11,11 +11,14 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(base_twerk_msgs REQUIRED)
 find_package(gait_generator_msgs REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(commons REQUIRED)
 
 # Declare library
 add_library(${PROJECT_NAME}
         src/${PROJECT_NAME}/joystick_extra_controls.cpp
         src/${PROJECT_NAME}/declare_load_parameters.cpp
+        src/${PROJECT_NAME}/cmd_vel_smoothing.cpp
         )
 
 target_include_directories(${PROJECT_NAME}
@@ -28,10 +31,17 @@ ament_target_dependencies(${PROJECT_NAME}
         sensor_msgs
         base_twerk_msgs
         gait_generator_msgs
+        rclcpp_action
+        commons
         )
 
 add_executable(joystick_extra_controls_node src/joystick_extra_controls_node.cpp)
 target_link_libraries(joystick_extra_controls_node
+        ${PROJECT_NAME}
+        )
+
+add_executable(cmd_vel_smoothing_node src/cmd_vel_smoothing_node.cpp)
+target_link_libraries(cmd_vel_smoothing_node
         ${PROJECT_NAME}
         )
 
@@ -43,6 +53,7 @@ install(
 
 install(TARGETS 
   joystick_extra_controls_node
+  cmd_vel_smoothing_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

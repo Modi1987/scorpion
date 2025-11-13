@@ -11,6 +11,14 @@ import os
 
 # This is a launch rviz2 on a laptop for the toperware_bot
 def generate_launch_description():
+    """ Launch args """
+    name_space_arg = DeclareLaunchArgument(
+        "name_space",
+        default_value="",
+        description="Robot name space",
+    )
+
+    """ Nodes """
     rviz_config_file = PathJoinSubstitution(
         [FindPackageShare('penta_description'), 'config', 'penta.rviz'])
     urdf_path = os.path.join(
@@ -23,6 +31,7 @@ def generate_launch_description():
     robot_description = ParameterValue(Command(['xacro ', LaunchConfiguration('model')]),
                                        value_type=str)
     return LaunchDescription([
+        name_space_arg,
         DeclareLaunchArgument(
             'config_file',
             default_value=rviz_config_file,
@@ -31,6 +40,7 @@ def generate_launch_description():
         Node(
             package='rviz2',
             executable='rviz2',
+            namespace=LaunchConfiguration('name_space'),
             name='rviz2',
             output='screen',
             arguments=['-d', LaunchConfiguration('config_file')]
@@ -39,6 +49,7 @@ def generate_launch_description():
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
+            namespace=LaunchConfiguration('name_space'),
             name='robot_state_publisher',
             output='screen',
             parameters=[

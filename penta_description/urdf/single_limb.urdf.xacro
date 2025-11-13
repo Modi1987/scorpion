@@ -1,94 +1,208 @@
 <?xml version="1.0"?>
 
-<robot name="penta_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <link name="base_footprint"/>
-
-  <link name="base_link">
-    <visual>
-      <geometry>
-        <cylinder radius="0.10" length="0.025"/>
-      </geometry>
-      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
-    </visual>
-  </link>
-
-  <joint name="joint_robot_body_center" type="fixed">
-    <parent link="base_footprint"/>
-    <child link="base_link"/>
-    <origin xyz="0.0 0.0 0.05" rpy="0 0 0"/>
-  </joint>
-
-  <xacro:macro name="leg" params="prefix">
+  <xacro:macro name="add_leg" params="prefix shoulderxyz shoulderrpy">
     <link name="${prefix}_shoulder_motor">
       <visual>
         <geometry>
           <cylinder radius="0.0350" length="0.035"/>
         </geometry>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+        <xacro:add_material_red/>
       </visual>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+        <mass value="1.0"/>
+        <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+      </inertial>
     </link>
 
     <link name="${prefix}_shoulder_link">
       <visual>
         <geometry>
-          <box size="0.1 0.02 0.02"/>
+          <mesh filename="file://$(find penta_description)/meshes/visual/penta_stl_v1/Shoulder.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <origin xyz="0.05 0.0 0.0" rpy="0 0 0"/>
+        <origin xyz="0.0 0.0 0.0" rpy="-${PI2} 0 0"/>
+        <xacro:add_material_red/>
       </visual>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+        <mass value="1.0"/>
+        <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+      </inertial>
     </link>
 
     <link name="${prefix}_upper_arm_link">
       <visual>
         <geometry>
-          <box size="0.1 0.02 0.02"/>
+          <mesh filename="file://$(find penta_description)/meshes/visual/penta_stl_v1/Upper_arm.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <origin xyz="0.05 0.0 0.0" rpy="0 0 0"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+        <xacro:add_material_red/>
       </visual>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+        <mass value="1.0"/>
+        <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+      </inertial>
     </link>
 
     <link name="${prefix}_lower_arm_link">
       <visual>
         <geometry>
-          <box size="0.1 0.02 0.02"/>
+          <mesh filename="file://$(find penta_description)/meshes/visual/penta_stl_v1/Lower_arm.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <origin xyz="0.05 0.0 0.0" rpy="0 0 0"/>
+        <origin xyz="0.0 0.0 0.0" rpy="-${PI2} ${PI2} 0.41"/>
+        <xacro:add_material_red/>
       </visual>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+        <mass value="1.0"/>
+        <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+      </inertial>
     </link>
 
-    <joint name="${prefix}_joint_shoulder_motor" type="fixed">
+    <link name="${prefix}_foot">
+      <visual>
+        <geometry>
+          <sphere radius="0.01"/>
+        </geometry>
+        <origin xyz="0.158 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      </visual>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+        <mass value="0.1"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <collision>
+        <geometry>
+          <sphere radius="0.015"/>
+        </geometry>
+        <origin xyz="0.158 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <surface>
+            <friction>
+              <!-- this is for ODE -->
+              <ode>
+                <mu>2.0</mu>
+                <mu2>2.0</mu2>
+                <fdir1>1 0 0</fdir1>
+              </ode>
+              <!-- this is for Bullet -->
+              <bullet>
+                <friction>2.0</friction>
+              </bullet>           
+            </friction>
+            <contact>
+              <ode>
+                <kp>100000.0</kp>
+                <kd>100.0</kd>
+                <min_depth>0.001</min_depth>
+                <max_vel>0.1</max_vel>
+              </ode>
+              <bullet>
+                <soft_cfm>0.0</soft_cfm>
+                <soft_erp>0.2</soft_erp>
+                <bounce>0.0</bounce>
+                <bounce_threshold>1.0</bounce_threshold>
+              </bullet>
+            </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <joint name="${prefix}/joint_shoulder_motor" type="fixed">
       <parent link="base_link"/>
       <child link="${prefix}_shoulder_motor"/>
-      <origin xyz="0.1 0.0 0.0" rpy="0 0 0"/>
+      <origin xyz="${shoulderxyz}" rpy="${shoulderrpy}"/>
     </joint>
 
 
-    <joint name="${prefix}_joint0" type="continuous">
+    <joint name="${prefix}/joint0" type="continuous">
       <parent link="${prefix}_shoulder_motor"/>
       <child link="${prefix}_shoulder_link"/>
       <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
       <axis xyz="0 0 1" />
     </joint>
 
-    <joint name="${prefix}_joint1" type="continuous">
+    <joint name="${prefix}/joint1" type="continuous">
       <parent link="${prefix}_shoulder_link"/>
       <child link="${prefix}_upper_arm_link"/>
-      <origin xyz="0.1 0.0 0.0" rpy="-1.57 0 0"/>
+      <origin xyz="0.0455 0.0 0.0" rpy="-1.57 0 0"/>
       <axis xyz="0 0 1" />
     </joint>
 
 
-    <joint name="${prefix}_joint2" type="continuous">
+    <joint name="${prefix}/joint2" type="continuous">
       <parent link="${prefix}_upper_arm_link"/>
       <child link="${prefix}_lower_arm_link"/>
-      <origin xyz="0.1 0.0 0.0" rpy="0 0 0"/>
+      <origin xyz="0.096 0.0 0.0" rpy="0 0 0"/>
       <axis xyz="0 0 1" />
     </joint>
 
+    <joint name="${prefix}/joint3" type="fixed">
+      <parent link="${prefix}_lower_arm_link"/>
+      <child link="${prefix}_foot"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- ros2_control interfaces for each joint -->
+    <ros2_control name="${prefix}_ros2_control" type="system">
+      <hardware>
+        <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+      </hardware>
+
+      <joint name="${prefix}/joint0">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="${prefix}/joint1">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="${prefix}/joint2">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+    </ros2_control>
+
+    <!-- Transmission blocks -->
+    <transmission name="${prefix}_joint0_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}/joint0">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${prefix}_motor0">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="${prefix}_joint1_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}/joint1">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${prefix}_motor1">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="${prefix}_joint2_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}/joint2">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${prefix}_motor2">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
   </xacro:macro>
-
-  <xacro:leg prefix="limb0" />
-
-
 
 </robot>

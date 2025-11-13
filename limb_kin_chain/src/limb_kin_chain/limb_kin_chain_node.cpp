@@ -96,7 +96,7 @@ LimbNode::LimbNode(Limb limb)
   }
 
   joint_state_publisher_ =
-      node_->create_publisher<sensor_msgs::msg::JointState>("joint_state", 10);
+      node_->create_publisher<sensor_msgs::msg::JointState>("joint_setpoints", 10);
   // you can publish initial joints states once
   sensor_msgs::msg::JointState msg;
   msg.name = joints_names;

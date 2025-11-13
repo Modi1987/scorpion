@@ -36,9 +36,16 @@ private:
   rclcpp::Node::SharedPtr node_;
   std::vector<double> q_state;
 
-  double current_phase_, max_gait_linear_speed_, max_gait_turning_speed_;
+  double current_phase_;
   bool is_walking_{false};
   int feet_num_;
+
+  struct GaitParameters {
+    double gait_radial_frequency;  // rad/s
+    double step_height;            // m
+    double max_gait_linear_speed;  // m/s
+    double max_gait_turning_speed; // rad/s
+  } gait_parameters_;
 
   struct GatiPatterns {
     int active_gait_index_ = 0;

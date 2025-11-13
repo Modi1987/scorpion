@@ -12,9 +12,11 @@
   <exec_depend>gait_generator</exec_depend>
   <exec_depend>joints_aggregator</exec_depend>
   <exec_depend>base_twerk</exec_depend>
+  <exec_depend>penta_teleop</exec_depend>
 
   <exec_depend>penta_i2c_actuators</exec_depend>
-  
+  <exec_depend>penta_hiwonder_actuators</exec_depend>
+
   <exec_depend>robot_state_publisher</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>

@@ -8,12 +8,25 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
+
+    ld = LaunchDescription()
+
+    """ Launch args """
+    name_space_arg = DeclareLaunchArgument(
+        "name_space",
+        default_value="",
+        description="Robot name space",
+    )
+    ld.add_action(name_space_arg)
+
+    """ Nodes """
     # Declare the launch argument 'mode'
     mode_arg = DeclareLaunchArgument(
         'mode',
         default_value='virtual',
         description='Choose operation mode: real or virtual'
     )
+    ld.add_action(mode_arg)
 
     # Path to the config file
     config = os.path.join(
@@ -28,14 +41,14 @@ def generate_launch_description():
         executable='penta_i2c_actuators_node',
         output='screen',
         parameters=[config],
+        namespace=LaunchConfiguration('name_space'),
         # Pass 'mode' argument to the node
-        arguments=[LaunchConfiguration('mode')]
+        arguments=[LaunchConfiguration('mode')],
+        remappings=[
+            ('joint_setpoints', 'joint_setpoints'),
+            ('actuator_setpoint_degree', 'actuator_setpoint_degree'),
+        ]
     )
-
-    # Create a launch description and add the actions
-    ld = LaunchDescription([
-        mode_arg,            # Add the mode argument
-        i2c_actuators_node   # Add the node
-    ])
+    ld.add_action(i2c_actuators_node)
 
     return ld
