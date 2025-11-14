@@ -53,3 +53,9 @@ sudo ./setup_on_raspberry.sh
 - After the installation is done reboot the robot
 
 - Enjoy
+
+## How to launch with Hiwonder serial bus motors
+
+```
+ros2 launch penta_pod realhardware_bringup.launch.py motors_interface:=hiwonder
+```
