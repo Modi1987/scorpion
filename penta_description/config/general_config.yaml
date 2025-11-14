@@ -113,3 +113,43 @@
         2500.0, 2500.0, 2500.0,
         2500.0, 2500.0, 2500.0,
       ]
+    hiwonder:
+      serial_port: /dev/ttyUSB0
+      baudrate: 115200
+      update_interval_sec: 0.1
+      servo_actuation_range_degree: [ # servo angle range
+        270.0, 270.0, 270.0,
+        270.0, 270.0, 270.0,
+        270.0, 270.0, 270.0,
+        270.0, 270.0, 270.0,
+        270.0, 270.0, 270.0,
+      ]
+      servo_min_ticks: [ # Hiwnoder servo min ticks (zero)
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
+      ]
+      servo_max_ticks: [ # Hiwonder, servo max ticks (motor type)
+        1000, 1000, 1000,
+        1000, 1000, 1000,
+        1000, 1000, 1000,
+        1000, 1000, 1000,
+        1000, 1000, 1000,
+      ]
+      actuator_angle_bias_at_joint_zero_degree: [ # considering the motors are at their midrange at 135 degrees when robot joint is at zero"
+        135.0, 135.0, 135.0,
+        135.0, 135.0, 135.0,
+        135.0, 135.0, 135.0,
+        135.0, 135.0, 135.0,
+        135.0, 135.0, 135.0,
+      ]
+      dir: [
+        1.0, 1.0, 1.0,
+        1.0, 1.0, 1.0,
+        1.0, 1.0, 1.0,
+        1.0, 1.0, 1.0,
+        1.0, 1.0, 1.0,
+      ]
+      actuation_time_ratio: 0.8
