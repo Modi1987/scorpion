@@ -67,7 +67,7 @@ float dt;
 #define I2C_SDA 21
 #define I2C_SCL 22
 // I2C request timeout (ms)
-#define I2C_REQUEST_TIMEOUT_MS 5
+#define I2C_REQUEST_TIMEOUT_MS 10
 //====================================================================================
 #define LED_INDICATOR 2
 long long led_time_millis;
@@ -88,7 +88,7 @@ void setup() {
     // Set up serial
     Serial.begin(115200);
     // Setup MPU
-    Wire.begin(I2C_SDA,I2C_SCL,400000);
+    Wire.begin(I2C_SDA,I2C_SCL,100000);
     setupMPU();
     delay(500);
     
