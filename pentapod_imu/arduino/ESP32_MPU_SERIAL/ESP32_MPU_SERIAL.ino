@@ -67,7 +67,7 @@ float dt;
 #define I2C_SDA 21
 #define I2C_SCL 22
 // I2C request timeout (ms)
-#define I2C_REQUEST_TIMEOUT_MS 100
+#define I2C_REQUEST_TIMEOUT_MS 5
 //====================================================================================
 #define LED_INDICATOR 2
 long long led_time_millis;
@@ -88,7 +88,7 @@ void setup() {
     // Set up serial
     Serial.begin(115200);
     // Setup MPU
-    Wire.begin(I2C_SDA,I2C_SCL,50000);
+    Wire.begin(I2C_SDA,I2C_SCL,400000);
     setupMPU();
     delay(500);
     
@@ -183,16 +183,20 @@ void loop() {
         led_time_millis = current_time;
       }
       calculate_dt();
-      recordAccelRegisters();
-      recordGyroRegisters();
-      calibrateBias();
-      wx=rotX*3.14/180;
-      wy=rotY*3.14/180;
-      wz=rotZ*3.14/180;
-      MahonyAHRSupdateIMU(wx, wy, wz, gForceX, gForceY, gForceZ);
-      // stream data over serial
-      printDataAscii();
-      delay(5);
+      bool ok1 = recordAccelRegisters();
+      bool ok2 = recordGyroRegisters();
+      if (ok1 && ok2) {
+        recordAccelRegisters();
+        recordGyroRegisters();
+        calibrateBias();
+        wx=rotX*3.14/180;
+        wy=rotY*3.14/180;
+        wz=rotZ*3.14/180;
+        MahonyAHRSupdateIMU(wx, wy, wz, gForceX, gForceY, gForceZ);
+        // stream data over serial
+        printDataAscii();
+        delay(4);
+      }
    }
 }
 
@@ -357,7 +361,6 @@ void printDataAscii() {
     case 4:
       Serial.print(" q3=");
       Serial.print(q3);
-      Serial.println();
       break;
     case 5:
       Serial.print(" wX=");
@@ -382,7 +385,7 @@ void printDataAscii() {
     case 10:
       Serial.print(" gZ=");
       Serial.print(gForceZ);
-      Serial.println();
+      Serial.println(" ");
       break;
   }
   cycle_count = cycle_count % 10;
