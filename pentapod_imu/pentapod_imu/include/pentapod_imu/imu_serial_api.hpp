@@ -20,8 +20,8 @@ class ImuSerialApi
 public:
     ImuSerialApi(std::string port_name = "/dev/ttyUSB0", int baud_rate = B115200);
     ~ImuSerialApi();
-    open();
-    close();
+    bool open();
+    bool close();
     bool isOpen() const;
 
     bool readImuData(sensor_msgs::msg::Imu::SharedPtr imu_msg);

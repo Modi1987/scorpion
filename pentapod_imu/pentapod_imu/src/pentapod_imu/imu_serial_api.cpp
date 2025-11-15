@@ -64,7 +64,7 @@ bool ImuSerialApi::isOpen() const
     return is_connected_;
 }
 
-void ImuSerialApi::~update()
+void ImuSerialApi::update()
 {
     int index = -1;
     int sign = +1;
@@ -119,12 +119,6 @@ bool ImuSerialApi::readImuData(sensor_msgs::msg::Imu::SharedPtr imu_msg)
     imu_msg->linear_acceleration.x = GRAVITY_MS2 * gravity_[0];
     imu_msg->linear_acceleration.y = GRAVITY_MS2 * gravity_[1];
     imu_msg->linear_acceleration.z = GRAVITY_MS2 * gravity_[2];
-    return true; // Return true if successful
-}
-
-bool ImuSerialApi::update()
-{
-    // Implementation to update IMU data
     return true; // Return true if successful
 }
 
