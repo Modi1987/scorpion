@@ -344,47 +344,59 @@ void processGyroData() {
 
 void printDataAscii() {
   cycle_count = cycle_count + 1;
+  int measruement;
+  constexpr int factor = 1000;
   switch (cycle_count)
   {
     case 1:
-      Serial.print(" q0=");
-      Serial.print(q0);
+      Serial.print(" a"); // qw
+      measruement = q0*1000;
+      Serial.print(measruement);
       break;
     case 2:
-      Serial.print(" q1=");
-      Serial.print(q1);
+      Serial.print(" b"); // qx
+      measruement = q1*1000;
+      Serial.print(measruement);
       break;
     case 3:
-      Serial.print(" q2=");
-      Serial.print(q2);
+      Serial.print(" c"); // qy
+      measruement = q2*1000;
+      Serial.print(measruement);
       break;
     case 4:
-      Serial.print(" q3=");
-      Serial.print(q3);
+      Serial.print(" d"); // qz
+      measruement = q3*1000;
+      Serial.print(measruement);
       break;
     case 5:
-      Serial.print(" wX=");
-      Serial.print(wx);
+      Serial.print(" e");
+      measruement = wx*1000;
+      Serial.print(measruement);
       break;
     case 6:
-      Serial.print(" wY=");
-      Serial.print(wy);
+      Serial.print(" f");
+      measruement = wy*1000;
+      Serial.print(measruement);
       break;
     case 7:
-      Serial.print(" wZ=");
-      Serial.print(wz);
+      Serial.print(" g");
+      measruement = wz*1000;
+      Serial.print(measruement);
       break;
     case 8:
-      Serial.print(" gX=");
-      Serial.print(gForceX);
+      Serial.print(" h");
+      measruement = gForceX*1000;
+      Serial.print(measruement);
       break;
     case 9:
-      Serial.print(" gY=");
-      Serial.print(gForceY);
+      Serial.print(" i");
+      measruement = gForceY*1000;
+      Serial.print(measruement);
       break;
     case 10:
-      Serial.print(" gZ=");
-      Serial.print(gForceZ);
+      Serial.print(" j");
+      measruement = gForceZ*1000;
+      Serial.print(measruement);
       Serial.println(" ");
       break;
   }
