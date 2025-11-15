@@ -11,7 +11,7 @@ namespace penta_pod_imu
 class PentapodIMU
 {
 public:
-    PentapodIMU();
+    PentapodIMU(rclcpp::Node::SharedPtr node);
     ~PentapodIMU() {};
 
 private:

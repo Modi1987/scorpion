@@ -10,30 +10,40 @@ ImuSerialApi::ImuSerialApi(std::string port_name, int baud_rate)
 
 ImuSerialApi::~ImuSerialApi()
 {
-    if (isOpen()) {
-        close();
+    if (is_connected()) {
+        disconnect();
     }
 }
 
-ImuSerialApi::open()
+bool ImuSerialApi::disconnect()
 {
-    fd = open(portName.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
-    if (fd < 0) {
-        std::cerr << "Error opening serial port " << portName << ": " << strerror(errno) << std::endl;
+    if (is_connected_) {
+        close(fd_);
+        is_connected_ = false;
+    }
+    return true;
+}
+
+
+bool ImuSerialApi::connect()
+{
+    fd_ = open(port_name_.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+    if (fd_ < 0) {
+        std::cerr << "Error opening serial port " << port_name_ << ": " << strerror(errno) << std::endl;
         return false;
     }
 
     struct termios tty;
     memset(&tty, 0, sizeof tty);
-    if (tcgetattr(fd, &tty) != 0) {
+    if (tcgetattr(fd_, &tty) != 0) {
         std::cerr << "Error from tcgetattr: " << strerror(errno) << std::endl;
-        close(fd);
+        close(fd_);
         return false;
     }
 
     // Configure serial port
-    cfsetospeed(&tty, baudRate);
-    cfsetispeed(&tty, baudRate);
+    cfsetospeed(&tty, baud_rate_);
+    cfsetispeed(&tty, baud_rate_);
 
     tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8; // 8-bit chars
     tty.c_iflag &= ~IGNBRK;                     // disable break processing
@@ -48,9 +58,9 @@ ImuSerialApi::open()
     tty.c_cflag &= ~CSTOPB;                     // 1 stop bit
     tty.c_cflag &= ~CRTSCTS;                    // no hardware flow control
 
-    if (tcsetattr(fd, TCSANOW, &tty) != 0) {
+    if (tcsetattr(fd_, TCSANOW, &tty) != 0) {
         std::cerr << "Error from tcsetattr: " << strerror(errno) << std::endl;
-        close(fd);
+        close(fd_);
         return false;
     }
 
@@ -59,31 +69,37 @@ ImuSerialApi::open()
     return true;
 }
 
-bool ImuSerialApi::isOpen() const
+bool ImuSerialApi::is_connected() const
 {
     return is_connected_;
 }
 
-void ImuSerialApi::update()
+int index = -1;
+int sign = +1;
+bool ImuSerialApi::update()
 {
-    int index = -1;
-    int sign = +1;
     auto packet_size = 1;
+    int byte_count = 0;
     constexpr float factor = 1000.0;
+    char chr;
     while (true) {
-        auto bytesRead = read( fd_, chr, packet_size);
-        if (bytesRead <= 0) return;
-        if (chr >= 'a') && (chr <= 'g') {
+        auto bytesRead = read( fd_, &chr, packet_size);
+        if (bytesRead <= 0) {
+            return byte_count > 0;
+        } else {
+            byte_count += bytesRead;
+        }
+        if ((chr >= 'a') && (chr <= 'g')) {
             index = chr - 'a';
             measruement_array_[index] = 0;
             sign = 1;
             continue;
         } else if (chr == '-') {
             sign = -1;
-        } else if (chr >= '0') && (chr <= '9') {
+        } else if ((chr >= '0') && (chr <= '9')) {
             measruement_array_[index] = measruement_array_[index] * 10;
             measruement_array_[index] = measruement_array_[index] +  sign * (chr - '0');
-        } else if ( chr == '\n ') { // flush data
+        } else if ( chr == char(13) || chr == char(10)) { // flush data on '\r' or '\n'
             index = 0;
             sign = 1;
             // rotation quaternion

@@ -10,7 +10,8 @@
 #include <unistd.h>     // read(), write(), close()
 #include <cstring>      // memset
 #include <vector>
-
+#include <thread>
+#include <chrono>
 
 namespace penta_pod_imu
 {
@@ -20,9 +21,9 @@ class ImuSerialApi
 public:
     ImuSerialApi(std::string port_name = "/dev/ttyUSB0", int baud_rate = B115200);
     ~ImuSerialApi();
-    bool open();
-    bool close();
-    bool isOpen() const;
+    bool connect();
+    bool disconnect();
+    bool is_connected() const;
 
     bool readImuData(sensor_msgs::msg::Imu::SharedPtr imu_msg);
     bool update();
