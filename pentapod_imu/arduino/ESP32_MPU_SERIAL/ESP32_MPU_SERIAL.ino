@@ -66,6 +66,8 @@ float dt;
 // SDA, SCL GPIO pins for the ESP32
 #define I2C_SDA 21
 #define I2C_SCL 22
+// I2C request timeout (ms)
+#define I2C_REQUEST_TIMEOUT_MS 100
 //====================================================================================
 #define LED_INDICATOR 2
 long long led_time_millis;
@@ -108,16 +110,29 @@ void calibrateGyroForBias()
   long tStart=millis();
   while((millis()-tStart)<1000)
   {
-    recordAccelRegisters();
-    recordGyroRegisters();
-    daCount++;
-    gyroX_sum=gyroX_sum+gyroX;
-    gyroY_sum=gyroY_sum+gyroY;
-    gyroZ_sum=gyroZ_sum+gyroZ;
+    // use safe non-blocking reads with timeout; if a read fails, skip this sample
+    bool ok1 = recordAccelRegisters();
+    bool ok2 = recordGyroRegisters();
+    if (ok1 && ok2) {
+      daCount++;
+      gyroX_sum=gyroX_sum+gyroX;
+      gyroY_sum=gyroY_sum+gyroY;
+      gyroZ_sum=gyroZ_sum+gyroZ;
+    }
+    // small pause to avoid hammering the bus
+    delay(5);
   }
-  gyroX_bias=gyroX_sum/daCount;
-  gyroY_bias=gyroY_sum/daCount;
-  gyroZ_bias=gyroZ_sum/daCount;
+  if (daCount > 0) {
+    gyroX_bias=gyroX_sum/daCount;
+    gyroY_bias=gyroY_sum/daCount;
+    gyroZ_bias=gyroZ_sum/daCount;
+  } else {
+    // No valid samples collected
+    gyroX_bias = 0;
+    gyroY_bias = 0;
+    gyroZ_bias = 0;
+    Serial.println("Warning: No gyro samples collected during calibration; biases set to 0");
+  }
   Serial.print("gyroX_bias:  ");
   Serial.println(gyroX_bias);
   Serial.print("gyroY_bias:  ");
@@ -246,12 +261,22 @@ int serializeData2Bytes(int index,float x)
   return index;
 }
 //====================================================================================
-void recordAccelRegisters() {
+bool recordAccelRegisters() {
   Wire.beginTransmission(MPUaddress); //I2C address of the MPU
   Wire.write(0x3B); //Starting register for Accel Readings
   Wire.endTransmission();
   Wire.requestFrom(MPUaddress,6); //Request Accel Registers (3B - 40)
-  while(Wire.available() < 6);
+  unsigned long start = millis();
+  while (Wire.available() < 6) {
+    if ((millis() - start) > I2C_REQUEST_TIMEOUT_MS) {
+      // timeout - no data
+      Serial.println("Warning: accel read timeout");
+      // consume any available bytes
+      while (Wire.available()) Wire.read();
+      return false;
+    }
+    delay(1);
+  }
   accelX = Wire.read()<<8|Wire.read(); //Store first two bytes into accelX
   accelX=checkOverFlow(accelX);
   accelY = Wire.read()<<8|Wire.read(); //Store middle two bytes into accelY
@@ -259,6 +284,7 @@ void recordAccelRegisters() {
   accelZ = Wire.read()<<8|Wire.read(); //Store last two bytes into accelZ
   accelZ=checkOverFlow(accelZ);
   processAccelData();
+  return true;
 }
 
 void processAccelData(){
@@ -267,12 +293,20 @@ void processAccelData(){
   gForceZ = accelZ / 16384.0;
 }
 
-void recordGyroRegisters() {
+bool recordGyroRegisters() {
   Wire.beginTransmission(MPUaddress); //I2C address of the MPU
   Wire.write(0x43); //Starting register for Gyro Readings
   Wire.endTransmission();
   Wire.requestFrom(MPUaddress,6); //Request Gyro Registers (43 - 48)
-  while(Wire.available() < 6);
+  unsigned long start = millis();
+  while (Wire.available() < 6) {
+    if ((millis() - start) > I2C_REQUEST_TIMEOUT_MS) {
+      Serial.println("Warning: gyro read timeout");
+      while (Wire.available()) Wire.read();
+      return false;
+    }
+    delay(1);
+  }
   gyroX = Wire.read()<<8|Wire.read(); //Store first two bytes into accelX
   gyroX=checkOverFlow(gyroX);
   gyroY = Wire.read()<<8|Wire.read(); //Store middle two bytes into accelY
@@ -281,6 +315,7 @@ void recordGyroRegisters() {
   gyroZ=checkOverFlow(gyroZ);
   // The following call does not have an effect during the Gyro bias calculation phase
   processGyroData();
+  return true;
 }
 
 long checkOverFlow(long x)
@@ -369,6 +404,7 @@ float calculate_dt()
   }
   dt= (tNow-tPrevious)/1000000.0;
   tPrevious=tNow;
+  return dt;
 }
 //====================================================================================
 // Filter
