@@ -8,6 +8,8 @@ namespace penta_pod_imu
 PentapodIMU::PentapodIMU(rclcpp::Node::SharedPtr node) : node_(node)
 {
     RCLCPP_INFO(node_->get_logger(), "Pentapod IMU Node Started");
+    imu_msg_ = std::make_shared<sensor_msgs::msg::Imu>();
+    imu_msg_->header.frame_id = "imu_link";
     node_->declare_parameter<std::string>("port_name", "/dev/ttyUSB0");
     port_name_ = node_->get_parameter("port_name").as_string();
     RCLCPP_INFO(node_->get_logger(), "IMU specified port is %s", port_name_.c_str());
@@ -48,21 +50,21 @@ void PentapodIMU::readDataPublishCallback() {
         return;
     } 
     imu_serial_api_->update();
-    auto imu_msg = std::make_shared<sensor_msgs::msg::Imu>();
-    if (imu_serial_api_->readImuData(imu_msg)) {
-        imu_publisher_->publish(*imu_msg);
+    if (imu_serial_api_->readImuData(imu_msg_)) {
+        imu_msg_->header.stamp = node_->now();
+        imu_publisher_->publish(*imu_msg_);
     }
     RCLCPP_DEBUG_THROTTLE(node_->get_logger(), *node_->get_clock(), 2000, "Publishing IMU data: Orientation [%.3f, %.3f, %.3f, %.3f], Angular Velocity [%.3f, %.3f, %.3f], Linear Acceleration [%.3f, %.3f, %.3f]",
-        imu_msg->orientation.w,
-        imu_msg->orientation.x,
-        imu_msg->orientation.y,
-        imu_msg->orientation.z,
-        imu_msg->angular_velocity.x,
-        imu_msg->angular_velocity.y,
-        imu_msg->angular_velocity.z,
-        imu_msg->linear_acceleration.x,
-        imu_msg->linear_acceleration.y,
-        imu_msg->linear_acceleration.z
+        imu_msg_->orientation.w,
+        imu_msg_->orientation.x,
+        imu_msg_->orientation.y,
+        imu_msg_->orientation.z,
+        imu_msg_->angular_velocity.x,
+        imu_msg_->angular_velocity.y,
+        imu_msg_->angular_velocity.z,
+        imu_msg_->linear_acceleration.x,
+        imu_msg_->linear_acceleration.y,
+        imu_msg_->linear_acceleration.z
     );
 }
 

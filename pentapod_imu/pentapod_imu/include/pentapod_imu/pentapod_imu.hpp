@@ -23,6 +23,7 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
     std::string port_name_;
     std::shared_ptr<ImuSerialApi> imu_serial_api_;
+    std::shared_ptr<sensor_msgs::msg::Imu> imu_msg_;
 };
 
 } // namespace penta_pod_imu

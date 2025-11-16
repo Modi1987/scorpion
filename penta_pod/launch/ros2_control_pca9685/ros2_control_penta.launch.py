@@ -28,6 +28,7 @@ def generate_launch_description():
         ),
         launch_arguments={
             'name_space': LaunchConfiguration('name_space'),
+            'readl_hardware' : 'true',
         }.items()
     )
     

@@ -16,6 +16,7 @@
   <exec_depend>ros_to_ros2_control_command_bridge</exec_depend>
   <exec_depend>pca9685_ros2_control</exec_depend>
   <exec_depend>rtrobot_ros2_control</exec_depend>
+  <exec_depend>pentapod_imu</exec_depend>
 
   <exec_depend>penta_i2c_actuators</exec_depend>
   <exec_depend>penta_hiwonder_actuators</exec_depend>

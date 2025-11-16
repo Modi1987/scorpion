@@ -15,6 +15,12 @@ def generate_launch_description():
         description="Robot name space",
     )
 
+    real_hardware_arg = DeclareLaunchArgument(
+        "real_hardware",
+        default_value="false",
+        description="Whether to use real hardware or simulation",
+    )
+
     # Include the penta_pod launch file
     penta_pod_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -65,11 +71,23 @@ def generate_launch_description():
         }.items()
     )
 
+    imu_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(FindPackageShare('pentapod_imu').find('pentapod_imu'), 'launch', 'pentapod_imu.launch.py')
+        ),
+        launch_arguments={
+            'name_space': LaunchConfiguration('name_space'),
+            'real_hardware': LaunchConfiguration('real_hardware'),
+        }.items()
+    )
+
     return LaunchDescription([
         name_space_arg,
+        real_hardware_arg,
         penta_pod_launch, # for limbs and joystick
         gait_generator_launch,
         joints_aggregator_launch,
         null_space_publisher,
-        twerk_action_server
+        twerk_action_server,
+        imu_launch,
     ])
