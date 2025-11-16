@@ -21,6 +21,7 @@ bool ImuSerialApi::disconnect()
         close(fd_);
         is_connected_ = false;
     }
+    std::cout << "ImuSerialApi disconnect called, serial port: " << port_name_ << " closed." << std::endl;
     return true;
 }
 
@@ -65,6 +66,7 @@ bool ImuSerialApi::connect()
     }
 
     is_connected_ = true;
+    std::cout << "ImuSerialApi connected to serial port: " << port_name_ << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(2)); // Wait for the connection to stabilize
     return true;
 }
@@ -74,50 +76,59 @@ bool ImuSerialApi::is_connected() const
     return is_connected_;
 }
 
-int index = -1;
-int sign = +1;
 bool ImuSerialApi::update()
 {
-    auto packet_size = 1;
-    int byte_count = 0;
-    constexpr float factor = 1000.0;
-    char chr;
-    while (true) {
-        auto bytesRead = read( fd_, &chr, packet_size);
-        if (bytesRead <= 0) {
-            return byte_count > 0;
-        } else {
-            byte_count += bytesRead;
+    if (!is_connected_) {
+        std::cerr << "Not connected to serial port" << std::endl;
+        return false;
+    }
+    
+    auto bytes_read = read(fd_, read_buffer_, buffer_size_);
+    if (bytes_read < 0) {
+        if (errno != EAGAIN && errno != EWOULDBLOCK) {
+            std::cerr << "Error reading from serial port: " << strerror(errno) << std::endl;
+            disconnect();
         }
-        if ((chr >= 'a') && (chr <= 'g')) {
+        return false;
+    }
+
+    constexpr float factor = 1000.0;
+
+    for (ssize_t i = 0; i < bytes_read; ++i) {
+        char chr = read_buffer_[i];
+
+        if ((chr >= 'a') && (chr <= 'j')) {
             index = chr - 'a';
-            measruement_array_[index] = 0;
+            measurement_array_[index] = 0;
             sign = 1;
-            continue;
         } else if (chr == '-') {
             sign = -1;
         } else if ((chr >= '0') && (chr <= '9')) {
-            measruement_array_[index] = measruement_array_[index] * 10;
-            measruement_array_[index] = measruement_array_[index] +  sign * (chr - '0');
+            measurement_array_[index] = measurement_array_[index] * 10;
+            measurement_array_[index] = measurement_array_[index] +  sign * (chr - '0');
         } else if ( chr == char(13) || chr == char(10)) { // flush data on '\r' or '\n'
             index = 0;
             sign = 1;
             // rotation quaternion
-            qw_ = measruement_array_[0] / factor;
-            q_vec_[0] = measruement_array_[1] / factor;
-            q_vec_[1] = measruement_array_[2] / factor;
-            q_vec_[2] = measruement_array_[3] / factor;
+            qw_ = measurement_array_[0] / factor;
+            q_vec_[0] = measurement_array_[1] / factor;
+            q_vec_[1] = measurement_array_[2] / factor;
+            q_vec_[2] = measurement_array_[3] / factor;
             // angular velocity rad/sec
-            gyro_[0] = measruement_array_[4] / factor;
-            gyro_[1] = measruement_array_[5] / factor;
-            gyro_[2] = measruement_array_[6] / factor;
+            gyro_[0] = measurement_array_[4] / factor;
+            gyro_[1] = measurement_array_[5] / factor;
+            gyro_[2] = measurement_array_[6] / factor;
             // gravity normalized to gravity acceleration
-            gravity_[0] = measruement_array_[4] / factor;
-            gravity_[1] = measruement_array_[5] / factor;
-            gravity_[2] = measruement_array_[6] / factor;
+            gravity_[0] = measurement_array_[7] / factor;
+            gravity_[1] = measurement_array_[8] / factor;
+            gravity_[2] = measurement_array_[9] / factor;
+        } else if (chr == ' ') {
+            /* This charecter is used to make it more readable when printing */
+        } else {
+            std::cerr << "Unexpected character received: " << chr << std::endl;
         }
-
     }
+    return true;
 }
 
 bool ImuSerialApi::readImuData(sensor_msgs::msg::Imu::SharedPtr imu_msg)

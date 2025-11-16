@@ -13,14 +13,16 @@ class PentapodIMU
 public:
     PentapodIMU(rclcpp::Node::SharedPtr node);
     ~PentapodIMU() {};
+    void readDataPublishCallback();
+    bool disconnect();
+    bool connect();
 
 private:
     rclcpp::Node::SharedPtr node_;
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
+    std::string port_name_;
     std::shared_ptr<ImuSerialApi> imu_serial_api_;
-
-    void timerCallback();
 };
 
 } // namespace penta_pod_imu

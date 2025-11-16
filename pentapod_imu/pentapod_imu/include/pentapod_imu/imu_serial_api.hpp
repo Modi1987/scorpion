@@ -33,12 +33,17 @@ private:
     int baud_rate_;
     int fd_; // File descriptor
     bool is_connected_;
-
+    // vars used to parse incoming data
+    static constexpr size_t buffer_size_ = 256;
+    char read_buffer_[buffer_size_];
+    int index = -1;
+    int sign = +1;
+    int measurement_array_[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    // IMU data
     float q_vec_[3] = {0.0f, 0.0f, 0.0f}; // Quaternion representing imaginary components
     float qw_ = 0.0f; // Quaternion w component
     float gyro_[3] = {0.0f, 0.0f, 0.0f}; // Gyroscope measurements
     float gravity_[3] = {0.0f, 0.0f, 0.0f}; // Gravity vector
-    int measruement_array_[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 };
 
 } // namespace penta_pod_imu

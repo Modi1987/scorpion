@@ -3,9 +3,23 @@
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<rclcpp::Node>("imu_node");
-  auto imu_obejct = std::make_shared<penta_pod_imu::PentapodIMU>(node);
-  rclcpp::spin(node);
+  auto node = std::make_shared<rclcpp::Node>("pentapod_imu_node");
+  auto imu_object = std::make_shared<penta_pod_imu::PentapodIMU>(node);
+  if (!imu_object->connect()) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to connect to IMU. Exiting.");
+    return -1;
+  }
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  try {
+    while (rclcpp::ok()) {
+      imu_object->readDataPublishCallback();
+      rclcpp::spin_some(node);
+      std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+  } catch (const std::exception &e) {
+    RCLCPP_ERROR(node->get_logger(), "Exception in main loop: %s", e.what());
+    imu_object->disconnect();
+  }
   rclcpp::shutdown();
   return 0;
 }

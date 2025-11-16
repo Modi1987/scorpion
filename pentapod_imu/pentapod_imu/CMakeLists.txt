@@ -32,6 +32,10 @@ target_link_libraries(pentapod_imu_node
         ${PROJECT_NAME}
         )
 
+add_executable(penta_imu_test src/penta_imu_test.cpp)
+target_link_libraries(penta_imu_test
+        ${PROJECT_NAME}
+        )
 
 # Install
 install(
@@ -41,6 +45,7 @@ install(
 
 install(TARGETS 
   pentapod_imu_node
+  penta_imu_test
   DESTINATION lib/${PROJECT_NAME}
 )
 
