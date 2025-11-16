@@ -71,14 +71,14 @@ Install the software required to comunicate bteween Raspberry Pi4 and PCA9685, w
 sudo pip3 install adafruit-circuitpython-servokit
 ```
 
-The gui script is available in the [scripts](https://github.com/Modi1987/scorpion/tree/main/rpi4_hw_interface/scripts) folder. It uses Tkinter libarry comes with python3 by default (otherwise it is required to be installed)
+The gui script is available in the [scripts](https://github.com/Modi1987/polypod/tree/main/rpi4_hw_interface/scripts) folder. It uses Tkinter libarry comes with python3 by default (otherwise it is required to be installed)
 
-The easiest way to use the gui is to Transfer the file [simple_limps_control_gui.py](https://github.com/Modi1987/scorpion/tree/main/rpi4_hw_interface/scripts/simple_limps_control_gui.py) into inside the raspberry-pi. You can use a USB pin drive to do so. Then connect a monitor to the raspberry-pi. Afterwards:
+The easiest way to use the gui is to Transfer the file [gui_simple_limps_control.py](https://github.com/Modi1987/polypod/tree/main/rpi4_hw_interface/scripts/simple_limps_control_gui.py) into inside the raspberry-pi. You can use a USB pin drive to do so. Then connect a monitor to the raspberry-pi. Afterwards:
 
 Open the terminal and then run:
 
 ```
-python3 simple_limps_control_gui.py
+python3 gui_simple_limps_control.py
 ```
 
 Move the sliders to control the motors into certain position, then press the update Button
