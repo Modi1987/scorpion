@@ -65,14 +65,28 @@ ImuStabilizer::ImuStabilizer(rclcpp::Node::SharedPtr node)  : node_(node) {
 ImuStabilizer::~ImuStabilizer() {}
 
 void ImuStabilizer::timer_callback() {
-
-    if (!imu_feedback_ || !current_base_pose_) {
+    bool ready = true;
+    if (!imu_feedback_) {
         RCLCPP_WARN_THROTTLE(
             node_->get_logger(), 
             *node_->get_clock(), 
             5000, 
-            "IMU or Base Pose feedback not ready yet."
+            "IMU not ready yet."
         );
+        ready = false;
+    }
+
+    if (!current_base_pose_) {
+        RCLCPP_WARN_THROTTLE(
+            node_->get_logger(), 
+            *node_->get_clock(), 
+            5000, 
+            "Base pose not ready yet."
+        );
+        ready = false;
+    }
+
+    if (!ready) {
         return;
     }
 

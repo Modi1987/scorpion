@@ -83,7 +83,7 @@ def generate_launch_description():
 
     imu_stabilizer_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('imu_stabilizer').find('imu_stabilizer'), 'launch', 'imu_stabilizer.launch.py')
+            os.path.join(FindPackageShare('imu_stabilization').find('imu_stabilization'), 'launch', 'imu_stabilizer.launch.py')
         ),
         launch_arguments={
             'name_space': LaunchConfiguration('name_space'),
