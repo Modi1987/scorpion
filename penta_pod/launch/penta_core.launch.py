@@ -81,6 +81,15 @@ def generate_launch_description():
         }.items()
     )
 
+    imu_stabilizer_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(FindPackageShare('imu_stabilizer').find('imu_stabilizer'), 'launch', 'imu_stabilizer.launch.py')
+        ),
+        launch_arguments={
+            'name_space': LaunchConfiguration('name_space'),
+        }.items()
+    )
+
     return LaunchDescription([
         name_space_arg,
         real_hardware_arg,
@@ -90,4 +99,5 @@ def generate_launch_description():
         null_space_publisher,
         twerk_action_server,
         imu_launch,
+        imu_stabilizer_launch,
     ])
