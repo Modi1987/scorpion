@@ -7,18 +7,58 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+# add external dependencies
+find_package(Eigen3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
+set(NON_ROS_LIBRARIES ${EIGEN3_LIBRARIES} ${PINOCCHIO_LIBRARIES})
 
-add_executable(imu_stabilization src/imu_stabilization.cpp)
+add_library(${PROJECT_NAME}
+        src/imu_stabilization/imu_stabilization.cpp
+        )
+
 target_include_directories(imu_stabilization PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 target_compile_features(imu_stabilization PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
-install(TARGETS imu_stabilization
-  DESTINATION lib/${PROJECT_NAME})
+ament_target_dependencies(${PROJECT_NAME}
+        rclcpp
+        sensor_msgs
+        geometry_msgs
+        Eigen3
+        )
+
+add_executable(imu_stabilization_node src/imu_stabilization_node.cpp)
+target_link_libraries(imu_stabilization_node
+        ${PROJECT_NAME}
+        )
+
+#############
+## Install ##
+#############
+
+install(
+        DIRECTORY include/
+        DESTINATION include
+)
+
+install(TARGETS 
+        imu_stabilization imu_stabilization_node
+        DESTINATION lib/${PROJECT_NAME}
+        )
+
+install(DIRECTORY
+  launch
+  config
+  DESTINATION share/${PROJECT_NAME}
+)
+
+#############
+## Testing ##
+#############
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
