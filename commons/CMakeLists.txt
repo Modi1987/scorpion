@@ -34,7 +34,7 @@ ament_target_dependencies(${PROJECT_NAME}
         )
 
 # export dependency so downstream ament package config knows about it
-ament_export_libraries(commons)
+# ament_export_libraries(commons)
 #############
 ## Install ##
 #############
