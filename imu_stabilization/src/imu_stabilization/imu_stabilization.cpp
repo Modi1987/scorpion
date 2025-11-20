@@ -134,6 +134,7 @@ void ImuStabilizer::declare_parameters() {
     node_->declare_parameter<double>("mounting.roll", 0.0);
     node_->declare_parameter<double>("mounting.pitch", 0.0);
     node_->declare_parameter<double>("mounting.yaw", 0.0);
+    node_->declare_parameter<double>("kp", 0.1);
 }
 
 void ImuStabilizer::get_parameters() {

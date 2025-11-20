@@ -33,7 +33,8 @@ ament_target_dependencies(${PROJECT_NAME}
         geometry_msgs
         )
 
-
+# export dependency so downstream ament package config knows about it
+ament_export_libraries(commons)
 #############
 ## Install ##
 #############
