@@ -58,7 +58,8 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-plotjuggler-ros \
     ros-${ROS_DISTRO}-joy \
     ros-${ROS_DISTRO}-teleop-twist-joy \
-    ros-${ROS_DISTRO}-imu-tools
+    ros-${ROS_DISTRO}-imu-tools \
+    ros-${ROS_DISTRO}-rviz2
 
 # Install navigation2 packages
 RUN apt-get update && apt-get install -y \
