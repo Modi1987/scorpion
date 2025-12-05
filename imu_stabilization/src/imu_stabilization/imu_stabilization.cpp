@@ -125,15 +125,12 @@ void ImuStabilizer::timer_callback() {
         axis.y(),
         axis.z()
     );
-    Eigen::Quaterniond q_target;
     if (angle < 1e-6) {
-        q_target = q_current;
-    } else {
-        Eigen::Quaterniond q_delta(Eigen::AngleAxisd(angle, axis));
-        q_target = q_delta * q_current;
+        // no need to stabilize
+        return;
     }
-    q_target.normalize();
-    Eigen::Matrix3d R_target = q_target.toRotationMatrix();
+    Eigen::Quaterniond q_adjustment(Eigen::AngleAxisd(angle, axis));
+    Eigen::Matrix3d R_target = q_adjustment.toRotationMatrix() * q_current.toRotationMatrix();
     if (!check_tilt_limits(R_target)) {
         RCLCPP_WARN_THROTTLE(
             node_->get_logger(),
