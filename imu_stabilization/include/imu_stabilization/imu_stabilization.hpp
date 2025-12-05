@@ -38,11 +38,17 @@ private:
         double mounting_rpy[3];
         double kp;
         Eigen::Matrix3d R_mounting;
+        struct tilt_limits {
+            double tan_x;
+            double tan_y;
+            double tan_z;
+        } tilt_limits;
     } params_;
 
     void timer_callback();
     void declare_parameters();
     void get_parameters();
+    bool check_tilt_limits(const Eigen::Matrix3d& R_target);
 };
 
 } // pentapod::imu::stabilizer

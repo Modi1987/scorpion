@@ -6,3 +6,7 @@
       roll: 0.0
       pitch: 0.0
       yaw: -90.0
+    tilt_limits: # tan
+      tan_x: 0.25
+      tan_y: 0.25
+      tan_z: 0.3

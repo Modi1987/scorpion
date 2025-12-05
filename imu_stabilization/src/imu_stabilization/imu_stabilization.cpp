@@ -134,6 +134,41 @@ void ImuStabilizer::declare_parameters() {
     node_->declare_parameter<double>("mounting.pitch", 0.0);
     node_->declare_parameter<double>("mounting.yaw", 0.0);
     node_->declare_parameter<double>("kp", 0.1);
+    node_->declare_parameter<double>("tilt_limits.tan_x", 0.25);
+    node_->declare_parameter<double>("tilt_limits.tan_y", 0.25);
+    node_->declare_parameter<double>("tilt_limits.tan_z", 0.3);
+}
+
+bool ImuStabilizer::check_tilt_limits(const Eigen::Matrix3d& R_target) {
+    auto tan_from_vec = [](const Eigen::Vector3d& v_xy_z) {
+        const double xy_norm = std::hypot(v_xy_z.x(), v_xy_z.y());
+        return v_xy_z.z() / xy_norm;
+    };
+
+    auto check_limit = [&](double value, double limit, const char* axis_name) {
+        if (std::abs(value) > limit) {
+            RCLCPP_WARN_THROTTLE(
+                node_->get_logger(),
+                *node_->get_clock(),
+                5000,
+                "%s tilt %f exceeds limit %f.",
+                axis_name, value, limit
+            );
+            return false;
+        }
+        return true;
+    };
+
+    const auto x_vec = R_target.col(0);
+    const auto y_vec = R_target.col(1);
+
+    const double tan_x = tan_from_vec(x_vec);
+    const double tan_y = tan_from_vec(y_vec);
+    const double tan_z = x_vec.y() / x_vec.x();   // original expression preserved
+
+    return  check_limit(tan_x, params_.tilt_limits.tan_x, "X") &&
+            check_limit(tan_y, params_.tilt_limits.tan_y, "Y") &&
+            check_limit(tan_z, params_.tilt_limits.tan_z, "Z");
 }
 
 void ImuStabilizer::get_parameters() {
@@ -170,6 +205,18 @@ void ImuStabilizer::get_parameters() {
         params_.mounting_rpy[1],
         params_.mounting_rpy[2]
     );
+    // Get tilt limits
+    auto load_tilt_limit = [this](std::string param_key, double &limit_var, double default_value) ->void {
+        if (!node_->get_parameter(param_key, limit_var)) {
+            limit_var = default_value;
+            RCLCPP_WARN(node_->get_logger(), "Could not load value for %s, loading default value: %f", param_key.c_str(), default_value);
+        } else {
+            RCLCPP_INFO(node_->get_logger(), "Loading value for %s: %f", param_key.c_str(), limit_var);
+        }
+    };
+    load_tilt_limit("tilt_limits.tan_x", params_.tilt_limits.tan_x, 0.2);
+    load_tilt_limit("tilt_limits.tan_y", params_.tilt_limits.tan_y, 0.2);
+    load_tilt_limit("tilt_limits.tan_z", params_.tilt_limits.tan_z, 0.2);
 }
 
 } // namespace pentapod::imu::stabilizer
