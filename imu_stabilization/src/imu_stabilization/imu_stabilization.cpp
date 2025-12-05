@@ -111,7 +111,6 @@ void ImuStabilizer::timer_callback() {
     Eigen::Vector3d vertical(0.0, 0.0, 1.0);
     auto error = vertical.cross(z_axis);
     auto w_stabilization = -params_.kp * error;
-    Eigen::Quaterniond q_current(R);
     Eigen::Vector3d delta_angle = w_stabilization * params_.interval_millis / 1000.0;
     double angle = delta_angle.norm();
     auto axis = delta_angle.normalized();
@@ -129,7 +128,14 @@ void ImuStabilizer::timer_callback() {
         // no need to stabilize
         return;
     }
+    // calculate target orientation
     Eigen::Quaterniond q_adjustment(Eigen::AngleAxisd(angle, axis));
+    Eigen::Quaterniond q_current = Eigen::Quaterniond(
+        current_base_pose_->pose.orientation.w,
+        current_base_pose_->pose.orientation.x,
+        current_base_pose_->pose.orientation.y,
+        current_base_pose_->pose.orientation.z
+    );
     Eigen::Matrix3d R_target = q_adjustment.toRotationMatrix() * q_current.toRotationMatrix();
     if (!check_tilt_limits(R_target)) {
         RCLCPP_WARN_THROTTLE(
