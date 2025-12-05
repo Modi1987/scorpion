@@ -114,11 +114,22 @@ void ImuStabilizer::timer_callback() {
     Eigen::Quaterniond q_current(R);
     Eigen::Vector3d delta_angle = w_stabilization * params_.interval_millis / 1000.0;
     double angle = delta_angle.norm();
+    auto axis = delta_angle.normalized();
+    RCLCPP_DEBUG_THROTTLE(
+        node_->get_logger(),
+        *node_->get_clock(),
+        100,
+        "Stabilization angle: %f rad, axis: [%f, %f, %f]",
+        angle,
+        axis.x(),
+        axis.y(),
+        axis.z()
+    );
     Eigen::Quaterniond q_target;
     if (angle < 1e-6) {
         q_target = q_current;
     } else {
-        Eigen::Quaterniond q_delta(Eigen::AngleAxisd(angle, delta_angle.normalized()));
+        Eigen::Quaterniond q_delta(Eigen::AngleAxisd(angle, axis));
         q_target = q_delta * q_current;
     }
     q_target.normalize();
