@@ -17,6 +17,13 @@ def generate_launch_description():
     )
     ld.add_action(name_space_arg)
 
+    log_level = DeclareLaunchArgument(
+        "log_level",
+        default_value="info",
+        description="Logging level",
+    )
+    ld.add_action(log_level)
+
     """ Nodes """
     config = os.path.join(
         get_package_share_directory("imu_stabilization"),
@@ -38,6 +45,7 @@ def generate_launch_description():
             ("base_orientation_sub", "null_space_pose"),
             ("base_orientation_pub", "set_null_space_pose"),
         ],
+        arguments=["--ros-args", "--log-level", LaunchConfiguration("log_level")],
     )
     ld.add_action(imu_stabilizer_node)
 
