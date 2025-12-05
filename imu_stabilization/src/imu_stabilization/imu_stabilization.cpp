@@ -114,6 +114,15 @@ void ImuStabilizer::timer_callback() {
     }
     q_target.normalize();
     Eigen::Matrix3d R_target = q_target.toRotationMatrix();
+    if (!check_tilt_limits(R_target)) {
+        RCLCPP_WARN_THROTTLE(
+            node_->get_logger(),
+            *node_->get_clock(),
+            5000,
+            "Tilt limits exceeded, skipping control loop."
+        );
+        return;
+    }
     if (!pose_cmd_) {
         pose_cmd_ = std::make_shared<PoseStamped>();
         pose_cmd_->header.frame_id = current_base_pose_->header.frame_id;
