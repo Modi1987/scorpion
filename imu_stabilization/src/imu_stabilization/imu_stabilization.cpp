@@ -90,7 +90,6 @@ void ImuStabilizer::timer_callback() {
         return;
     }
 
-    std::shared_ptr<PoseStamped> current_base_pose_; // current pose feedback
     auto quat = Eigen::Quaterniond(
         imu_feedback_->orientation.w,
         imu_feedback_->orientation.x,
@@ -98,13 +97,8 @@ void ImuStabilizer::timer_callback() {
         imu_feedback_->orientation.z
     );
     Eigen::Matrix3d R = quat.toRotationMatrix();
-    auto R_mounting = euler2rotation(
-        params_.mounting_rpy[0],
-        params_.mounting_rpy[1],
-        params_.mounting_rpy[2]
-    );
-    R = R * R_mounting.transpose(); // compensate mounting orientation
-    Eigen::Vector3d z_axis(R(2,0), R(2,1), R(2,2));
+    R = R * params_.R_mounting.transpose(); // compensate mounting orientation
+    Eigen::Vector3d z_axis = R.col(2);
     Eigen::Vector3d vertical(0.0, 0.0, 1.0);
     auto error = vertical.cross(z_axis);
     auto w_stabilization = -params_.kp * error;
@@ -120,6 +114,11 @@ void ImuStabilizer::timer_callback() {
     }
     q_target.normalize();
     Eigen::Matrix3d R_target = q_target.toRotationMatrix();
+    if (!pose_cmd_) {
+        pose_cmd_ = std::make_shared<PoseStamped>();
+        pose_cmd_->header.frame_id = current_base_pose_->header.frame_id;
+    }
+    pose_cmd_->header.stamp = node_->now();
     pose_cmd_->pose.position = current_base_pose_->pose.position; // command stabilization pose
     Eigen::Quaterniond target_q(R_target);
     pose_cmd_->pose.orientation.x = target_q.x();
@@ -165,6 +164,12 @@ void ImuStabilizer::get_parameters() {
             RCLCPP_WARN(node_->get_logger(), "Loaded parameter value for %s is: %f", keys[i].c_str(), params_.mounting_rpy[i]);
         }
     }
+    // Calculate mounting rotation
+    params_.R_mounting = euler2rotation(
+        params_.mounting_rpy[0],
+        params_.mounting_rpy[1],
+        params_.mounting_rpy[2]
+    );
 }
 
 } // namespace pentapod::imu::stabilizer

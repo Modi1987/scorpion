@@ -37,6 +37,7 @@ private:
         int interval_millis;
         double mounting_rpy[3];
         double kp;
+        Eigen::Matrix3d R_mounting;
     } params_;
 
     void timer_callback();
