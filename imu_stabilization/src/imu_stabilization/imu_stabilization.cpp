@@ -99,6 +99,15 @@ void ImuStabilizer::timer_callback() {
     Eigen::Matrix3d R = quat.toRotationMatrix();
     R = R * params_.R_mounting.transpose(); // compensate mounting orientation
     Eigen::Vector3d z_axis = R.col(2);
+    RCLCPP_DEBUG_THROTTLE(
+        node_->get_logger(),
+        *node_->get_clock(),
+        100,
+        "IMU Z axis: [%f, %f, %f]",
+        z_axis.x(),
+        z_axis.y(),
+        z_axis.z()
+    );
     Eigen::Vector3d vertical(0.0, 0.0, 1.0);
     auto error = vertical.cross(z_axis);
     auto w_stabilization = -params_.kp * error;
