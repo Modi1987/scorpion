@@ -90,14 +90,14 @@ void ImuStabilizer::timer_callback() {
         return;
     }
 
-    auto quat = Eigen::Quaterniond(
+    auto quat_imu_measurement = Eigen::Quaterniond(
         imu_feedback_->orientation.w,
         imu_feedback_->orientation.x,
         imu_feedback_->orientation.y,
         imu_feedback_->orientation.z
     );
-    Eigen::Matrix3d R = quat.toRotationMatrix();
-    R = R * params_.R_mounting.transpose(); // compensate mounting orientation
+    Eigen::Matrix3d R_imu_measurement = quat_imu_measurement.toRotationMatrix();
+    auto R = R_imu_measurement * params_.R_mounting.transpose(); // compensate mounting orientation
     Eigen::Vector3d z_axis = R.col(2);
     RCLCPP_DEBUG_THROTTLE(
         node_->get_logger(),
