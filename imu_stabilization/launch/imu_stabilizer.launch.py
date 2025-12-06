@@ -44,6 +44,7 @@ def generate_launch_description():
             ("imu_sub", "imu/data_raw"),
             ("base_orientation_sub", "null_space_pose"),
             ("base_orientation_pub", "set_null_space_pose"),
+            ("joy", "joy"),
         ],
         arguments=["--ros-args", "--log-level", LaunchConfiguration("log_level")],
     )
