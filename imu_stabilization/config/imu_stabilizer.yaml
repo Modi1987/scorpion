@@ -1,7 +1,7 @@
 /**:
   ros__parameters:
     interval_millis: 20
-    kp: -5.0
+    kp: 5.0
     mounting: # in degrees
       roll: 0.0
       pitch: 0.0

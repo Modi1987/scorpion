@@ -155,7 +155,7 @@ void ImuStabilizer::timer_callback() {
         current_base_pose_->pose.orientation.y,
         current_base_pose_->pose.orientation.z
     );
-    Eigen::Matrix3d R_target = q_adjustment.toRotationMatrix() * q_current.toRotationMatrix();
+    Eigen::Matrix3d R_target = q_current.toRotationMatrix() * q_adjustment.toRotationMatrix();
     if (!check_tilt_limits(R_target)) {
         RCLCPP_WARN_THROTTLE(
             node_->get_logger(),
