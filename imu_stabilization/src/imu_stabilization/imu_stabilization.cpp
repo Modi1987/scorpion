@@ -217,7 +217,6 @@ bool ImuStabilizer::check_tilt_limits(const Eigen::Matrix3d& R_target) {
 
     const double tan_x = tan_from_vec(x_vec);
     const double tan_y = tan_from_vec(y_vec);
-    const double tan_z = x_vec.y() / x_vec.x();   // original expression preserved
 
     return  check_limit(tan_x, params_.tilt_limits.tan_x, "X") &&
             check_limit(tan_y, params_.tilt_limits.tan_y, "Y");
