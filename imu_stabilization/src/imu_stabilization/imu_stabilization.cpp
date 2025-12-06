@@ -56,6 +56,25 @@ ImuStabilizer::ImuStabilizer(rclcpp::Node::SharedPtr node)  : node_(node) {
             }
             *current_base_pose_ = *msg;
         });
+    
+    joy_sub_ = node_->create_subscription<sensor_msgs::msg::Joy>(
+        "joy",
+        10,
+        [this](const sensor_msgs::msg::Joy::SharedPtr msg) {
+            int index = params_.joy_enable_button_index;
+            auto value = (index >= 0 && index < static_cast<int>(msg->buttons.size())) ? msg->buttons[index] : 0;
+            static bool last_button_state = false;
+            bool current_state = (value != 0);
+            if (current_state && (!last_button_state)) {
+                this->enable_controller_ = !this->enable_controller_;
+                RCLCPP_INFO(
+                    node_->get_logger(),
+                    "IMU Stabilization Controller %s",
+                    this->enable_controller_ ? "ENABLED" : "DISABLED"
+                );
+            }
+            last_button_state = current_state;
+        });
 
     timer_ = node_->create_wall_timer(
       std::chrono::milliseconds(static_cast<int>(params_.interval_millis)),
@@ -157,6 +176,7 @@ void ImuStabilizer::timer_callback() {
     pose_cmd_->pose.orientation.y = target_q.y();
     pose_cmd_->pose.orientation.z = target_q.z();
     pose_cmd_->pose.orientation.w = target_q.w();
+    if (!enable_controller_) return;
     base_pose_publisher_->publish(*pose_cmd_);
 }
 
@@ -169,6 +189,7 @@ void ImuStabilizer::declare_parameters() {
     node_->declare_parameter<double>("tilt_limits.tan_x", 0.25);
     node_->declare_parameter<double>("tilt_limits.tan_y", 0.25);
     node_->declare_parameter<double>("tilt_limits.tan_z", 0.3);
+    node_->declare_parameter<int>("joy.enable_button_index", 3);
 }
 
 bool ImuStabilizer::check_tilt_limits(const Eigen::Matrix3d& R_target) {
@@ -248,6 +269,13 @@ void ImuStabilizer::get_parameters() {
     load_tilt_limit("tilt_limits.tan_x", params_.tilt_limits.tan_x, 0.2);
     load_tilt_limit("tilt_limits.tan_y", params_.tilt_limits.tan_y, 0.2);
     load_tilt_limit("tilt_limits.tan_z", params_.tilt_limits.tan_z, 0.2);
+
+    if (!node_->get_parameter("joy.enable_button_index", params_.joy_enable_button_index)) {
+        params_.joy_enable_button_index = 3;
+        RCLCPP_WARN(node_->get_logger(), "Could not load parameter joy.enable_button_index, defaulting to: %d", params_.joy_enable_button_index);
+    } else {
+        RCLCPP_WARN(node_->get_logger(), "Loaded parameter value for joy.enable_button_index is: %d", params_.joy_enable_button_index);
+    }
 }
 
 } // namespace pentapod::imu::stabilizer

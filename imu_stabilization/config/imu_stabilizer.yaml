@@ -10,3 +10,5 @@
       tan_x: 0.35
       tan_y: 0.35
       tan_z: 0.35
+    joy:
+      enable_button_index: 3

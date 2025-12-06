@@ -22,6 +22,8 @@ Connect the dongle to Raspberry PI, to control the robot as follows:
 
 7- `D-pad + Right Trigger button (RT)` allow the robot to pitch
 
+8- `Y button` is used to enable/disbale imu stabilization
+
 
 Note, make sure to enable the motion using:
 

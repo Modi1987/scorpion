@@ -27,17 +27,20 @@ private:
     rclcpp::Subscription<Imu>::SharedPtr imu_sub_;
     rclcpp::Subscription<PoseStamped>::SharedPtr base_pose_sub_;
     rclcpp::Publisher<PoseStamped>::SharedPtr base_pose_publisher_;
+    rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
     rclcpp::TimerBase::SharedPtr timer_;
 
     std::shared_ptr<PoseStamped> current_base_pose_; // current pose feedback
     std::shared_ptr<Imu> imu_feedback_; // imu feedback
     std::shared_ptr<PoseStamped> pose_cmd_; // command stabilization pose
+    bool enable_controller_{false};
 
     struct NodeParams {
         int interval_millis;
         double mounting_rpy[3];
         double kp;
         Eigen::Matrix3d R_mounting;
+        int joy_enable_button_index;
         struct tilt_limits {
             double tan_x;
             double tan_y;
