@@ -33,7 +33,7 @@ private:
     std::shared_ptr<PoseStamped> current_base_pose_; // current pose feedback
     std::shared_ptr<Imu> imu_feedback_; // imu feedback
     std::shared_ptr<PoseStamped> pose_cmd_; // command stabilization pose
-    bool enable_controller_{true};
+    bool enable_controller_{false};
 
     struct NodeParams {
         int interval_millis;
