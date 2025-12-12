@@ -56,6 +56,11 @@ ImuStabilizer::ImuStabilizer(rclcpp::Node::SharedPtr node)  : node_(node) {
             }
             *current_base_pose_ = *msg;
         });
+    angular_error_msg_ = std::make_shared<Float64>();
+    angular_error_pub_ = node_->create_publisher<Float64>(
+        "imu_angular_error",
+        10
+    );
     
     joy_sub_ = node_->create_subscription<sensor_msgs::msg::Joy>(
         "joy",
@@ -143,11 +148,16 @@ void ImuStabilizer::timer_callback() {
         axis.y(),
         axis.z()
     );
+    angular_error_msg_->data = angle;
+    angular_error_pub_->publish(*angular_error_msg_);
     if (angle < 1e-6) {
         // no need to stabilize
         return;
     }
     // calculate target orientation
+    // The error (from cross product) is in world frame, so the adjustment
+    // must be applied in world frame (pre-multiply), not body frame (post-multiply).
+    // Using post-multiply causes yaw drift because body-frame z != world-frame z when tilted.
     Eigen::Quaterniond q_adjustment(Eigen::AngleAxisd(angle, axis));
     Eigen::Quaterniond q_current = Eigen::Quaterniond(
         current_base_pose_->pose.orientation.w,
@@ -155,7 +165,8 @@ void ImuStabilizer::timer_callback() {
         current_base_pose_->pose.orientation.y,
         current_base_pose_->pose.orientation.z
     );
-    Eigen::Matrix3d R_target = q_current.toRotationMatrix() * q_adjustment.toRotationMatrix();
+    // Pre-multiply: apply adjustment in world frame to avoid yaw drift
+    Eigen::Matrix3d R_target = q_adjustment.toRotationMatrix() * q_current.toRotationMatrix();
     if (!check_tilt_limits(R_target)) {
         RCLCPP_WARN_THROTTLE(
             node_->get_logger(),

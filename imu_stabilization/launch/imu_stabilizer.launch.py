@@ -45,6 +45,7 @@ def generate_launch_description():
             ("base_orientation_sub", "null_space_pose"),
             ("base_orientation_pub", "set_null_space_pose"),
             ("joy", "joy"),
+            ("imu_stabilization/angular_error", "imu_stabilization/angular_error")
         ],
         arguments=["--ros-args", "--log-level", LaunchConfiguration("log_level")],
     )
