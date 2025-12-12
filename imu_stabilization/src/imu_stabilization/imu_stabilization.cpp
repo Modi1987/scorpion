@@ -58,7 +58,7 @@ ImuStabilizer::ImuStabilizer(rclcpp::Node::SharedPtr node)  : node_(node) {
         });
     angular_error_msg_ = std::make_shared<Float64>();
     angular_error_pub_ = node_->create_publisher<Float64>(
-        "imu_angular_error",
+        "imu_stabilization/angular_error",
         10
     );
     

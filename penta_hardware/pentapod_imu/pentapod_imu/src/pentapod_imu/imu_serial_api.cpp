@@ -122,6 +122,7 @@ bool ImuSerialApi::update()
             gravity_[0] = measurement_array_[7] / factor;
             gravity_[1] = measurement_array_[8] / factor;
             gravity_[2] = measurement_array_[9] / factor;
+            new_measruement_ready_ = true;
         } else if (chr == ' ') {
             /* This charecter is used to make it more readable when printing */
         } else {
@@ -133,6 +134,8 @@ bool ImuSerialApi::update()
 
 bool ImuSerialApi::readImuData(sensor_msgs::msg::Imu::SharedPtr imu_msg)
 {
+    if (!new_measruement_ready_) return false;
+    new_measruement_ready_ = false;
     imu_msg->orientation.w = qw_;
     imu_msg->orientation.x = q_vec_[0];
     imu_msg->orientation.y = q_vec_[1];

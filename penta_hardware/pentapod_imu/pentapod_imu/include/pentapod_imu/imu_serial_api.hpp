@@ -44,6 +44,7 @@ private:
     float qw_ = 0.0f; // Quaternion w component
     float gyro_[3] = {0.0f, 0.0f, 0.0f}; // Gyroscope measurements
     float gravity_[3] = {0.0f, 0.0f, 0.0f}; // Gravity vector
+    bool new_measruement_ready_{false};
 };
 
 } // namespace penta_pod_imu
