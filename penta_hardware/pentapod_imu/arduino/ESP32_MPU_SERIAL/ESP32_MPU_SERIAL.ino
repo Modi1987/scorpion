@@ -32,6 +32,8 @@ float twoKp = twoKpDef;                      // 2 * proportional gain (Kp)
 float twoKi = twoKiDef;                      // 2 * integral gain (Ki)
 float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;          // quaternion of sensor frame relative to auxiliary frame
 float integralFBx = 0.0f,  integralFBy = 0.0f, integralFBz = 0.0f; // integral error terms scaled by Ki
+constexpr float INV_GYRO_SCALE = 1.0f / 131.0f;
+constexpr float DEG2RAD        = 3.14159265f / 180.0f;
 
 // Bytes buffer message
 const unsigned int header_len=4;
@@ -141,11 +143,11 @@ void calibrateGyroForBias()
   Serial.println(gyroZ_bias);
 }
 
-void calibrateBias()
+void calibrateGyroBias()
 {
-  gyroXCalibrated=gyroX - gyroX_bias;
-  gyroYCalibrated=gyroY - gyroY_bias;
-  gyroZCalibrated=gyroZ - gyroZ_bias;
+  gyroXCalibrated = gyroX - gyroX_bias;
+  gyroYCalibrated = gyroY - gyroY_bias;
+  gyroZCalibrated = gyroZ - gyroZ_bias;
 }
 //====================================================================================
 void dispAuthorsMessage()
@@ -182,20 +184,18 @@ void loop() {
         digitalWrite(LED_INDICATOR, value);
         led_time_millis = current_time;
       }
-      calculate_dt();
       bool ok1 = recordAccelRegisters();
       bool ok2 = recordGyroRegisters();
       if (ok1 && ok2) {
-        recordAccelRegisters();
-        recordGyroRegisters();
-        calibrateBias();
-        wx=rotX*3.14/180;
-        wy=rotY*3.14/180;
-        wz=rotZ*3.14/180;
+        calibrateGyroBias();
+        processGyroData();
+        calculate_dt();
         MahonyAHRSupdateIMU(wx, wy, wz, gForceX, gForceY, gForceZ);
         // stream data over serial
-        printDataAscii();
-        delay(4);
+        for (int i = 0; i < 4; i++) {
+          printDataAscii();
+        }
+        delay(2);
       }
    }
 }
@@ -317,8 +317,6 @@ bool recordGyroRegisters() {
   gyroY=checkOverFlow(gyroY);
   gyroZ = Wire.read()<<8|Wire.read(); //Store last two bytes into accelZ
   gyroZ=checkOverFlow(gyroZ);
-  // The following call does not have an effect during the Gyro bias calculation phase
-  processGyroData();
   return true;
 }
 
@@ -337,9 +335,12 @@ long checkOverFlow(long x)
 }
 
 void processGyroData() {
-  rotX = gyroXCalibrated / 131.0;
-  rotY = gyroYCalibrated / 131.0; 
-  rotZ = gyroZCalibrated / 131.0;
+  rotX = gyroXCalibrated * INV_GYRO_SCALE;
+  rotY = gyroYCalibrated * INV_GYRO_SCALE; 
+  rotZ = gyroZCalibrated * INV_GYRO_SCALE;
+  wx = rotX * DEG2RAD;
+  wy = rotY * DEG2RAD;
+  wz = rotZ * DEG2RAD;
 }
 
 void printDataAscii() {
