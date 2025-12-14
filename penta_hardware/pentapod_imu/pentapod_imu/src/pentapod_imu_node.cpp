@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     while (rclcpp::ok()) {
       imu_object->readDataPublishCallback();
       rclcpp::spin_some(node);
-      std::this_thread::sleep_for(std::chrono::milliseconds(20));
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
   } catch (const std::exception &e) {
     RCLCPP_ERROR(node->get_logger(), "Exception in main loop: %s", e.what());
