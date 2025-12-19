@@ -19,6 +19,14 @@
 // ===============
 // This program receives MPU6050 data over I2C, then it stream it over Serial
 
+// Change gain:
+// ===========
+// you can change the Kp gain over serial by sending:
+// "Kp0.05{chr(10)}"
+// you can change the Ki gain over serial by sending:
+// "Ki.05{chr(10)}"
+// To stop update quaternion update set Kp and Ki to zero
+
 //-- Libraries Included --------------------------------------------------------------
 #include <Wire.h>
 //====================================================================================
@@ -173,6 +181,53 @@ void setupMPU(){
   Wire.write(0b00000000); //Setting the accel to +/- 2g
   Wire.endTransmission(); 
 }
+
+//====================================================================================
+static class ReadConstantsFromSerial {
+private:
+  float kp_buffer = 0.0f;
+  float ki_buffer = 0.0f;
+  char previous_char = '\0';
+  float factor = 0.0f;
+public:
+  void update() {
+    while (Serial.available() > 0) {
+      char c = Serial.read();
+      if (c == 'K') {
+        previous_char = c;
+        factor = 0.0f;
+      } else if (previous_char == 'K' && c == 'p') {
+        kp_buffer = 0.0f;
+        previous_char = c;
+      } else if (previous_char == 'K' && c == 'i') {
+        ki_buffer = 0.0f;
+        previous_char = c;
+      } else if ((c >= '0') && (c <= '9')) {
+        if (previous_char == 'p') {
+          kp_buffer = kp_buffer + float(c - '0') * factor;
+          factor = factor * 0.1f;
+        } else if (previous_char == 'i') {
+          ki_buffer = ki_buffer + float(c - '0') * factor;
+          factor = factor * 0.1f;
+        }
+      } else if (c == '.') {
+        factor = 0.1f;
+      } else if (c == char(10)) { // terminator
+        // end of command, apply values
+        if (previous_char == 'p') {
+          twoKp = 2.0f * kp_buffer;
+        } else if (previous_char == 'i') {
+          twoKi = 2.0f * ki_buffer;
+        }
+        previous_char = '\0';
+      } else {
+        // unexpected character, reset state
+        previous_char = '\0';
+      }
+    }
+  }
+} params_reader;
+
 //====================================================================================
   
 void loop() {
@@ -184,6 +239,7 @@ void loop() {
         digitalWrite(LED_INDICATOR, value);
         led_time_millis = current_time;
       }
+      params_reader.update();
       bool ok1 = recordAccelRegisters();
       bool ok2 = recordGyroRegisters();
       if (ok1 && ok2) {
@@ -429,6 +485,8 @@ void MahonyAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float
   float halfvx, halfvy, halfvz;
   float halfex, halfey, halfez;
   float qa, qb, qc;
+
+  if ((twoKp == 0.0) && (twoKi == 0.0)) return;
 
   // Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
   if(!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f))) {

@@ -76,6 +76,38 @@ bool ImuSerialApi::is_connected() const
     return is_connected_;
 }
 
+bool ImuSerialApi::write_imu_kp(float kp) const
+{
+    if (!is_connected_) {
+        std::cerr << "Not connected to serial port" << std::endl;
+        return false;
+    }
+    std::string command = "Kp" + std::to_string(kp) + static_cast<char>(10);
+    std::cout << "Writing Kp command: " << command;
+    ssize_t bytes_written = write(fd_, command.c_str(), command.size());
+    if (bytes_written < 0) {
+        std::cerr << "Error writing to serial port: " << strerror(errno) << std::endl;
+        return false;
+    }
+    return true;
+}
+
+bool ImuSerialApi::write_imu_ki(float ki) const
+{
+    if (!is_connected_) {
+        std::cerr << "Not connected to serial port" << std::endl;
+        return false;
+    }
+    std::string command = "Ki" + std::to_string(ki) + static_cast<char>(10);
+    std::cout << "Writing Ki command: " << command;
+    ssize_t bytes_written = write(fd_, command.c_str(), command.size());
+    if (bytes_written < 0) {
+        std::cerr << "Error writing to serial port: " << strerror(errno) << std::endl;
+        return false;
+    }
+    return true;
+}
+
 bool ImuSerialApi::update()
 {
     if (!is_connected_) {

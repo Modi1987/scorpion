@@ -3,7 +3,7 @@
 #include <thread>
 #include <chrono>
 
-int main(int argc, char **argv)
+int main()
 {
     auto imu = std::make_shared<penta_pod_imu::ImuSerialApi>();
     imu->connect();

@@ -26,6 +26,8 @@ public:
     bool is_connected() const;
 
     bool readImuData(sensor_msgs::msg::Imu::SharedPtr imu_msg);
+    bool write_imu_kp(float kp) const;
+    bool write_imu_ki(float ki) const;
     bool update();
 
 private:

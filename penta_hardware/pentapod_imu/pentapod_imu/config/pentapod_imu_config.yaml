@@ -1,0 +1,6 @@
+/**:
+  ros__parameters:
+    port_name: /dev/ttyUSB0
+    imu_frame_id: imu_link
+    kp: 0.25
+    ki: 0.0
