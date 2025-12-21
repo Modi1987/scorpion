@@ -121,20 +121,21 @@ void ImuStabilizer::timer_callback() {
         imu_feedback_->orientation.z
     );
     Eigen::Matrix3d R_imu_measurement = quat_imu_measurement.toRotationMatrix();
-    auto R = R_imu_measurement * params_.R_mounting.transpose(); // compensate mounting orientation
-    Eigen::Vector3d z_axis = R.col(2);
+    auto R_imu_measurement_transpose = R_imu_measurement.transpose();
+    auto z_world_in_sensor_frame = R_imu_measurement_transpose.col(2);
     RCLCPP_DEBUG_THROTTLE(
         node_->get_logger(),
         *node_->get_clock(),
         100,
         "IMU Z axis: [%f, %f, %f]",
-        z_axis.x(),
-        z_axis.y(),
-        z_axis.z()
+        z_world_in_sensor_frame.x(),
+        z_world_in_sensor_frame.y(),
+        z_world_in_sensor_frame.z()
     );
-    Eigen::Vector3d vertical(0.0, 0.0, 1.0);
-    auto error = vertical.cross(z_axis);
-    auto w_stabilization = -params_.kp * error;
+    Eigen::Vector3d z_sensor(0.0, 0.0, 1.0);
+    auto error = z_sensor.cross(z_world_in_sensor_frame);
+    auto error_in_robot_frame = params_.R_mounting * error;
+    auto w_stabilization = params_.kp * error_in_robot_frame;
     Eigen::Vector3d delta_angle = w_stabilization * params_.interval_millis / 1000.0;
     double angle = delta_angle.norm();
     auto axis = delta_angle.normalized();

@@ -1,11 +1,11 @@
 /**:
   ros__parameters:
     interval_millis: 20
-    kp: 2.0
+    kp: 8.0
     mounting: # in degrees
       roll: 0.0
       pitch: 0.0
-      yaw: -90.0
+      yaw: 0.0
     tilt_limits: # tan
       tan_x: 0.35
       tan_y: 0.35
