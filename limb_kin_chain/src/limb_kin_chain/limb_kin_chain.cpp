@@ -11,7 +11,8 @@
 #define DEBUG_PRINTS false
 namespace penta_pod::kin::limb_kin_chain {
 
-inline void get_transform(double q_i, double alfa_i, double a_i, double d_i, int index, std::vector<std::vector<double>> &Ttemp) {
+inline void get_transform(double q_i, double alfa_i, double a_i, double d_i,
+                          int index, std::vector<std::vector<double>> &Ttemp) {
   double c_alfa = cos(alfa_i);
   double s_alfa = sin(alfa_i);
   double c_theta = cos(q_i);
@@ -54,8 +55,7 @@ void Limb::init(const int n, const std::vector<double> &a,
                 const std::vector<double> &q_min) {
   size_t n_size = static_cast<size_t>(n);
   if (a.size() < n_size || d.size() < n_size || alfa.size() < n_size ||
-          eef_trans.size() < 3 || q_max.size() < n_size ||
-      q_min.size() < n_size) {
+      eef_trans.size() < 3 || q_max.size() < n_size || q_min.size() < n_size) {
     throw std::invalid_argument("Input vector size is incorrect");
   }
   // store kinenatic constatnts
@@ -143,14 +143,17 @@ std::vector<double> Limb::get_vector(const int n,
 
 void Limb::fk(const std::vector<double> &q) {
   constexpr int start_index = 0;
-  get_transform(q[start_index], this->alfa[start_index], this->a[start_index], this->d[start_index], start_index, this->Ttemp); // result is in Ttemp
+  get_transform(q[start_index], this->alfa[start_index], this->a[start_index],
+                this->d[start_index], start_index,
+                this->Ttemp); // result is in Ttemp
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       T[i][j][0] = Ttemp[i][j];
     }
   }
   for (int m = 1; m < this->dof; m++) { // loop over all T matrices
-    get_transform(q[m], this->alfa[m], this->a[m], this->d[m], m, this->Ttemp); // result is in Ttemp
+    get_transform(q[m], this->alfa[m], this->a[m], this->d[m], m,
+                  this->Ttemp); // result is in Ttemp
 
     for (int i = 0; i < 4; i++) {   // loop over rows of matrix T[m]
       for (int j = 0; j < 4; j++) { // loop over columns of matrix T[m]
