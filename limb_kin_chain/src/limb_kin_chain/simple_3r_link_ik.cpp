@@ -75,8 +75,15 @@ void Simple3RLinkLimb::init(const int n, const std::vector<double> &a,
   }
 }
 
-std::vector<double> Simple3RLinkLimb::get_ik(const double &x, const double &y, const double &z,
-            const std::vector<double> &/*q0*/) {
+bool Simple3RLinkLimb::get_ik(const double &x, const double &y, const double &z,
+            const std::vector<double> &/*q0*/,
+            std::vector<double> &q_out) {
+    constexpr size_t dof_3R = 3;
+    if (q_out.size() < dof_3R) {
+      std::cerr << "Size of vector (q_out) is incorrect" << std::endl;
+      return false;
+    }
+
     double l1 = a[1];
     double l2 = a[2];
     double l3 = eef_trans[0];
@@ -88,7 +95,10 @@ std::vector<double> Simple3RLinkLimb::get_ik(const double &x, const double &y, c
     double q3 = acos((w*w - l2*l2 - l3*l3) / (2*l2*l3));
     double q2 = atan2(-z, temp) - atan2(l3*sin(q3), l2 + l3*cos(q3));
 
-    return std::vector<double>{q1, q2, q3};
+    q_out[0] = q1;
+    q_out[1] = q2;
+    q_out[2] = q3;
+    return true;
 }
 
 std::vector<double> Simple3RLinkLimb::get_vector(const int n,

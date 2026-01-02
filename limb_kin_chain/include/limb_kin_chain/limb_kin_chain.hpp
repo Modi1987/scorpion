@@ -1,10 +1,11 @@
 #ifndef LIMB_KIN_CHAIN_HPP_
 #define LIMB_KIN_CHAIN_HPP_
 
+#include "limb_kin_chain/limb_ik_interface.hpp"
 #include "rclcpp/rclcpp.hpp" // for rclcpp
 #include <rclcpp/executors.hpp>
 #include <vector>
-#include "limb_kin_chain/limb_ik_interface.hpp"
+#include <array>
 
 namespace penta_pod::kin::limb_kin_chain {
 /*
@@ -31,7 +32,7 @@ private:
   std::vector<double> q_min;
 
   // private functions
-  std::vector<std::vector<double>> JJT_dls_inverter(double lambda);
+  std::array<std::array<double, 3>, 3> JJT_dls_inverter(double lambda);
   void fk(const std::vector<double> &q);
   void ik();
   std::vector<double> get_vector(const int n, const std::vector<double> &vec);
@@ -42,9 +43,11 @@ public:
   void init(const int n, const std::vector<double> &a,
             const std::vector<double> &d, const std::vector<double> &alfa,
             const std::vector<double> &eef_trans,
-            const std::vector<double> &q_max, const std::vector<double> &q_min) override;
-  std::vector<double> get_ik(const double &x, const double &y, const double &z,
-                             const std::vector<double> &q0) override;
+            const std::vector<double> &q_max,
+            const std::vector<double> &q_min) override;
+  bool get_ik(const double &x, const double &y, const double &z,
+              const std::vector<double> &q0,
+              std::vector<double> &q_out) override;
   std::string solver_type() override { return std::string("DLS"); };
 };
 

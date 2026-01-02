@@ -99,9 +99,12 @@ void Limb::init(const int n, const std::vector<double> &a,
   }
 }
 
-std::vector<std::vector<double>> Limb::JJT_dls_inverter(double lambda) {
-  std::vector<std::vector<double>> m(3, std::vector<double>(3, 0));
-  std::vector<std::vector<double>> minv(3, std::vector<double>(3, 0));
+std::array<std::array<double, 3>, 3> Limb::JJT_dls_inverter(double lambda) {
+  std::array<std::array<double, 3>, 3> m = {
+      {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}}};
+
+  std::array<std::array<double, 3>, 3> minv = {
+      {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}}};
 
   // Add damping
   for (int i = 0; i < 3; i++) {
@@ -228,17 +231,19 @@ void Limb::fk(const std::vector<double> &q) {
   }
 }
 
-std::vector<double> Limb::get_ik(const double &x, const double &y,
-                                 const double &z,
-                                 const std::vector<double> &q0) {
+bool Limb::get_ik(const double &x, const double &y, const double &z,
+                  const std::vector<double> &q0, std::vector<double> &q_out) {
+  if (q_out.size() < static_cast<size_t>(this->dof)) {
+    std::cerr << "Size of vector (q_out) is incorrect" << std::endl;
+    return false;
+  }
   /* following is for not to get errors */
   constexpr int max_iterations = 200;
   constexpr double epsilon = 0.0001; // positioning accuracy of 0.1 mm
-  std::vector<double> q(this->dof);
   for (int i = 0; i < this->dof; i++)
-    q[i] = q0[i];
+    q_out[i] = q0[i];
   for (int iterations = 0; iterations < max_iterations; iterations++) {
-    this->fk(q); // calculates (T, tcp_xyz_base, J, JJT) @(q)
+    this->fk(q_out); // calculates (T, tcp_xyz_base, J, JJT) @(q)
     double lambda = 0.1;
     auto JJT_1 = JJT_dls_inverter(lambda);
     double c = 0.9; // (iterations+1)/max_iterations;
@@ -248,8 +253,8 @@ std::vector<double> Limb::get_ik(const double &x, const double &y,
     double norm_seq = dx * dx + dy * dy + dz * dz;
     if (norm_seq < epsilon * epsilon)
       break;
-    std::vector<double> disp = {c * dx, c * dy, c * dz};
-    std::vector<double> disp1 = std::vector<double>(3);
+    std::array<double, 3> disp = {c * dx, c * dy, c * dz};
+    std::array<double, 3> disp1{};
     for (int i = 0; i < 3; i++) {
       double accum = 0.;
       for (int j = 0; j < 3; j++)
@@ -257,14 +262,14 @@ std::vector<double> Limb::get_ik(const double &x, const double &y,
       disp1[i] = accum;
     }
     for (int j = 0; j < this->dof; j++) {
-      q[j] =
-          q[j] + J[0][j] * disp1[0] + J[1][j] * disp1[1] + J[2][j] * disp1[2];
-      if (q[j] > q_max[j])
-        q[j] = q_max[j];
-      if (q[j] < q_min[j])
-        q[j] = q_min[j];
+      q_out[j] = q_out[j] + J[0][j] * disp1[0] + J[1][j] * disp1[1] +
+                 J[2][j] * disp1[2];
+      if (q_out[j] > q_max[j])
+        q_out[j] = q_max[j];
+      if (q_out[j] < q_min[j])
+        q_out[j] = q_min[j];
     }
   }
-  return q;
+  return true;
 }
 } // namespace penta_pod::kin::limb_kin_chain

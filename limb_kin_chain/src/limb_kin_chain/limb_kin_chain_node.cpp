@@ -105,6 +105,8 @@ LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb,
     rclcpp::shutdown();
   }
 
+  q_target = std::vector<double>(dof, 0.0);
+
   limb_->init(dof, a, d, alfa, eef_trans, q_max, q_min);
 
   for (int i = 0; i < dof; i++) {
@@ -127,14 +129,18 @@ LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb,
         double z = xyz_msg.z;
         // RCLCPP_INFO_STREAM(node_->get_logger(), "x, y, z received: " << x <<
         // y << z); get inverse kinematics
-        std::vector<double> q = limb_->get_ik(x, y, z, q_state);
+        bool success = limb_->get_ik(x, y, z, q_state, q_target);
+        if (!success) {
+          RCLCPP_ERROR(node_->get_logger(), "IK solver failed");
+          return;
+        }
         // update internal state
-        for (size_t i = 0; i < q.size(); i++)
-          q_state[i] = q[i];
+        for (size_t i = 0; i < q_target.size(); i++)
+          q_state[i] = q_target[i];
         // create and publish the message
         sensor_msgs::msg::JointState msg;
         msg.name = joints_names;
-        msg.position = q;
+        msg.position = q_target;
         joint_state_publisher_->publish(msg);
       });
 }

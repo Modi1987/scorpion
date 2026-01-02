@@ -21,6 +21,7 @@ private:
   std::shared_ptr<LimbIKInterface> limb_;
   std::vector<std::string> joints_names;
   std::vector<double> q_state;
+  std::vector<double> q_target; // target setpoints
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr
       joint_state_publisher_;
   rclcpp::Subscription<limb_msgs::msg::Pxyz>::SharedPtr xyz_subscriber_;
