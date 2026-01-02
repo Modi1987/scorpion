@@ -232,8 +232,8 @@ std::vector<double> Limb::get_ik(const double &x, const double &y,
                                  const double &z,
                                  const std::vector<double> &q0) {
   /* following is for not to get errors */
-  const int max_iterations = 200;
-  const double epsilon = 0.0001; // positioning accuracy of 0.1 mm
+  constexpr int max_iterations = 200;
+  constexpr double epsilon = 0.0001; // positioning accuracy of 0.1 mm
   std::vector<double> q(this->dof);
   for (int i = 0; i < this->dof; i++)
     q[i] = q0[i];
