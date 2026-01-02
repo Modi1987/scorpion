@@ -21,7 +21,7 @@ auto service_call_template(
   auto status = future.wait_for(timeout_millis);
   if (status == std::future_status::ready) {
     auto result = future.get();
-    RCLCPP_INFO(node->get_logger(), "Service %s response is ready!",
+    RCLCPP_DEBUG(node->get_logger(), "Service %s response is ready!",
                 service_name);
     return result->success;
   } else {

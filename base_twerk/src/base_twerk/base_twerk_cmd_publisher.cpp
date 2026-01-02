@@ -49,7 +49,7 @@ void BaseTwerkCmdPuplisher::create_setpoint_service() {
       return true;
     }
     setpoint_base_pose_ = request->pose;
-    RCLCPP_INFO(node_->get_logger(),
+    RCLCPP_DEBUG(node_->get_logger(),
                 "Base pose setpoint received x: %f | y: %f | z: %f",
                 setpoint_base_pose_.pose.position.x,
                 setpoint_base_pose_.pose.position.y,
