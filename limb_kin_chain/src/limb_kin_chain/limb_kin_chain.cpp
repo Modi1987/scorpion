@@ -11,6 +11,42 @@
 #define DEBUG_PRINTS false
 namespace penta_pod::kin::limb_kin_chain {
 
+inline void get_transform(double q_i, double alfa_i, double a_i, double d_i, int index, std::vector<std::vector<double>> &Ttemp) {
+  double c_alfa = cos(alfa_i);
+  double s_alfa = sin(alfa_i);
+  double c_theta = cos(q_i);
+  double s_theta = sin(q_i);
+  // first column
+  Ttemp[0][0] = c_theta;
+  Ttemp[1][0] = s_theta * c_alfa;
+  Ttemp[2][0] = s_theta * s_alfa;
+  Ttemp[3][0] = 0.;
+  // second column
+  Ttemp[0][1] = -s_theta;
+  Ttemp[1][1] = c_theta * c_alfa;
+  Ttemp[2][1] = c_theta * s_alfa;
+  Ttemp[3][1] = 0.;
+  // third column
+  Ttemp[0][2] = 0.;
+  Ttemp[1][2] = -s_alfa;
+  Ttemp[2][2] = c_alfa;
+  Ttemp[3][2] = 0.;
+  // forth column
+  Ttemp[0][3] = a_i;
+  Ttemp[1][3] = -s_alfa * d_i;
+  Ttemp[2][3] = c_alfa * d_i;
+  Ttemp[3][3] = 1.;
+  if (DEBUG_PRINTS) {
+    std::cout << "T_" << index << "_" << index - 1 << std::endl;
+    for (int k = 0; k < 4; k++) {
+      for (int l = 0; l < 4; l++) {
+        std::cout << Ttemp[k][l] << " | ";
+      }
+      std::cout << std::endl;
+    }
+  }
+}
+
 void Limb::init(const int n, const std::vector<double> &a,
                 const std::vector<double> &d, const std::vector<double> &alfa,
                 const std::vector<double> &eef_trans,
@@ -106,14 +142,16 @@ std::vector<double> Limb::get_vector(const int n,
 }
 
 void Limb::fk(const std::vector<double> &q) {
-  calculate_Ttemp_at_i(0, q);
+  constexpr int start_index = 0;
+  get_transform(q[start_index], this->alfa[start_index], this->a[start_index], this->d[start_index], start_index, this->Ttemp); // result is in Ttemp
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       T[i][j][0] = Ttemp[i][j];
     }
   }
   for (int m = 1; m < this->dof; m++) { // loop over all T matrices
-    calculate_Ttemp_at_i(m, q);
+    get_transform(q[m], this->alfa[m], this->a[m], this->d[m], m, this->Ttemp); // result is in Ttemp
+
     for (int i = 0; i < 4; i++) {   // loop over rows of matrix T[m]
       for (int j = 0; j < 4; j++) { // loop over columns of matrix T[m]
         double accum = 0.;
@@ -183,42 +221,6 @@ void Limb::fk(const std::vector<double> &q) {
       }
       JJT[i][j] = accum;
       JJT[j][i] = accum;
-    }
-  }
-}
-
-void Limb::calculate_Ttemp_at_i(int i, const std::vector<double> &q) {
-  double c_alfa = cos(this->alfa[i]);
-  double s_alfa = sin(this->alfa[i]);
-  double c_theta = cos(q[i]);
-  double s_theta = sin(q[i]);
-  // first column
-  this->Ttemp[0][0] = c_theta;
-  this->Ttemp[1][0] = s_theta * c_alfa;
-  this->Ttemp[2][0] = s_theta * s_alfa;
-  this->Ttemp[3][0] = 0.;
-  // second column
-  this->Ttemp[0][1] = -s_theta;
-  this->Ttemp[1][1] = c_theta * c_alfa;
-  this->Ttemp[2][1] = c_theta * s_alfa;
-  this->Ttemp[3][1] = 0.;
-  // third column
-  this->Ttemp[0][2] = 0.;
-  this->Ttemp[1][2] = -s_alfa;
-  this->Ttemp[2][2] = c_alfa;
-  this->Ttemp[3][2] = 0.;
-  // forth column
-  this->Ttemp[0][3] = a[i];
-  this->Ttemp[1][3] = -s_alfa * d[i];
-  this->Ttemp[2][3] = c_alfa * d[i];
-  this->Ttemp[3][3] = 1.;
-  if (DEBUG_PRINTS) {
-    std::cout << "T_" << i << "_" << i - 1 << std::endl;
-    for (int k = 0; k < 4; k++) {
-      for (int l = 0; l < 4; l++) {
-        std::cout << Ttemp[k][l] << " | ";
-      }
-      std::cout << std::endl;
     }
   }
 }
