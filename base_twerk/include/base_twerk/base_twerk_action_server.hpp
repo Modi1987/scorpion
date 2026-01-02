@@ -31,6 +31,10 @@ private:
 
   rclcpp::Client<GetCurrentBasePose>::SharedPtr get_currnet_pose_client_;
 
+  rclcpp::Subscription<PoseStamped>::SharedPtr base_pose_sub_;
+
+  rclcpp::Publisher<PoseStamped>::SharedPtr base_pose_pub_;
+
   rclcpp::CallbackGroup::SharedPtr callback_group_;
 
   auto handle_goal(const rclcpp_action::GoalUUID &,
@@ -57,13 +61,16 @@ private:
 
   auto quiry_current_base_pose() -> std::optional<GetCurrentBasePose::Response>;
 
+  // clang-format off
   struct TwerkYamlConfigs {
+    bool   control_through_topics{true};
     double update_interval_millis_double_;
     double max_permissible_displacement_meter_;
     double min_permissible_displacement_meter_;
     double max_permissible_rotation_rad_;
     double min_permissible_rotation_rad_;
   } twerk_yaml_configs_;
+  // clang-format on
 
   struct ReceviedPoseStamped {
     rclcpp::Time timestamp;

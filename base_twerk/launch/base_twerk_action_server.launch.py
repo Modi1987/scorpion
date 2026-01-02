@@ -36,6 +36,8 @@ def generate_launch_description():
                 ("cmd_null_setpoint", "base_twerk/cmd_null_setpoint"),
                 ("get_current_null_pose", "base_twerk/get_current_null_pose"),
                 # topics
+                ("null_space_pose", "null_space_pose"),
+                ("set_null_space_pose", "set_null_space_pose"),
             ],
         )
     )

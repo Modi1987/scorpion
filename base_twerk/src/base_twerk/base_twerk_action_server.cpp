@@ -22,6 +22,15 @@ BaseTwerkActionServer::BaseTwerkActionServer()
       "get_current_null_pose", rclcpp::QoS(rclcpp::ServicesQoS()),
       callback_group_);
 
+  this->base_pose_sub_ = node_->create_subscription<PoseStamped>(
+      "null_space_pose", 1, [this](PoseStamped::UniquePtr msg) {
+        std::lock_guard<std::mutex> lock(received_base_pose_mutex_);
+        received_base_pose_ = {node_->now(), *msg};
+      });
+
+  this->base_pose_pub_ =
+      node_->create_publisher<PoseStamped>("set_null_space_pose", 1);
+
   this->base_twerk_action_server_ =
       rclcpp_action::create_server<BaseTwerkAction>(
           node_, "base_twerk_action",
@@ -186,7 +195,7 @@ auto BaseTwerkActionServer::quiry_current_base_pose()
   }
 
   RCLCPP_DEBUG(node_->get_logger(), "Service %s response is ready!",
-              service_name);
+               service_name);
   return *result;
 }
 
@@ -216,12 +225,19 @@ auto BaseTwerkActionServer::calculate_twerk_pose_from_goal(
   auto roll = rpy[0];
   auto pitch = rpy[1];
   auto yaw = rpy[2];
-  pose.pose.orientation = penta_pod::kin::commons::quaternion_utils::rpy_to_quaternion(yaw, pitch, roll);
+  using penta_pod::kin::commons::quaternion_utils::rpy_to_quaternion;
+  pose.pose.orientation = rpy_to_quaternion(yaw, pitch, roll);
   return pose;
 }
 
 auto BaseTwerkActionServer::call_setpoint_client(
     const PoseStamped &base_to_basefootprint) -> bool {
+  // If control base pose using pub/sub
+  if (twerk_yaml_configs_.control_through_topics) {
+    base_pose_pub_->publish(base_to_basefootprint);
+    return true;
+  }
+  // If control base pose using service client
   RCLCPP_DEBUG(node_->get_logger(), "Setting PoseStamped");
   auto request = std::make_shared<BasePoseSetpointSrv::Request>();
   request->pose.header.frame_id = "base_footprint";
