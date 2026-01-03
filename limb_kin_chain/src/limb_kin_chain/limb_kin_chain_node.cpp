@@ -14,12 +14,11 @@
 namespace penta_pod::kin::limb_kin_chain {
 
 LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb,
-      rclcpp::Node::SharedPtr node)
-    : node_{node},
-      limb_(limb) {
+                   rclcpp::Node::SharedPtr node)
+    : node_{node}, limb_(limb) {
   RCLCPP_INFO(node_->get_logger(), "Starting limb node");
 
-  const auto & opts = node_->get_node_options();
+  const auto &opts = node_->get_node_options();
   if (opts.use_intra_process_comms()) {
     RCLCPP_INFO(node_->get_logger(), ">> Intra-process comms is ENABLED");
   } else {
@@ -28,7 +27,7 @@ LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb,
 
   this->declare_parameters();
 
-  int dof=3;
+  int dof = 3;
   if (node_->get_parameter("modified_dh.dof", dof)) {
     RCLCPP_INFO(node_->get_logger(), "limb dof loaded successfully");
   } else {
@@ -67,7 +66,7 @@ LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb,
     rclcpp::shutdown();
   }
   // get initial q0
-  if (node_->get_parameter("modified_dh.q0", q_state)) {
+  if (node_->get_parameter("modified_dh.q0", q_state_)) {
 
   } else {
     RCLCPP_ERROR(node_->get_logger(), "ERROR, can not load dof parameter");
@@ -105,25 +104,27 @@ LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb,
     rclcpp::shutdown();
   }
 
-  q_target = std::vector<double>(dof, 0.0);
+  q_target_ = std::vector<double>(dof, 0.0);
 
   limb_->init(dof, a, d, alfa, eef_trans, q_max, q_min);
 
   for (int i = 0; i < dof; i++) {
     std::string temp = "Joint_" + std::to_string(i);
-    joints_names.push_back(temp);
+    joints_names_.push_back(temp);
   }
 
+  // clang-format off
   joint_setpoint_publisher_ =
       node_->create_publisher<sensor_msgs::msg::JointState>("joint_setpoints", 10);
+  // clang-format on
   // you can publish initial joints states once
   sensor_msgs::msg::JointState msg;
-  msg.name = joints_names;
-  msg.position = q_state;
+  msg.name = joints_names_;
+  msg.position = q_state_;
   joint_setpoint_publisher_->publish(msg);
   // following is for tcp position sub and joints setpoint pub
-  joints_setpoint_msg_.name = joints_names;
-  joints_setpoint_msg_.position = q_target;
+  joints_setpoint_msg_.name = joints_names_;
+  joints_setpoint_msg_.position = q_target_;
   xyz_subscriber_ = node_->create_subscription<limb_msgs::msg::Pxyz>(
       "xyz_msg", 1, [this](const limb_msgs::msg::Pxyz &xyz_msg) -> void {
         double x = xyz_msg.x;
@@ -131,16 +132,15 @@ LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb,
         double z = xyz_msg.z;
         // RCLCPP_INFO_STREAM(node_->get_logger(), "x, y, z received: " << x <<
         // y << z); get inverse kinematics
-        bool success = limb_->get_ik(x, y, z, q_state, q_target);
+        bool success = limb_->get_ik(x, y, z, q_state_, q_target_);
         if (!success) {
           RCLCPP_ERROR(node_->get_logger(), "IK solver failed");
           return;
         }
         // update internal state
-        for (size_t i = 0; i < q_target.size(); i++)
-        {
-          q_state[i] = q_target[i]; // later must come from feedback
-          joints_setpoint_msg_.position[i] = q_target[i];
+        for (size_t i = 0; i < q_target_.size(); i++) {
+          q_state_[i] = q_target_[i]; // later must come from feedback
+          joints_setpoint_msg_.position[i] = q_target_[i];
         }
         joint_setpoint_publisher_->publish(joints_setpoint_msg_);
       });

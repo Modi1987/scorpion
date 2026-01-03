@@ -19,9 +19,9 @@ class LimbNode {
 private:
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<LimbIKInterface> limb_;
-  std::vector<std::string> joints_names;
-  std::vector<double> q_state;
-  std::vector<double> q_target; // target setpoints
+  std::vector<std::string> joints_names_;
+  std::vector<double> q_state_;
+  std::vector<double> q_target_; // target setpoints
   sensor_msgs::msg::JointState joints_setpoint_msg_{};
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr
       joint_setpoint_publisher_;
