@@ -19,7 +19,7 @@
     </link>
 
 
-    <joint name="${name_space}/${name_space}laser_joint" type="fixed">
+    <joint name="laser_joint" type="fixed">
       <parent link="${name_space}base_link"/>
       <child link="${name_space}laser_frame"/>
       <origin xyz="${xyz}" rpy="${rpy}"/>

@@ -32,7 +32,7 @@ JointsAggregator::JointsAggregator(rclcpp::Node::SharedPtr node)
     for (int j = 0; j < joints_per_limb_[i]; j++) {
       joints_count = joints_count + 1;
       std::string temp =
-      name_space_ + "limb" + std::to_string(i) + "/joint" + std::to_string(j);
+        "limb" + std::to_string(i) + "/joint" + std::to_string(j);
       RCLCPP_INFO(node_->get_logger(), "joint state [%d] name is %s",
                   joints_count, temp.c_str());
       joints_states_names.push_back(temp);
@@ -108,7 +108,6 @@ JointsAggregator::JointsAggregator(rclcpp::Node::SharedPtr node)
 
 void JointsAggregator::declare_parameters() {
   // robot geometry
-  node_->declare_parameter<std::string>("name_space", "");
   node_->declare_parameter<int>("limbs_num");
   node_->declare_parameter<std::vector<long int>>("joints_per_limb",
                                                   std::vector<long int>{});
@@ -125,16 +124,6 @@ void JointsAggregator::declare_parameters() {
 }
 
 auto JointsAggregator::get_parameters() -> bool {
-  // load name_space
-  if (node_->get_parameter("name_space", name_space_)) {
-    RCLCPP_INFO_STREAM(node_->get_logger(),
-                        "name_space parameter loaded and equal to: "
-                            << name_space_);
-  } else {
-    RCLCPP_ERROR(node_->get_logger(),
-                 "ERROR, can not load name_space parameter");
-    return false;
-  }
   // load limbs_num
   if (node_->get_parameter("limbs_num", limbs_num_)) {
     RCLCPP_INFO_STREAM(

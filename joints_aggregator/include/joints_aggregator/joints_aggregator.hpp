@@ -31,7 +31,6 @@ private:
   std::mutex q_mutex_;
   std::vector<double> q_;
   std::vector<double> previous_q_;
-  std::string name_space_;
   int limbs_num_;
   std::vector<long int> joints_per_limb_;
   int update_interval_millis_;

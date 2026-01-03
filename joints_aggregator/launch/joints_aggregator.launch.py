@@ -31,7 +31,6 @@ def generate_launch_description():
                 output="screen",
                 namespace=LaunchConfiguration("name_space"),
                 parameters=[
-                    {"name_space": LaunchConfiguration("name_space")},
                     config
                 ],
                 remappings=[

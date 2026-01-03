@@ -52,7 +52,7 @@
       </inertial>
     </link>
 
-    <joint name="${name_space}joint_robot_body_center" type="fixed">
+    <joint name="joint_robot_body_center" type="fixed">
       <parent link="${name_space}base_footprint"/>
       <child link="${name_space}base_link"/>
       <origin xyz="0.0 0.0 0.075" rpy="0 0 0"/>
@@ -67,7 +67,7 @@
       </visual>
     </link>
 
-    <joint name="${name_space}head_base" type="fixed">
+    <joint name="head_base" type="fixed">
       <parent link="${name_space}base_link"/>
       <child link="${name_space}head_link"/>
       <origin xyz="-0.1 0.0 0.025" rpy="0 0 0"/>
