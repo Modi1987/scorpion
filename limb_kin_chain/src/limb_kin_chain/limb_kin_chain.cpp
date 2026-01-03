@@ -9,6 +9,37 @@
 #include <vector>
 
 #define DEBUG_PRINTS false
+
+static long malloc_start_log_window_millis = 5000;
+static long malloc_end_log_window_millis = 5500;
+long start_time_millis = -1;
+bool malloc_logging_enabled = false;
+long current_time_millis() {
+  return std::chrono::duration_cast<std::chrono::milliseconds>(
+             std::chrono::system_clock::now().time_since_epoch())
+      .count();
+}
+
+void *operator new(size_t size) {
+  if (start_time_millis < 0) {
+    start_time_millis = current_time_millis();
+  }
+  auto delta_millis = current_time_millis() - start_time_millis;
+  if (delta_millis >= malloc_start_log_window_millis &&
+      delta_millis <= malloc_end_log_window_millis) {
+    malloc_logging_enabled = true;
+  } else {
+    malloc_logging_enabled = false;
+  }
+  if (malloc_logging_enabled) {
+    std::cout << "mallocating: " << size << " bytes\n";
+  }
+  void *p = malloc(size);
+  if (!p)
+    throw std::bad_alloc();
+  return p;
+}
+
 namespace penta_pod::kin::limb_kin_chain {
 
 inline void get_transform(double q_i, double alfa_i, double a_i, double d_i,
@@ -145,6 +176,9 @@ std::vector<double> Limb::get_vector(const int n,
 }
 
 void Limb::fk(const std::vector<double> &q) {
+  if (malloc_logging_enabled) {
+    std::cout << "=== ENTERING fk ===" << std::endl;
+  }
   constexpr int start_index = 0;
   get_transform(q[start_index], this->alfa[start_index], this->a[start_index],
                 this->d[start_index], start_index,
@@ -233,6 +267,9 @@ void Limb::fk(const std::vector<double> &q) {
 
 bool Limb::get_ik(const double &x, const double &y, const double &z,
                   const std::vector<double> &q0, std::vector<double> &q_out) {
+  if (malloc_logging_enabled) {
+    std::cout << "=== ENTERING get_ik ===" << std::endl;
+  }
   if (q_out.size() < static_cast<size_t>(this->dof)) {
     std::cerr << "Size of vector (q_out) is incorrect" << std::endl;
     return false;
