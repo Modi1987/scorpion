@@ -22,8 +22,9 @@ private:
   std::vector<std::string> joints_names;
   std::vector<double> q_state;
   std::vector<double> q_target; // target setpoints
+  sensor_msgs::msg::JointState joints_setpoint_msg_{};
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr
-      joint_state_publisher_;
+      joint_setpoint_publisher_;
   rclcpp::Subscription<limb_msgs::msg::Pxyz>::SharedPtr xyz_subscriber_;
   void declare_parameters(); // shall declarte modified dh paramters
 

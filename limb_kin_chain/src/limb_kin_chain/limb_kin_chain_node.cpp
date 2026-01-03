@@ -114,14 +114,16 @@ LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb,
     joints_names.push_back(temp);
   }
 
-  joint_state_publisher_ =
+  joint_setpoint_publisher_ =
       node_->create_publisher<sensor_msgs::msg::JointState>("joint_setpoints", 10);
   // you can publish initial joints states once
   sensor_msgs::msg::JointState msg;
   msg.name = joints_names;
   msg.position = q_state;
-  joint_state_publisher_->publish(msg);
-  // following is the tcp position subscriber
+  joint_setpoint_publisher_->publish(msg);
+  // following is for tcp position sub and joints setpoint pub
+  joints_setpoint_msg_.name = joints_names;
+  joints_setpoint_msg_.position = q_target;
   xyz_subscriber_ = node_->create_subscription<limb_msgs::msg::Pxyz>(
       "xyz_msg", 1, [this](const limb_msgs::msg::Pxyz &xyz_msg) -> void {
         double x = xyz_msg.x;
@@ -136,12 +138,11 @@ LimbNode::LimbNode(std::shared_ptr<LimbIKInterface> limb,
         }
         // update internal state
         for (size_t i = 0; i < q_target.size(); i++)
-          q_state[i] = q_target[i];
-        // create and publish the message
-        sensor_msgs::msg::JointState msg;
-        msg.name = joints_names;
-        msg.position = q_target;
-        joint_state_publisher_->publish(msg);
+        {
+          q_state[i] = q_target[i]; // later must come from feedback
+          joints_setpoint_msg_.position[i] = q_target[i];
+        }
+        joint_setpoint_publisher_->publish(joints_setpoint_msg_);
       });
 }
 
