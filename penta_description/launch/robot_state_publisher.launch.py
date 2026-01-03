@@ -50,6 +50,7 @@ def generate_launch_description():
             ],
             remappings=[
                 ('joint_states', LaunchConfiguration('joint_states_remappings')),
+                ('robot_description', 'robot_description')
             ]
         ),
     ])

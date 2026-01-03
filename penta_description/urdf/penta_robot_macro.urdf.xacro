@@ -29,9 +29,9 @@
         </material>
     </xacro:macro>
 
-    <link name="base_footprint"/>
+    <link name="${name_space}base_footprint"/>
 
-    <link name="base_link">
+    <link name="${name_space}base_link">
       <visual>
         <geometry>
           <mesh filename="file://$(find penta_description)/meshes/visual/penta_stl_v1/Chassi_middle.stl" scale="0.001 0.001 0.001"/>
@@ -52,13 +52,13 @@
       </inertial>
     </link>
 
-    <joint name="joint_robot_body_center" type="fixed">
-      <parent link="base_footprint"/>
-      <child link="base_link"/>
+    <joint name="${name_space}joint_robot_body_center" type="fixed">
+      <parent link="${name_space}base_footprint"/>
+      <child link="${name_space}base_link"/>
       <origin xyz="0.0 0.0 0.075" rpy="0 0 0"/>
     </joint>
 
-    <link name="head_link">
+    <link name="${name_space}head_link">
       <visual>
         <geometry>
           <sphere radius="0.01"/>
@@ -67,14 +67,14 @@
       </visual>
     </link>
 
-    <joint name="head_base" type="fixed">
-      <parent link="base_link"/>
-      <child link="head_link"/>
+    <joint name="${name_space}head_base" type="fixed">
+      <parent link="${name_space}base_link"/>
+      <child link="${name_space}head_link"/>
       <origin xyz="-0.1 0.0 0.025" rpy="0 0 0"/>
     </joint>
 
-    <xacro:macro name="add_base_plate" params="name stl_file_name z">
-      <link name="${name}_link">
+    <xacro:macro name="add_base_plate" params="name_space name stl_file_name z">
+      <link name="${name_space}${name}_link">
         <visual>
           <geometry>
             <mesh filename="file://$(find penta_description)/meshes/visual/penta_stl_v1/${stl_file_name}" scale="0.001 0.001 0.001"/>
@@ -84,8 +84,8 @@
         </visual>
       </link>
       <joint name="${name}_joint" type="fixed">
-        <parent link="base_link"/>
-        <child link="${name}_link"/>
+        <parent link="${name_space}base_link"/>
+        <child link="${name_space}${name}_link"/>
       <origin xyz="0.0 0.0 ${z}" rpy="0 0 0"/>
     </joint>
     </xacro:macro>
@@ -97,8 +97,8 @@
     <xacro:add_leg prefix="limb3" shoulderxyz="${0.085*cos(3.*3.141592/2.5)} ${0.085*sin(3.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(3.*3.141592/2.5)}" name_space="${name_space}" use_gazebo_simulation="${use_gazebo_simulation}"/>
     <xacro:add_leg prefix="limb4" shoulderxyz="${0.085*cos(4.*3.141592/2.5)} ${0.085*sin(4.*3.141592/2.5)} 0." shoulderrpy="0. 0. ${(4.*3.141592/2.5)}" name_space="${name_space}" use_gazebo_simulation="${use_gazebo_simulation}"/>
 
-    <xacro:add_base_plate name="upper_plate" stl_file_name="Chassi_top.stl" z="0.03"/>
-    <xacro:add_base_plate name="lower_plate" stl_file_name="Chassi_bottom.stl" z="-0.03"/>
+    <xacro:add_base_plate name="upper_plate" name_space="${name_space}" stl_file_name="Chassi_top.stl" z="0.03"/>
+    <xacro:add_base_plate name="lower_plate" name_space="${name_space}" stl_file_name="Chassi_bottom.stl" z="-0.03"/>
     <xacro:add_lidar name_space="${name_space}" xyz="0 0 0.06" rpy="0 0 0" use_gazebo_simulation="${use_gazebo_simulation}"/>
 
   </xacro:macro>
