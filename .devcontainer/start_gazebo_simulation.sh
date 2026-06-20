@@ -1,1 +1,1 @@
-docker compose up penta-jazzy-ros2
+docker compose up penta-lyrical-ros2

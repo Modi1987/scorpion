@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 project(twist_to_odom)
 
 # Default to C++20
@@ -31,13 +31,13 @@ target_include_directories(${PROJECT_NAME}
         $<INSTALL_INTERFACE:include>)
 
 
-ament_target_dependencies(${PROJECT_NAME}
-        rclcpp
-        std_msgs
-        geometry_msgs
-        nav_msgs
-        tf2
-        tf2_ros
+target_link_libraries(${PROJECT_NAME}
+        rclcpp::rclcpp
+        std_msgs::std_msgs
+        geometry_msgs::geometry_msgs
+        nav_msgs::nav_msgs
+        tf2::tf2
+        tf2_ros::tf2_ros
         )
 
 
@@ -54,6 +54,13 @@ target_link_libraries(${PROJECT_NAME}_node
 install(
         DIRECTORY include/
         DESTINATION include
+        )
+
+install(TARGETS 
+        ${PROJECT_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
         )
 
 install(TARGETS 

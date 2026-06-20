@@ -32,13 +32,13 @@ target_include_directories(${PROJECT_NAME}
         $<INSTALL_INTERFACE:include>)
 
 
-ament_target_dependencies(${PROJECT_NAME}
-        rclcpp
-        std_msgs
-        geometry_msgs
-        limb_msgs
-        sensor_msgs
-        commons
+target_link_libraries(${PROJECT_NAME}
+        rclcpp::rclcpp
+        std_msgs::std_msgs
+        geometry_msgs::geometry_msgs
+        limb_msgs::limb_msgs
+        sensor_msgs::sensor_msgs
+        commons::commons
         )
 
 
@@ -56,6 +56,13 @@ install(
         DIRECTORY include/
         DESTINATION include
 )
+
+install(TARGETS 
+        ${PROJECT_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        )
 
 install(TARGETS 
         ${PROJECT_NAME}_node

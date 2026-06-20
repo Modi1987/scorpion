@@ -10,10 +10,12 @@ int main(int argc, char **argv)
     return -1;
   }
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
   try {
     while (rclcpp::ok()) {
       imu_object->readDataPublishCallback();
-      rclcpp::spin_some(node);
+      executor.spin_some();
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
   } catch (const std::exception &e) {

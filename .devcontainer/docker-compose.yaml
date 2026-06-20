@@ -1,5 +1,5 @@
 services:
-  penta-jazzy-ros2:
+  penta-lyrical-ros2:
     build:
       context: ../
       dockerfile: ./.devcontainer/Dockerfile
@@ -30,7 +30,7 @@ services:
     tty: true
     command: [ "/bin/bash", "-c", "/root/ros_ws/src/polypod/.devcontainer/entrypoint.sh" ]
 
-  penta-jazzy-ros2-test:
+  penta-lyrical-ros2-test:
     build:
       context: ../
       dockerfile: ./.devcontainer/Dockerfile
@@ -41,4 +41,4 @@ services:
     environment:
       - ROS_DOMAIN_ID=91
     network_mode: "host"
-    command: [ "/bin/bash", "-c", "source /opt/ros/jazzy/setup.bash && cd /root/ros_ws && colcon test" ]
+    command: [ "/bin/bash", "-c", "source /opt/ros/lyrical/setup.bash && cd /root/ros_ws && colcon test" ]

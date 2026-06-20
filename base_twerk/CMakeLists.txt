@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 project(base_twerk)
 
 # Default to C++20
@@ -31,13 +31,14 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
-ament_target_dependencies(${PROJECT_NAME}
-        "rclcpp_action"
-        "rclcpp_components"
-        std_msgs
-        geometry_msgs
-        base_twerk_msgs
-        commons
+target_link_libraries(${PROJECT_NAME}
+        rclcpp::rclcpp
+        rclcpp_action::rclcpp_action
+        # "rclcpp_components"
+        std_msgs::std_msgs
+        geometry_msgs::geometry_msgs
+        base_twerk_msgs::base_twerk_msgs
+        commons::commons
         )
 
 add_executable(${PROJECT_NAME}_publisher_node src/${PROJECT_NAME}_publisher_node.cpp)
@@ -58,6 +59,14 @@ install(
         DIRECTORY include/
         DESTINATION include
 )
+
+
+install(TARGETS 
+        ${PROJECT_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        )
 
 install(TARGETS 
         ${PROJECT_NAME}_publisher_node

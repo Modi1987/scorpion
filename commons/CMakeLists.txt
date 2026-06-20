@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 project(commons)
 
 # Default to C++20
@@ -14,6 +14,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
 # # Declare library
@@ -27,14 +28,13 @@ target_include_directories(${PROJECT_NAME}
         $<INSTALL_INTERFACE:include>)
 
 
-ament_target_dependencies(${PROJECT_NAME}
-        rclcpp
-        std_msgs
-        geometry_msgs
+target_link_libraries(${PROJECT_NAME}
+        PUBLIC
+        rclcpp::rclcpp
+        std_msgs::std_msgs
+        geometry_msgs::geometry_msgs
         )
 
-# export dependency so downstream ament package config knows about it
-# ament_export_libraries(commons)
 #############
 ## Install ##
 #############
@@ -45,13 +45,15 @@ install(
 )
 
 install(TARGETS ${PROJECT_NAME}
+        EXPORT export_${PROJECT_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin
         INCLUDES DESTINATION include
 )
 
-ament_export_include_directories(include)
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(rclcpp std_msgs geometry_msgs)
 
 ##############.
 ## Testing  ##

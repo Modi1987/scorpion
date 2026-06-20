@@ -36,9 +36,13 @@ target_include_directories(pca9685_ros2_control PUBLIC
 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/hardware/include>
 $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
-ament_target_dependencies(
+target_link_libraries(
   pca9685_ros2_control PUBLIC
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
+  hardware_interface::hardware_interface
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
+  pca9685_interfaces::pca9685_interfaces
 )
 
 # Export hardware plugins

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.16)
 project(laser_scan_remapper)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -21,10 +21,10 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
-ament_target_dependencies(${PROJECT_NAME}
-        rclcpp
-        std_msgs
-        sensor_msgs
+target_link_libraries(${PROJECT_NAME}
+        rclcpp::rclcpp
+        std_msgs::std_msgs
+        sensor_msgs::sensor_msgs
 )
 
 add_executable(${PROJECT_NAME}_node src/${PROJECT_NAME}_node.cpp)
@@ -41,6 +41,13 @@ install(
         DIRECTORY include/
         DESTINATION include
 )
+
+install(TARGETS 
+        ${PROJECT_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        )
 
 install(TARGETS 
         ${PROJECT_NAME}_node

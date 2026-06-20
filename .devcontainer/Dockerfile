@@ -1,10 +1,10 @@
 # Dockerfile
 
-# FROM osrf/ros:jazzy-desktop-full
-FROM ros:jazzy-perception-noble
+FROM osrf/ros:lyrical-desktop-full
+# FROM ros:lyrical-ros-core
 
 ARG COLCON_WORKSPACE
-ARG ROS_DISTRO=jazzy
+ARG ROS_DISTRO=lyrical
 
 SHELL [ "/bin/bash" , "-c" ]
 
@@ -55,18 +55,17 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
     ros-${ROS_DISTRO}-rmw-zenoh-cpp \
     ros-${ROS_DISTRO}-plotjuggler \
-    ros-${ROS_DISTRO}-plotjuggler-ros \
     ros-${ROS_DISTRO}-joy \
     ros-${ROS_DISTRO}-teleop-twist-joy \
     ros-${ROS_DISTRO}-imu-tools \
     ros-${ROS_DISTRO}-rviz2
 
 # Install navigation2 packages
-RUN apt-get update && apt-get install -y \
-    ros-${ROS_DISTRO}-navigation2 \
-    ros-${ROS_DISTRO}-nav2-bringup \
-    ros-${ROS_DISTRO}-nav2-common \
-    ros-${ROS_DISTRO}-nav2-costmap-2d
+# RUN apt-get update && apt-get install -y \
+#     ros-${ROS_DISTRO}-navigation2 \
+#     ros-${ROS_DISTRO}-nav2-bringup \
+#     ros-${ROS_DISTRO}-nav2-common \
+#     ros-${ROS_DISTRO}-nav2-costmap-2d
 
 # gazebo ros2 control packages
 RUN apt-get install -y \

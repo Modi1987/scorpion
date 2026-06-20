@@ -7,7 +7,7 @@ namespace penta_pod::kin::commons::quaternion_utils {
 
 using geometry_msgs::msg::Quaternion;
 
-Quaternion rpy_to_quaternion(double yaw, double pitch, double roll) // yaw (Z), pitch (Y), roll (X)
+inline Quaternion rpy_to_quaternion(double yaw, double pitch, double roll) // yaw (Z), pitch (Y), roll (X)
 {
   double cy = cos(yaw * 0.5);
   double sy = sin(yaw * 0.5);
@@ -24,7 +24,7 @@ Quaternion rpy_to_quaternion(double yaw, double pitch, double roll) // yaw (Z), 
   return q;
 }
 
-Quaternion hamilton_product(Quaternion u, Quaternion v)
+inline Quaternion hamilton_product(Quaternion u, Quaternion v)
 {
     Quaternion result;
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.16)
 project(penta_teleop)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -30,15 +30,15 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
-ament_target_dependencies(${PROJECT_NAME}
-        rclcpp
-        sensor_msgs
-        base_twerk_msgs
-        gait_generator_msgs
-        rclcpp_action
-        commons
-        tf2
-        tf2_geometry_msgs
+target_link_libraries(${PROJECT_NAME}
+        rclcpp::rclcpp
+        sensor_msgs::sensor_msgs
+        base_twerk_msgs::base_twerk_msgs
+        gait_generator_msgs::gait_generator_msgs
+        rclcpp_action::rclcpp_action
+        commons::commons
+        tf2::tf2
+        tf2_geometry_msgs::tf2_geometry_msgs
         )
 
 add_executable(joystick_extra_controls_node src/joystick_extra_controls_node.cpp)
@@ -60,6 +60,13 @@ install(
   DIRECTORY include/
   DESTINATION include
 )
+
+install(TARGETS 
+        ${PROJECT_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        )
 
 install(TARGETS 
   joystick_extra_controls_node

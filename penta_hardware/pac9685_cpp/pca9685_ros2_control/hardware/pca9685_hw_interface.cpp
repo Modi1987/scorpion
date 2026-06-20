@@ -21,7 +21,7 @@
 namespace pca9685_ros2_control
 {
 hardware_interface::CallbackReturn Pca9685HardwareInterface::on_init(
-  const hardware_interface::HardwareInfo & info)
+  const hardware_interface::HardwareComponentInterfaceParams & info)
 {
   if (
     hardware_interface::SystemInterface::on_init(info) !=

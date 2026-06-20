@@ -39,7 +39,7 @@ git clone https://github.com/Modi1987/polypod.git
 
 cd polypod
 
-git checkout poc/jazzy
+git checkout poc/lyrical
 ```
 
 - Then, do the installation using the installation scripts (this script will build your workspace inside docker on Raspberry PI and autostart the robot on boot)

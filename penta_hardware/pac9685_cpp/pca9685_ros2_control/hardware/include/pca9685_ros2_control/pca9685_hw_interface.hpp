@@ -34,7 +34,7 @@ public:
   RCLCPP_SHARED_PTR_DEFINITIONS(Pca9685HardwareInterface);
 
   hardware_interface::CallbackReturn on_init(
-    const hardware_interface::HardwareInfo & info) override;
+    const hardware_interface::HardwareComponentInterfaceParams & info) override;
 
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 

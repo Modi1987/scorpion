@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 project(gait_generator)
 
 # Default to C++20
@@ -34,15 +34,15 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
-ament_target_dependencies(${PROJECT_NAME}
-        rclcpp
-        std_msgs
-        geometry_msgs
-        limb_msgs
-        gait_generator_msgs
-        tf2
-        tf2_geometry_msgs
-        commons
+target_link_libraries(${PROJECT_NAME}
+        rclcpp::rclcpp
+        std_msgs::std_msgs
+        geometry_msgs::geometry_msgs
+        limb_msgs::limb_msgs
+        gait_generator_msgs::gait_generator_msgs
+        tf2::tf2
+        tf2_geometry_msgs::tf2_geometry_msgs
+        commons::commons
         )
 
 add_executable(${PROJECT_NAME}_node src/${PROJECT_NAME}_node.cpp)
@@ -63,6 +63,13 @@ install(
         DIRECTORY include/
         DESTINATION include
 )
+
+install(TARGETS 
+        ${PROJECT_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        )
 
 install(TARGETS 
         ${PROJECT_NAME}_node

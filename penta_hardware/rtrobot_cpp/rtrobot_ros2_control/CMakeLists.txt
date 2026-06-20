@@ -36,9 +36,13 @@ target_include_directories(rtrobot_ros2_control PUBLIC
 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/hardware/include>
 $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
-ament_target_dependencies(
+target_link_libraries(
   rtrobot_ros2_control PUBLIC
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
+  hardware_interface::hardware_interface
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
+  rtrobot_interfaces::rtrobot_interfaces
 )
 
 # Export hardware plugins
@@ -65,6 +69,13 @@ install(
 install(TARGETS test_rtrobot_hw_interface_node
   DESTINATION lib/${PROJECT_NAME}
 )
+
+install(TARGETS 
+        ${PROJECT_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        )
 
 install(TARGETS rtrobot_ros2_control
   EXPORT export_rtrobot_ros2_control

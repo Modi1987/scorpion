@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.16)
 project(imu_stabilization)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -24,11 +24,11 @@ target_include_directories(imu_stabilization PUBLIC
   $<INSTALL_INTERFACE:include>)
 target_compile_features(imu_stabilization PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
-ament_target_dependencies(${PROJECT_NAME}
-        rclcpp
-        sensor_msgs
-        geometry_msgs
-        Eigen3
+target_link_libraries(${PROJECT_NAME}
+        rclcpp::rclcpp
+        sensor_msgs::sensor_msgs
+        geometry_msgs::geometry_msgs
+        Eigen3::Eigen
         )
 
 add_executable(imu_stabilization_node src/imu_stabilization_node.cpp)
@@ -44,6 +44,14 @@ install(
         DIRECTORY include/
         DESTINATION include
 )
+
+
+install(TARGETS 
+        ${PROJECT_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        )
 
 install(TARGETS 
         imu_stabilization imu_stabilization_node
