@@ -1,8 +1,8 @@
 services:
   penta-jazzy-ros2:
     build:
-      context: ../
-      dockerfile: ./.devcontainer/Dockerfile
+      context: ./
+      dockerfile: ./Dockerfile
       args:
         COLCON_WORKSPACE: /root/ros_ws
     volumes:
