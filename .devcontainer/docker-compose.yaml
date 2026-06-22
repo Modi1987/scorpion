@@ -11,9 +11,11 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./entrypoint.sh:/root/ros_ws/src/polypod/.devcontainer/entrypoint.sh
     environment:
-      # - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - ROS_DOMAIN_ID=95
       - DISPLAY=${DISPLAY}
+      - ROS_DOMAIN_ID=11
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - FASTDDS_BUILTIN_TRANSPORTS=UDPv4
+      - ROS_LOCALHOST_ONLY=0
       - QT_X11_NO_MITSHM=1
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
