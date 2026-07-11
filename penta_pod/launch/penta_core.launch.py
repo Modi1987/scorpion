@@ -3,6 +3,7 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
 from launch.substitutions import LaunchConfiguration
+from ament_index_python.packages import get_package_share_directory, PackageNotFoundError
 import os
 
 def generate_launch_description():
@@ -71,15 +72,29 @@ def generate_launch_description():
         }.items()
     )
 
-    imu_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(FindPackageShare('pentapod_imu').find('pentapod_imu'), 'launch', 'pentapod_imu.launch.py')
-        ),
-        launch_arguments={
-            'name_space': LaunchConfiguration('name_space'),
-            'real_hardware': LaunchConfiguration('real_hardware'),
-        }.items()
-    )
+    try:
+        imu_pkg_share = get_package_share_directory("imu_arduino_serial_ros2_interface")
+        print("imu_arduino_serial_ros2_interface is available will launch imu_node.launch.py")
+        imu_launch = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(imu_pkg_share, 'launch', 'imu_node.launch.py')
+            ),
+            launch_arguments={
+                'name_space': LaunchConfiguration('name_space'),
+                'real_hardware': LaunchConfiguration('real_hardware'),
+            }.items()
+        )
+    except PackageNotFoundError:
+        print("imu_arduino_serial_ros2_interface is not available, reverting to pentapod_imu package")
+        imu_launch = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(FindPackageShare('pentapod_imu').find('pentapod_imu'), 'launch', 'pentapod_imu.launch.py')
+            ),
+            launch_arguments={
+                'name_space': LaunchConfiguration('name_space'),
+                'real_hardware': LaunchConfiguration('real_hardware'),
+            }.items()
+        )
 
     imu_stabilizer_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
