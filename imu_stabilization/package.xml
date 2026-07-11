@@ -4,7 +4,7 @@
   <name>imu_stabilization</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="mohammad.safeea@hilti.com">modi</maintainer>
+  <maintainer email="mohammad.safeea@uc.com">modi</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
