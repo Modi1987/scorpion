@@ -6,7 +6,7 @@ from launch.substitutions import Command, FindExecutable, PathJoinSubstitution, 
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-
+from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     declared_arguments = []
@@ -22,17 +22,20 @@ def generate_launch_description():
     use_rtrobot_ros2_control = LaunchConfiguration("use_rtrobot_ros2_control")
 
     # Get URDF via xacro
-    robot_description_content = Command(
-        [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution(
-                [FindPackageShare("penta_description"), "urdf", "penta.urdf.xacro"]
-            ),
-            " ",
-            "use_rtrobot_ros2_control:=",
-            use_rtrobot_ros2_control,
-        ]
+    robot_description_content = ParameterValue(
+        Command(
+            [
+                PathJoinSubstitution([FindExecutable(name="xacro")]),
+                " ",
+                PathJoinSubstitution(
+                    [FindPackageShare("penta_description"), "urdf", "penta.urdf.xacro"]
+                ),
+                " ",
+                "use_rtrobot_ros2_control:=",
+                use_rtrobot_ros2_control,
+            ],
+        ),
+        value_type=str,
     )
     robot_description = {"robot_description": robot_description_content}
     robot_state_pub_node = Node(
