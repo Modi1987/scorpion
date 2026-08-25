@@ -28,6 +28,12 @@ def generate_launch_description():
         description="Change to true to use Gazebo",
     )
 
+    use_mujoco_simulation_arg = DeclareLaunchArgument(
+        "use_mujoco_simulation",
+        default_value="False",
+        description="Change to true to use MuJoCo",
+    )
+
     """ Nodes """
     # Include RVIZ launch file
     rviz_penta_pod_launch = IncludeLaunchDescription(
@@ -37,6 +43,7 @@ def generate_launch_description():
         launch_arguments={
             'name_space': LaunchConfiguration('name_space'),
             'use_gazebo_simulation': LaunchConfiguration('use_gazebo_simulation'),
+            'use_mujoco_simulation': LaunchConfiguration('use_mujoco_simulation'),
             'joint_states_remappings': 'joint_setpoints',
         }.items()
     )
@@ -55,6 +62,7 @@ def generate_launch_description():
     return LaunchDescription([
         # scorption_cmd_vel_mux_launch,
         name_space_arg,
+        use_mujoco_simulation_arg,
         use_gazebo_simulation_arg,
         rviz_penta_pod_launch,
         penta_core_launch,

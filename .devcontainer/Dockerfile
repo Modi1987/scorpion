@@ -19,7 +19,8 @@ RUN apt install -y wget python3-rosdep \
     python3-pytest-cov \
     python3-pytest-runner \
     python3-setuptools \
-    python3-pip
+    python3-pip \
+    python3-venv
 
 # Install important tools
 RUN apt install -y \
@@ -36,6 +37,7 @@ RUN apt install -y nvidia-cuda-toolkit
 # Install ROS 2 control and additional ROS2 utilities
 RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-ros2-control \
+    ros-${ROS_DISTRO}-teleop-twist-keyboard \
     ros-${ROS_DISTRO}-ros2-controllers \
     ros-${ROS_DISTRO}-controller-manager \
     ros-${ROS_DISTRO}-joint-state-broadcaster \

@@ -27,6 +27,12 @@ def generate_launch_description():
         description="Change to true to use Gazebo",
     )
 
+    use_mujoco_simulation_arg = DeclareLaunchArgument(
+        "use_mujoco_simulation",
+        default_value="False",
+        description="Change to true to use MuJoCo",
+    )
+
     robot_state_publisher_remapping_arg = DeclareLaunchArgument(
         'joint_states_remappings',
         default_value='/joint_states',
@@ -51,12 +57,14 @@ def generate_launch_description():
         launch_arguments={
             'name_space': LaunchConfiguration('name_space'),
             'use_gazebo_simulation': LaunchConfiguration('use_gazebo_simulation'),
+            'use_mujoco_simulation': LaunchConfiguration('use_mujoco_simulation'),
             'joint_states_remappings': LaunchConfiguration('joint_states_remappings'),
         }.items()
     )
     return LaunchDescription([
         name_space_arg,
         use_gazebo_simulation_arg,
+        use_mujoco_simulation_arg,
         robot_state_publisher_remapping_arg,
         rviz_config_file_arg,
         Node(

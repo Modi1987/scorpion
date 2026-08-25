@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    Top-level MuJoCo hooks for the penta robot.
+
+    - Emits a single <mujoco_inputs> block that the URDF -> MJCF conversion
+      tool (mujoco_ros2_control / make_mjcf_from_robot_description.py) will
+      pick up when translating the URDF to MJCF.
+    - Declares MuJoCo `position` actuators for all 15 leg joints.
+    - Provides scene defaults (integrator, gravity, ground plane, sky).
+
+    NOTE: `use_mujoco_simulation` is expected to be a xacro:arg upstream. This
+    xacro is only included when that argument is True.
+  -->
+
+  <!-- Emits <joint> entries for one leg. Used inside add_mujoco_top_level's single <ros2_control>. -->
+  <xacro:macro name="mujoco_leg_joints" params="prefix">
+    <joint name="${prefix}/joint0">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="${prefix}/joint1">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">-0.6</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="${prefix}/joint2">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">0.7</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="add_mujoco_top_level" params="name_space">
+
+    <!--
+      Single ros2_control system for the whole robot. Emitting this once (instead
+      of one per leg) means the mujoco_ros2_control node loads a single
+      MujocoSystemInterface and therefore a single MuJoCo simulation + viewer.
+    -->
+    <ros2_control name="${name_space}mujoco_ros2_control" type="system">
+      <hardware>
+        <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
+      </hardware>
+
+      <xacro:mujoco_leg_joints prefix="limb0"/>
+      <xacro:mujoco_leg_joints prefix="limb1"/>
+      <xacro:mujoco_leg_joints prefix="limb2"/>
+      <xacro:mujoco_leg_joints prefix="limb3"/>
+      <xacro:mujoco_leg_joints prefix="limb4"/>
+    </ros2_control>
+
+    <mujoco_inputs>
+
+      <!-- Content copied verbatim into the generated MJCF -->
+      <raw_inputs>
+        <option integrator="implicitfast" timestep="0.002">
+          <flag contact="enable"/>
+        </option>
+
+        <default>
+          <default class="visual">
+            <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+          </default>
+          <default class="collision">
+            <geom group="3"/>
+          </default>
+        </default>
+
+        <!-- Position actuators for all 15 leg joints.
+             Names must match the URDF joint names so mujoco_ros2_control
+             maps them back to ros2_control command interfaces. -->
+        <actuator>
+          <!-- limb0 -->
+          <position name="${name_space}limb0/joint0" joint="${name_space}limb0/joint0" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position name="${name_space}limb0/joint1" joint="${name_space}limb0/joint1" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position name="${name_space}limb0/joint2" joint="${name_space}limb0/joint2" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <!-- limb1 -->
+          <position name="${name_space}limb1/joint0" joint="${name_space}limb1/joint0" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position name="${name_space}limb1/joint1" joint="${name_space}limb1/joint1" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position name="${name_space}limb1/joint2" joint="${name_space}limb1/joint2" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <!-- limb2 -->
+          <position name="${name_space}limb2/joint0" joint="${name_space}limb2/joint0" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position name="${name_space}limb2/joint1" joint="${name_space}limb2/joint1" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position name="${name_space}limb2/joint2" joint="${name_space}limb2/joint2" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <!-- limb3 -->
+          <position name="${name_space}limb3/joint0" joint="${name_space}limb3/joint0" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position name="${name_space}limb3/joint1" joint="${name_space}limb3/joint1" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position name="${name_space}limb3/joint2" joint="${name_space}limb3/joint2" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <!-- limb4 -->
+          <position name="${name_space}limb4/joint0" joint="${name_space}limb4/joint0" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position name="${name_space}limb4/joint1" joint="${name_space}limb4/joint1" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position name="${name_space}limb4/joint2" joint="${name_space}limb4/joint2" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+        </actuator>
+      </raw_inputs>
+
+      <processed_inputs>
+        <!-- Small amount of joint damping to keep sim stable at higher speeds. -->
+        <modify_element type="joint" name="${name_space}limb0/joint0" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb0/joint1" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb0/joint2" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb1/joint0" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb1/joint1" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb1/joint2" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb2/joint0" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb2/joint1" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb2/joint2" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb3/joint0" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb3/joint1" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb3/joint2" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb4/joint0" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb4/joint1" damping="0.05"/>
+        <modify_element type="joint" name="${name_space}limb4/joint2" damping="0.05"/>
+      </processed_inputs>
+
+    </mujoco_inputs>
+
+  </xacro:macro>
+
+</robot>

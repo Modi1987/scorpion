@@ -2,6 +2,7 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.parameter_descriptions import ParameterValue
 from launch import LaunchDescription
 
 def generate_launch_description():
@@ -15,6 +16,11 @@ def generate_launch_description():
         "use_gazebo_simulation",
         default_value="False",
         description="Change to true to use Gazebo",
+    )
+    use_mujoco_simulation_arg = DeclareLaunchArgument(
+        "use_mujoco_simulation",
+        default_value="False",
+        description="Change to true to use MuJoCo",
     )
     remapping_arg = DeclareLaunchArgument(
         'joint_states_remappings',
@@ -33,11 +39,14 @@ def generate_launch_description():
         LaunchConfiguration('name_space'),
         ' use_gazebo_simulation:=',
         LaunchConfiguration('use_gazebo_simulation'),
+        ' use_mujoco_simulation:=',
+        LaunchConfiguration('use_mujoco_simulation'),
     ])
 
     return LaunchDescription([
         name_space_arg,
         use_gazebo_simulation_arg,
+        use_mujoco_simulation_arg,
         remapping_arg,
         Node(
             package='robot_state_publisher',
@@ -46,7 +55,7 @@ def generate_launch_description():
             name='robot_state_publisher',
             output='screen',
             parameters=[
-                {'robot_description': robot_description_content}
+                {'robot_description': ParameterValue(robot_description_content, value_type=str)}
             ],
             remappings=[
                 ('joint_states', LaunchConfiguration('joint_states_remappings')),

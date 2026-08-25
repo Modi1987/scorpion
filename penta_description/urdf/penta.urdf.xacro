@@ -4,6 +4,7 @@
 
   <xacro:arg name="name_space" default="" />
   <xacro:arg name="use_gazebo_simulation" default="False" />
+  <xacro:arg name="use_mujoco_simulation" default="False" />
   <xacro:arg name="use_pca9685_ros2_control" default="False" />
   <xacro:arg name="use_rtrobot_ros2_control" default="False" />
 
@@ -23,6 +24,12 @@
           <parameters>$(find penta_description)/config/ros2_control_params.yaml</parameters>
       </plugin>
   </gazebo>
+  </xacro:if>
+
+  <!-- mujoco ros2_control top-level actuator / scene block -->
+  <xacro:if value="$(arg use_mujoco_simulation)">
+    <xacro:include filename="$(find penta_description)/ros2_control/mujoco.ros2_control.xacro" />
+    <xacro:add_mujoco_top_level name_space="$(arg name_space)"/>
   </xacro:if>
 
   <!-- pca9685 ros2_control hardware interface plugin-->
