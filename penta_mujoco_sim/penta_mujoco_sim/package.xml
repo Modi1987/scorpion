@@ -16,6 +16,7 @@
   <exec_depend>penta_pod</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>ros2launch</exec_depend>
+  <exec_depend>ros_to_ros2_control_command_bridge</exec_depend>
   <exec_depend>xacro</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>

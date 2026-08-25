@@ -133,6 +133,21 @@ def generate_launch_description():
         ],
     )
 
+    # Bridge /joint_setpoints (sensor_msgs/JointState from the gait/kin-chain
+    # pipeline) to /forward_position_controller/commands (Float64MultiArray).
+    joint_setpoints_to_forward_cmd_bridge = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory("ros_to_ros2_control_command_bridge"),
+                "launch",
+                "gazebo_forward_joint_command_bridge.launch.py",
+            )
+        ),
+        launch_arguments={
+            "name_space": LaunchConfiguration("name_space"),
+        }.items(),
+    )
+
     return LaunchDescription(
         [
             headless_arg,
@@ -147,5 +162,6 @@ def generate_launch_description():
                     on_exit=[forward_position_controller_spawner],
                 )
             ),
+            joint_setpoints_to_forward_cmd_bridge,
         ]
     )
