@@ -76,6 +76,10 @@
           <default class="collision">
             <geom group="3"/>
           </default>
+          <!-- Single place to tune leg position-actuator gains. -->
+          <default class="penta_pos">
+            <position kp="150" kv="5" ctrlrange="-3.14159 3.14159"/>
+          </default>
         </default>
 
         <!-- Position actuators for all 15 leg joints.
@@ -83,25 +87,25 @@
              maps them back to ros2_control command interfaces. -->
         <actuator>
           <!-- limb0 -->
-          <position name="${name_space}limb0/joint0" joint="${name_space}limb0/joint0" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
-          <position name="${name_space}limb0/joint1" joint="${name_space}limb0/joint1" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
-          <position name="${name_space}limb0/joint2" joint="${name_space}limb0/joint2" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position class="penta_pos" name="${name_space}limb0/joint0" joint="${name_space}limb0/joint0"/>
+          <position class="penta_pos" name="${name_space}limb0/joint1" joint="${name_space}limb0/joint1"/>
+          <position class="penta_pos" name="${name_space}limb0/joint2" joint="${name_space}limb0/joint2"/>
           <!-- limb1 -->
-          <position name="${name_space}limb1/joint0" joint="${name_space}limb1/joint0" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
-          <position name="${name_space}limb1/joint1" joint="${name_space}limb1/joint1" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
-          <position name="${name_space}limb1/joint2" joint="${name_space}limb1/joint2" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position class="penta_pos" name="${name_space}limb1/joint0" joint="${name_space}limb1/joint0"/>
+          <position class="penta_pos" name="${name_space}limb1/joint1" joint="${name_space}limb1/joint1"/>
+          <position class="penta_pos" name="${name_space}limb1/joint2" joint="${name_space}limb1/joint2"/>
           <!-- limb2 -->
-          <position name="${name_space}limb2/joint0" joint="${name_space}limb2/joint0" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
-          <position name="${name_space}limb2/joint1" joint="${name_space}limb2/joint1" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
-          <position name="${name_space}limb2/joint2" joint="${name_space}limb2/joint2" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position class="penta_pos" name="${name_space}limb2/joint0" joint="${name_space}limb2/joint0"/>
+          <position class="penta_pos" name="${name_space}limb2/joint1" joint="${name_space}limb2/joint1"/>
+          <position class="penta_pos" name="${name_space}limb2/joint2" joint="${name_space}limb2/joint2"/>
           <!-- limb3 -->
-          <position name="${name_space}limb3/joint0" joint="${name_space}limb3/joint0" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
-          <position name="${name_space}limb3/joint1" joint="${name_space}limb3/joint1" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
-          <position name="${name_space}limb3/joint2" joint="${name_space}limb3/joint2" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position class="penta_pos" name="${name_space}limb3/joint0" joint="${name_space}limb3/joint0"/>
+          <position class="penta_pos" name="${name_space}limb3/joint1" joint="${name_space}limb3/joint1"/>
+          <position class="penta_pos" name="${name_space}limb3/joint2" joint="${name_space}limb3/joint2"/>
           <!-- limb4 -->
-          <position name="${name_space}limb4/joint0" joint="${name_space}limb4/joint0" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
-          <position name="${name_space}limb4/joint1" joint="${name_space}limb4/joint1" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
-          <position name="${name_space}limb4/joint2" joint="${name_space}limb4/joint2" kp="20" kv="0.5" ctrlrange="-3.14159 3.14159"/>
+          <position class="penta_pos" name="${name_space}limb4/joint0" joint="${name_space}limb4/joint0"/>
+          <position class="penta_pos" name="${name_space}limb4/joint1" joint="${name_space}limb4/joint1"/>
+          <position class="penta_pos" name="${name_space}limb4/joint2" joint="${name_space}limb4/joint2"/>
         </actuator>
       </raw_inputs>
 
